@@ -2,17 +2,18 @@
 
 use super::{App, CachedLogs, CachedStreamLogs, SelectedTab};
 use crate::cmd::console::events::{DataRequest, DataResponse};
-use hotpath::json::{
-    ChannelLogs, FunctionLogsJson, FunctionsJson, FutureCalls, FuturesJson as FuturesJsonData,
-    StreamLogs, StreamsJson, ThreadsJson,
+use hotpath::formatted::{
+    FormattedChannelLogs, FormattedChannelsJson, FormattedFunctionAllocLogsJson,
+    FormattedFunctionData, FormattedFunctionTimingLogsJson, FormattedFunctionsJson,
+    FormattedFutureCalls, FormattedFuturesJson, FormattedStreamLogs, FormattedStreamsJson,
+    FormattedThreadsJson,
 };
-use std::collections::HashMap;
 use std::time::Instant;
 use tracing::{trace, warn};
 
 #[hotpath::measure_all]
 impl App {
-    pub(crate) fn update_timing_metrics(&mut self, metrics: FunctionsJson) {
+    pub(crate) fn update_timing_metrics(&mut self, metrics: FormattedFunctionsJson) {
         // Capture the currently selected function name (not index!)
         let selected_function_name = self.selected_function_name();
 
@@ -24,7 +25,7 @@ impl App {
 
         if let Some(function_name) = selected_function_name {
             // Find the new index of the previously selected function in sorted order
-            if let Some(new_idx) = entries.iter().position(|(name, _)| name == &function_name) {
+            if let Some(new_idx) = entries.iter().position(|f| f.name == function_name) {
                 self.timing_table_state.select(Some(new_idx));
             } else {
                 // Function no longer exists, select the last one
@@ -43,7 +44,7 @@ impl App {
         }
     }
 
-    pub(crate) fn update_memory_metrics(&mut self, metrics: FunctionsJson) {
+    pub(crate) fn update_memory_metrics(&mut self, metrics: FormattedFunctionsJson) {
         // Capture the currently selected function name (not index!)
         let selected_function_name = self.selected_function_name();
 
@@ -55,7 +56,7 @@ impl App {
 
         if let Some(function_name) = selected_function_name {
             // Find the new index of the previously selected function in sorted order
-            if let Some(new_idx) = entries.iter().position(|(name, _)| name == &function_name) {
+            if let Some(new_idx) = entries.iter().position(|f| f.name == function_name) {
                 self.memory_table_state.select(Some(new_idx));
             } else {
                 // Function no longer exists, select the last one
@@ -78,7 +79,7 @@ impl App {
         self.error_message = Some(error);
     }
 
-    pub(crate) fn update_channels(&mut self, channels: hotpath::json::ChannelsJson) {
+    pub(crate) fn update_channels(&mut self, channels: FormattedChannelsJson) {
         // Capture the currently selected channel ID (not index!)
         let selected_channel_id = self
             .channels_table_state
@@ -134,14 +135,8 @@ impl App {
         }
     }
 
-    pub(crate) fn handle_channel_logs(&mut self, _channel_id: u64, logs: ChannelLogs) {
-        let received_map: HashMap<u64, hotpath::json::LogEntry> = logs
-            .received_logs
-            .iter()
-            .map(|entry| (entry.index, entry.clone()))
-            .collect();
-
-        self.logs = Some(CachedLogs { logs, received_map });
+    pub(crate) fn handle_channel_logs(&mut self, _channel_id: u64, logs: FormattedChannelLogs) {
+        self.logs = Some(CachedLogs { logs });
 
         // Ensure logs table selection is valid
         if let Some(ref cached_logs) = self.logs {
@@ -155,12 +150,12 @@ impl App {
     }
 
     #[hotpath::measure(log = true)]
-    pub(crate) fn get_timing_measurements(&self) -> &[(String, Vec<hotpath::MetricType>)] {
+    pub(crate) fn get_timing_measurements(&self) -> &[FormattedFunctionData] {
         &self.timing_functions.data
     }
 
     #[hotpath::measure(log = true)]
-    pub(crate) fn get_memory_measurements(&self) -> &[(String, Vec<hotpath::MetricType>)] {
+    pub(crate) fn get_memory_measurements(&self) -> &[FormattedFunctionData] {
         &self.memory_functions.data
     }
 
@@ -173,15 +168,15 @@ impl App {
         };
         table_state
             .selected()
-            .and_then(|idx| entries.get(idx).map(|(name, _)| name.clone()))
+            .and_then(|idx| entries.get(idx).map(|f| f.name.clone()))
     }
 
-    pub(crate) fn update_function_logs(&mut self, function_logs: FunctionLogsJson) {
-        self.current_function_logs = Some(function_logs);
+    pub(crate) fn update_timing_logs(&mut self, logs: FormattedFunctionTimingLogsJson) {
+        self.current_timing_logs = Some(logs);
     }
 
-    pub(crate) fn clear_function_logs(&mut self) {
-        self.current_function_logs = None;
+    pub(crate) fn update_alloc_logs(&mut self, logs: FormattedFunctionAllocLogsJson) {
+        self.current_alloc_logs = Some(logs);
     }
 
     pub(crate) fn update_pinned_function(&mut self) {
@@ -221,7 +216,7 @@ impl App {
         self.request_function_logs_if_open();
     }
 
-    pub(crate) fn update_streams(&mut self, streams: StreamsJson) {
+    pub(crate) fn update_streams(&mut self, streams: FormattedStreamsJson) {
         // Capture the currently selected stream ID (not index!)
         let selected_stream_id = self
             .streams_table_state
@@ -262,7 +257,7 @@ impl App {
         }
     }
 
-    pub(crate) fn update_threads(&mut self, threads: ThreadsJson) {
+    pub(crate) fn update_threads(&mut self, threads: FormattedThreadsJson) {
         // Capture the currently selected thread TID (not index!)
         let selected_thread_tid = self
             .threads_table_state
@@ -314,7 +309,7 @@ impl App {
         }
     }
 
-    pub(crate) fn handle_stream_logs(&mut self, _stream_id: u64, logs: StreamLogs) {
+    pub(crate) fn handle_stream_logs(&mut self, _stream_id: u64, logs: FormattedStreamLogs) {
         self.stream_logs = Some(CachedStreamLogs { logs });
 
         // Ensure logs table selection is valid
@@ -388,20 +383,20 @@ impl App {
                 logs,
             } => {
                 trace!("Received function timing logs: {} entries", logs.logs.len());
-                self.update_function_logs(logs);
+                self.update_timing_logs(logs);
             }
             DataResponse::FunctionLogsTimingNotFound(_) => {
-                self.clear_function_logs();
+                self.current_timing_logs = None;
             }
             DataResponse::FunctionLogsAlloc {
                 function_name: _,
                 logs,
             } => {
                 trace!("Received function alloc logs: {} entries", logs.logs.len());
-                self.update_function_logs(logs);
+                self.update_alloc_logs(logs);
             }
             DataResponse::FunctionLogsAllocNotFound(_) => {
-                self.clear_function_logs();
+                self.current_alloc_logs = None;
             }
             DataResponse::Channels(data) => {
                 trace!("Received channels data: {} channels", data.channels.len());
@@ -460,7 +455,7 @@ impl App {
         }
     }
 
-    pub(crate) fn update_futures(&mut self, futures: FuturesJsonData) {
+    pub(crate) fn update_futures(&mut self, futures: FormattedFuturesJson) {
         // Capture the currently selected future ID (not index!)
         let selected_future_id = self
             .futures_table_state
@@ -516,7 +511,7 @@ impl App {
         }
     }
 
-    pub(crate) fn handle_future_calls(&mut self, _future_id: u64, calls: FutureCalls) {
+    pub(crate) fn handle_future_calls(&mut self, _future_id: u64, calls: FormattedFutureCalls) {
         self.future_calls = Some(calls);
 
         // Ensure calls table selection is valid

@@ -16,9 +16,8 @@ use tokio_util::sync::CancellationToken;
 
 use crate::channels::{get_channel_logs, get_channels_json, START_TIME};
 use crate::formatted::{
-    FormattedChannelLogs, FormattedChannelsJson, FormattedFunctionAllocLogsJson,
-    FormattedFunctionTimingLogsJson, FormattedFunctionsJson, FormattedFutureCalls,
-    FormattedFuturesJson, FormattedStreamLogs, FormattedStreamsJson, FormattedThreadsJson,
+    FormattedChannelLogs, FormattedFunctionAllocLogsJson, FormattedFunctionTimingLogsJson,
+    FormattedFutureCalls, FormattedStreamLogs,
 };
 use crate::functions::{
     get_function_logs_alloc, get_function_logs_timing, get_functions_alloc_json,
@@ -86,9 +85,7 @@ Use this first to identify performance hotspots. Look for high p95/p99 values in
     async fn functions_timing(&self) -> Result<CallToolResult, McpError> {
         log_debug("Tool called: functions_timing");
 
-        let metrics = get_functions_timing_json();
-        let current_elapsed_ns = get_current_elapsed_ns();
-        let formatted = FormattedFunctionsJson::new(&metrics, current_elapsed_ns);
+        let formatted = get_functions_timing_json();
         Ok(CallToolResult::success(vec![Content::text(to_json(
             &formatted,
         )?)]))
@@ -108,13 +105,9 @@ Returns error if hotpath-alloc feature is not enabled. Cross-reference with func
         log_debug("Tool called: functions_alloc");
 
         match get_functions_alloc_json() {
-            Some(metrics) => {
-                let current_elapsed_ns = get_current_elapsed_ns();
-                let formatted = FormattedFunctionsJson::new(&metrics, current_elapsed_ns);
-                Ok(CallToolResult::success(vec![Content::text(to_json(
-                    &formatted,
-                )?)]))
-            }
+            Some(formatted) => Ok(CallToolResult::success(vec![Content::text(to_json(
+                &formatted,
+            )?)])),
             None => Ok(CallToolResult::error(vec![Content::text(
                 "Memory profiling not available - enable hotpath-alloc feature",
             )])),
@@ -138,9 +131,8 @@ Look for channels with growing queue_size or "full" state to identify bottleneck
         log_debug("Tool called: channels");
 
         let channels = get_channels_json();
-        let formatted = FormattedChannelsJson::from(&channels);
         Ok(CallToolResult::success(vec![Content::text(to_json(
-            &formatted,
+            &channels,
         )?)]))
     }
 
@@ -157,9 +149,8 @@ Use to track stream throughput and identify stalled streams."#)]
         log_debug("Tool called: streams");
 
         let streams = get_streams_json();
-        let formatted = FormattedStreamsJson::from(&streams);
         Ok(CallToolResult::success(vec![Content::text(to_json(
-            &formatted,
+            &streams,
         )?)]))
     }
 
@@ -176,9 +167,8 @@ High poll counts with "active" state suggest futures that wake frequently withou
         log_debug("Tool called: futures");
 
         let futures = get_futures_json();
-        let formatted = FormattedFuturesJson::from(&futures);
         Ok(CallToolResult::success(vec![Content::text(to_json(
-            &formatted,
+            &futures,
         )?)]))
     }
 
@@ -193,9 +183,8 @@ Sampled at configurable interval (HOTPATH_THREADS_INTERVAL env var, default 1000
         log_debug("Tool called: threads");
 
         let threads = get_threads_json();
-        let formatted = FormattedThreadsJson::from(&threads);
         Ok(CallToolResult::success(vec![Content::text(to_json(
-            &formatted,
+            &threads,
         )?)]))
     }
 

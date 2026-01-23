@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::sync::LazyLock;
 
-pub use crate::output::{FunctionLogsJson, FunctionsJson};
+pub use crate::output::FunctionLogsJson;
 
 /// State of a channel or stream.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -109,62 +109,12 @@ impl LogEntry {
     }
 }
 
-/// Wrapper for channels-only JSON response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ChannelsJson {
-    /// Current elapsed time since program start in nanoseconds
-    pub current_elapsed_ns: u64,
-    /// Channel statistics
-    pub channels: Vec<SerializableChannelStats>,
-}
-
-/// Serializable version of channel statistics for JSON responses.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SerializableChannelStats {
-    pub id: u64,
-    pub source: String,
-    pub label: String,
-    pub has_custom_label: bool,
-    pub channel_type: ChannelType,
-    pub state: ChannelState,
-    pub sent_count: u64,
-    pub received_count: u64,
-    pub queued: u64,
-    pub type_name: String,
-    pub type_size: usize,
-    pub queued_bytes: u64,
-    pub iter: u32,
-}
-
 /// Serializable log response containing sent and received logs for channels.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChannelLogs {
     pub id: String,
     pub sent_logs: Vec<LogEntry>,
     pub received_logs: Vec<LogEntry>,
-}
-
-/// Wrapper for streams-only JSON response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StreamsJson {
-    /// Current elapsed time since program start in nanoseconds
-    pub current_elapsed_ns: u64,
-    /// Stream statistics
-    pub streams: Vec<SerializableStreamStats>,
-}
-
-/// Serializable version of stream statistics for JSON responses.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SerializableStreamStats {
-    pub id: u64,
-    pub source: String,
-    pub label: String,
-    pub has_custom_label: bool,
-    pub state: ChannelState,
-    pub items_yielded: u64,
-    pub type_name: String,
-    pub type_size: usize,
-    pub iter: u32,
 }
 
 /// Serializable log response containing yielded logs for streams.
@@ -224,24 +174,6 @@ impl FutureCall {
             result: None,
         }
     }
-}
-
-/// Wrapper for futures-only JSON response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FuturesJson {
-    pub current_elapsed_ns: u64,
-    pub futures: Vec<SerializableFutureStats>,
-}
-
-/// Serializable version of future statistics for JSON responses.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SerializableFutureStats {
-    pub id: u64,
-    pub source: String,
-    pub label: String,
-    pub has_custom_label: bool,
-    pub call_count: u64,
-    pub total_polls: u64,
 }
 
 /// Serializable response for future calls.
@@ -305,22 +237,6 @@ impl ThreadMetrics {
             mem_diff: None,
         }
     }
-}
-
-/// JSON response structure for /threads endpoint.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ThreadsJson {
-    /// Current elapsed time since program start in nanoseconds
-    pub current_elapsed_ns: u64,
-    /// Sample interval in milliseconds
-    pub sample_interval_ms: u64,
-    /// Thread metrics
-    pub threads: Vec<ThreadMetrics>,
-    /// Total number of threads
-    pub thread_count: usize,
-    /// Process RSS (Resident Set Size) in bytes
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rss_bytes: Option<u64>,
 }
 
 /// HTTP routes for the hotpath metrics server.

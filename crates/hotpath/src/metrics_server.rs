@@ -1,3 +1,8 @@
+use crate::channels::START_TIME;
+use crate::formatted::{
+    FormattedChannelLogs, FormattedFunctionAllocLogsJson, FormattedFunctionTimingLogsJson,
+    FormattedFutureCalls, FormattedStreamLogs,
+};
 use crate::functions::{
     get_function_logs_alloc, get_function_logs_timing, get_functions_alloc_json,
     get_functions_timing_json,
@@ -73,11 +78,11 @@ fn handle_request(request: Request) {
 
     match path.parse::<Route>() {
         Ok(Route::FunctionsTiming) => {
-            let metrics = get_functions_timing_json();
-            respond_json(request, &metrics);
+            let formatted = get_functions_timing_json();
+            respond_json(request, &formatted);
         }
         Ok(Route::FunctionsAlloc) => match get_functions_alloc_json() {
-            Some(metrics) => respond_json(request, &metrics),
+            Some(formatted) => respond_json(request, &formatted),
             None => respond_error(
                 request,
                 404,
@@ -98,7 +103,11 @@ fn handle_request(request: Request) {
         }
         Ok(Route::FunctionTimingLogs { function_name }) => {
             match get_function_logs_timing(&function_name) {
-                Some(logs) => respond_json(request, &logs),
+                Some(logs) => {
+                    let formatted =
+                        FormattedFunctionTimingLogsJson::from_logs(&logs, get_current_elapsed_ns());
+                    respond_json(request, &formatted);
+                }
                 None => respond_error(
                     request,
                     404,
@@ -108,7 +117,11 @@ fn handle_request(request: Request) {
         }
         Ok(Route::FunctionAllocLogs { function_name }) => {
             match get_function_logs_alloc(&function_name) {
-                Some(logs) => respond_json(request, &logs),
+                Some(logs) => {
+                    let formatted =
+                        FormattedFunctionAllocLogsJson::from_logs(&logs, get_current_elapsed_ns());
+                    respond_json(request, &formatted);
+                }
                 None => respond_error(
                     request,
                     404,
@@ -117,15 +130,24 @@ fn handle_request(request: Request) {
             }
         }
         Ok(Route::ChannelLogs { channel_id }) => match get_channel_logs(&channel_id.to_string()) {
-            Some(logs) => respond_json(request, &logs),
+            Some(logs) => {
+                let formatted = FormattedChannelLogs::from_logs(&logs, get_current_elapsed_ns());
+                respond_json(request, &formatted);
+            }
             None => respond_error(request, 404, "Channel not found"),
         },
         Ok(Route::StreamLogs { stream_id }) => match get_stream_logs(&stream_id.to_string()) {
-            Some(logs) => respond_json(request, &logs),
+            Some(logs) => {
+                let formatted = FormattedStreamLogs::from_logs(&logs, get_current_elapsed_ns());
+                respond_json(request, &formatted);
+            }
             None => respond_error(request, 404, "Stream not found"),
         },
         Ok(Route::FutureCalls { future_id }) => match get_future_calls(future_id) {
-            Some(calls) => respond_json(request, &calls),
+            Some(calls) => {
+                let formatted = FormattedFutureCalls::from(&calls);
+                respond_json(request, &formatted);
+            }
             None => respond_error(request, 404, "Future not found"),
         },
         #[cfg(feature = "threads")]
@@ -143,6 +165,13 @@ fn handle_request(request: Request) {
         }
         Err(_) => respond_error(request, 404, "Not found"),
     }
+}
+
+fn get_current_elapsed_ns() -> u64 {
+    START_TIME
+        .get()
+        .map(|start| start.elapsed().as_nanos() as u64)
+        .unwrap_or(0)
 }
 
 fn respond_json<T: Serialize>(request: Request, value: &T) {

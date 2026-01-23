@@ -1,6 +1,6 @@
 //! Futures instrumentation module - tracks async Future lifecycle and poll statistics.
 
-use crate::channels::{get_log_limit, resolve_label, START_TIME};
+use crate::channels::{get_log_limit, START_TIME};
 use crate::metrics_server::METRICS_SERVER_PORT;
 use crossbeam_channel::{unbounded, Sender as CbSender};
 use std::collections::{HashMap, VecDeque};
@@ -19,7 +19,8 @@ pub(crate) mod wrapper;
 pub use guard::{FuturesGuard, FuturesGuardBuilder};
 pub use wrapper::{InstrumentedFuture, InstrumentedFutureLog};
 
-pub use crate::json::{FutureCall, FutureCalls, FutureState, FuturesJson, SerializableFutureStats};
+use crate::formatted::{FormattedFutureStats, FormattedFuturesJson};
+pub use crate::json::{FutureCall, FutureCalls, FutureState};
 pub use crate::Format;
 
 pub(crate) static FUTURE_ID_COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -83,21 +84,6 @@ impl FutureStats {
     /// Find a call by ID
     fn find_call_mut(&mut self, id: u64) -> Option<&mut FutureCall> {
         self.calls.iter_mut().find(|c| c.id == id)
-    }
-}
-
-impl From<&FutureStats> for SerializableFutureStats {
-    fn from(future_stats: &FutureStats) -> Self {
-        let label = resolve_label(future_stats.source, future_stats.label.as_deref(), None);
-
-        Self {
-            id: future_stats.id,
-            source: future_stats.source.to_string(),
-            label,
-            has_custom_label: future_stats.label.is_some(),
-            call_count: future_stats.call_count,
-            total_polls: future_stats.total_polls(),
-        }
     }
 }
 
@@ -309,10 +295,10 @@ pub(crate) fn get_sorted_future_stats() -> Vec<FutureStats> {
     stats
 }
 
-pub fn get_futures_json() -> FuturesJson {
+pub fn get_futures_json() -> FormattedFuturesJson {
     let futures = get_sorted_future_stats()
         .iter()
-        .map(SerializableFutureStats::from)
+        .map(FormattedFutureStats::from)
         .collect();
 
     let current_elapsed_ns = START_TIME
@@ -320,7 +306,7 @@ pub fn get_futures_json() -> FuturesJson {
         .map(|t| t.elapsed().as_nanos() as u64)
         .unwrap_or(0);
 
-    FuturesJson {
+    FormattedFuturesJson {
         current_elapsed_ns,
         futures,
     }

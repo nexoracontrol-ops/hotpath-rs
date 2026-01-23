@@ -16,7 +16,8 @@ pub use guard::{StreamsGuard, StreamsGuardBuilder};
 
 pub(crate) mod wrapper;
 
-pub use crate::json::{ChannelState, LogEntry, SerializableStreamStats, StreamLogs, StreamsJson};
+use crate::formatted::{FormattedStreamStats, FormattedStreamsJson};
+pub use crate::json::{ChannelState, LogEntry, StreamLogs};
 use crate::metrics_server::METRICS_SERVER_PORT;
 pub use crate::Format;
 
@@ -32,28 +33,6 @@ pub(crate) struct StreamStats {
     pub(crate) type_size: usize,
     pub(crate) logs: VecDeque<LogEntry>,
     pub(crate) iter: u32,
-}
-
-impl From<&StreamStats> for SerializableStreamStats {
-    fn from(stream_stats: &StreamStats) -> Self {
-        let label = crate::channels::resolve_label(
-            stream_stats.source,
-            stream_stats.label.as_deref(),
-            Some(stream_stats.iter),
-        );
-
-        Self {
-            id: stream_stats.id,
-            source: stream_stats.source.to_string(),
-            label,
-            has_custom_label: stream_stats.label.is_some(),
-            state: stream_stats.state,
-            items_yielded: stream_stats.items_yielded,
-            type_name: stream_stats.type_name.to_string(),
-            type_size: stream_stats.type_size,
-            iter: stream_stats.iter,
-        }
-    }
 }
 
 impl StreamStats {
@@ -312,10 +291,10 @@ pub(crate) fn get_sorted_stream_stats() -> Vec<StreamStats> {
     stats
 }
 
-pub fn get_streams_json() -> StreamsJson {
+pub fn get_streams_json() -> FormattedStreamsJson {
     let streams = get_sorted_stream_stats()
         .iter()
-        .map(SerializableStreamStats::from)
+        .map(FormattedStreamStats::from)
         .collect();
 
     let current_elapsed_ns = crate::channels::START_TIME
@@ -324,7 +303,7 @@ pub fn get_streams_json() -> StreamsJson {
         .elapsed()
         .as_nanos() as u64;
 
-    StreamsJson {
+    FormattedStreamsJson {
         current_elapsed_ns,
         streams,
     }

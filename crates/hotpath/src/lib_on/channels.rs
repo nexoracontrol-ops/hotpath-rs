@@ -16,9 +16,8 @@ pub use guard::{ChannelsGuard, ChannelsGuardBuilder};
 
 mod wrapper;
 
-pub use crate::json::{
-    ChannelLogs, ChannelState, ChannelType, ChannelsJson, LogEntry, SerializableChannelStats,
-};
+use crate::formatted::{FormattedChannelStats, FormattedChannelsJson};
+pub use crate::json::{ChannelLogs, ChannelState, ChannelType, LogEntry};
 use crate::metrics_server::METRICS_SERVER_PORT;
 use crate::output::truncate_result;
 
@@ -55,32 +54,6 @@ impl ChannelStats {
 
     pub fn queued_bytes(&self) -> u64 {
         self.queued() * self.type_size as u64
-    }
-}
-
-impl From<&ChannelStats> for SerializableChannelStats {
-    fn from(channel_stats: &ChannelStats) -> Self {
-        let label = resolve_label(
-            channel_stats.source,
-            channel_stats.label.as_deref(),
-            Some(channel_stats.iter),
-        );
-
-        Self {
-            id: channel_stats.id,
-            source: channel_stats.source.to_string(),
-            label,
-            has_custom_label: channel_stats.label.is_some(),
-            channel_type: channel_stats.channel_type,
-            state: channel_stats.state,
-            sent_count: channel_stats.sent_count,
-            received_count: channel_stats.received_count,
-            queued: channel_stats.queued(),
-            type_name: channel_stats.type_name.to_string(),
-            type_size: channel_stats.type_size,
-            queued_bytes: channel_stats.queued_bytes(),
-            iter: channel_stats.iter,
-        }
     }
 }
 
@@ -545,10 +518,10 @@ pub(crate) fn get_sorted_channel_stats() -> Vec<ChannelStats> {
     stats
 }
 
-pub fn get_channels_json() -> ChannelsJson {
+pub fn get_channels_json() -> FormattedChannelsJson {
     let channels = get_sorted_channel_stats()
         .iter()
-        .map(SerializableChannelStats::from)
+        .map(FormattedChannelStats::from)
         .collect();
 
     let current_elapsed_ns = START_TIME
@@ -557,7 +530,7 @@ pub fn get_channels_json() -> ChannelsJson {
         .elapsed()
         .as_nanos() as u64;
 
-    ChannelsJson {
+    FormattedChannelsJson {
         current_elapsed_ns,
         channels,
     }

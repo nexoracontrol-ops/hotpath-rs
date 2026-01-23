@@ -61,10 +61,8 @@ pub(crate) fn render_ui(frame: &mut Frame, app: &mut App) {
 
                 functions_timing::render_functions_table(frame, app, content_chunks[0]);
                 timing_logs::render_function_logs_panel(
-                    app.current_function_logs.as_ref(),
+                    app.current_timing_logs.as_ref(),
                     app.selected_function_name().as_deref(),
-                    &app.timing_functions.hotpath_profiling_mode,
-                    app.timing_functions.total_elapsed,
                     content_chunks[1],
                     frame,
                     &mut app.function_logs_table_state,
@@ -77,7 +75,7 @@ pub(crate) fn render_ui(frame: &mut Frame, app: &mut App) {
                             inspected_log,
                             main_chunks[2],
                             frame,
-                            app.timing_functions.total_elapsed,
+                            app.timing_functions.total_elapsed_ns,
                         );
                     }
                 }
@@ -94,10 +92,8 @@ pub(crate) fn render_ui(frame: &mut Frame, app: &mut App) {
 
                 functions_memory::render_functions_table(frame, app, content_chunks[0]);
                 memory_logs::render_function_logs_panel(
-                    app.current_function_logs.as_ref(),
+                    app.current_alloc_logs.as_ref(),
                     app.selected_function_name().as_deref(),
-                    &app.memory_functions.hotpath_profiling_mode,
-                    app.memory_functions.total_elapsed,
                     content_chunks[1],
                     frame,
                     &mut app.function_logs_table_state,
@@ -110,7 +106,7 @@ pub(crate) fn render_ui(frame: &mut Frame, app: &mut App) {
                             inspected_log,
                             main_chunks[2],
                             frame,
-                            app.memory_functions.total_elapsed,
+                            app.memory_functions.total_elapsed_ns,
                         );
                     }
                 }
@@ -243,7 +239,6 @@ fn render_channels_view(frame: &mut Frame, app: &mut App, area: Rect) {
                 frame,
                 &mut app.channel_logs_table_state,
                 app.channels_focus == ChannelsFocus::Logs,
-                app.channels.current_elapsed_ns,
             );
         } else {
             let message = if app.paused {
@@ -362,7 +357,6 @@ fn render_streams_view(frame: &mut Frame, app: &mut App, area: Rect) {
                 frame,
                 &mut app.stream_logs_table_state,
                 app.streams_focus == StreamsFocus::Logs,
-                app.streams.current_elapsed_ns,
             );
         } else {
             let message = if app.paused {
@@ -434,7 +428,7 @@ fn render_threads_view(frame: &mut Frame, app: &mut App, area: Rect) {
         &mut app.threads_table_state,
         thread_position,
         total_threads,
-        app.threads.rss_bytes,
+        app.threads.rss_bytes.as_deref(),
     );
 }
 
