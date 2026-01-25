@@ -1,4 +1,5 @@
 use crate::channels::START_TIME;
+use crate::debug::{get_dbg_logs, get_dbg_stats_json};
 use crate::functions::{
     get_function_logs_alloc, get_function_logs_timing, get_functions_alloc_json,
     get_functions_timing_json,
@@ -149,6 +150,16 @@ fn handle_request(request: Request) {
                 respond_json(request, &formatted);
             }
             None => respond_error(request, 404, "Future not found"),
+        },
+        Ok(Route::DebugStats) => {
+            let debug_stats = get_dbg_stats_json();
+            respond_json(request, &debug_stats);
+        }
+        Ok(Route::DebugLogs { source, expression }) => match get_dbg_logs(&source, &expression) {
+            Some(formatted) => {
+                respond_json(request, &formatted);
+            }
+            None => respond_error(request, 404, "Debug location not found"),
         },
         #[cfg(feature = "threads")]
         Ok(Route::Threads) => {

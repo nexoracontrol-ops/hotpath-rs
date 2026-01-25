@@ -3,9 +3,10 @@
 use crossbeam_channel::{Receiver, Sender};
 use hotpath::json::Route;
 use hotpath::json::{
-    FormattedChannelLogs, FormattedChannelsJson, FormattedFunctionAllocLogsJson,
-    FormattedFunctionTimingLogsJson, FormattedFunctionsJson, FormattedFutureCalls,
-    FormattedFuturesJson, FormattedStreamLogs, FormattedStreamsJson, FormattedThreadsJson,
+    FormattedChannelLogs, FormattedChannelsJson, FormattedDbgJson, FormattedDbgLogs,
+    FormattedFunctionAllocLogsJson, FormattedFunctionTimingLogsJson, FormattedFunctionsJson,
+    FormattedFutureCalls, FormattedFuturesJson, FormattedStreamLogs, FormattedStreamsJson,
+    FormattedThreadsJson,
 };
 use reqwest::StatusCode;
 use serde::de::DeserializeOwned;
@@ -25,11 +26,13 @@ enum RequestKey {
     Streams,
     Threads,
     Futures,
+    Debug,
     FunctionLogsTiming,
     FunctionLogsAlloc,
     ChannelLogs,
     StreamLogs,
     FutureCalls,
+    DebugLogs,
 }
 
 impl DataRequest {
@@ -41,11 +44,13 @@ impl DataRequest {
             DataRequest::RefreshStreams => RequestKey::Streams,
             DataRequest::RefreshThreads => RequestKey::Threads,
             DataRequest::RefreshFutures => RequestKey::Futures,
+            DataRequest::RefreshDebug => RequestKey::Debug,
             DataRequest::FetchFunctionLogsTiming(_) => RequestKey::FunctionLogsTiming,
             DataRequest::FetchFunctionLogsAlloc(_) => RequestKey::FunctionLogsAlloc,
             DataRequest::FetchChannelLogs(_) => RequestKey::ChannelLogs,
             DataRequest::FetchStreamLogs(_) => RequestKey::StreamLogs,
             DataRequest::FetchFutureCalls(_) => RequestKey::FutureCalls,
+            DataRequest::FetchDebugLogs { .. } => RequestKey::DebugLogs,
         }
     }
 }
@@ -150,6 +155,10 @@ impl RouteExt for Route {
             Route::FunctionAllocLogs { function_name } => Some(
                 DataResponse::FunctionLogsAllocNotFound(function_name.clone()),
             ),
+            Route::DebugLogs { source, expression } => Some(DataResponse::DebugLogsNotFound {
+                source: source.clone(),
+                expression: expression.clone(),
+            }),
             _ => None,
         }
     }
@@ -198,6 +207,14 @@ impl RouteExt for Route {
                 parse_json::<FormattedFutureCalls>(bytes).map(|calls| DataResponse::FutureCalls {
                     future_id: *future_id,
                     calls,
+                })
+            }
+            Route::DebugStats => parse_json::<FormattedDbgJson>(bytes).map(DataResponse::Debug),
+            Route::DebugLogs { source, expression } => {
+                parse_json::<FormattedDbgLogs>(bytes).map(|logs| DataResponse::DebugLogs {
+                    source: source.clone(),
+                    expression: expression.clone(),
+                    logs,
                 })
             }
         }

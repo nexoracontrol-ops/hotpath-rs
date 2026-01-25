@@ -3,6 +3,7 @@ pub use cfg_if::cfg_if;
 pub use hotpath_macros::{future_fn, main, measure, measure_all, skip};
 
 pub mod channels;
+pub mod debug;
 pub mod futures;
 pub mod streams;
 #[cfg(feature = "threads")]
@@ -72,6 +73,45 @@ macro_rules! measure_block {
 
         $expr
     }};
+}
+
+/// Debug macro that tracks debug output in the profiler.
+///
+/// Works like `std::dbg!` but sends debug logs to a background worker thread
+/// for tracking in the profiler. The logs can be viewed in the TUI or via
+/// the HTTP API at `/debug` and `/debug/{id}/logs`.
+///
+/// # Variants
+///
+/// - `dbg!(expr)` - Returns value, logs expression + result
+/// - `dbg!(a, b, c)` - Multiple expressions, returns tuple
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// use hotpath::dbg;
+///
+/// // Debug a single value
+/// let x = dbg!(1 + 2);  // returns 3, logs "1 + 2 = 3"
+///
+/// // Debug multiple values
+/// let (a, b) = dbg!(1, 2);  // returns (1, 2)
+/// ```
+#[macro_export]
+macro_rules! dbg {
+    ($val:expr $(,)?) => {{
+        const DBG_LOC: &'static str = concat!(file!(), ":", line!());
+        const DBG_EXPR: &'static str = stringify!($val);
+        match $val {
+            tmp => {
+                $crate::debug::dbg::log_dbg(DBG_LOC, DBG_EXPR, &tmp);
+                tmp
+            }
+        }
+    }};
+    ($($val:expr),+ $(,)?) => {
+        ($($crate::dbg!($val)),+,)
+    };
 }
 
 #[cfg(test)]
