@@ -19,7 +19,7 @@ use crate::functions::{
     get_function_logs_alloc, get_function_logs_timing, get_functions_alloc_json,
     get_functions_timing_json,
 };
-use crate::futures::{get_future_calls, get_futures_json};
+use crate::futures::{get_future_logs_list, get_futures_json};
 use crate::json::{
     JsonChannelLogsList, JsonFunctionAllocLogsList, JsonFunctionTimingLogsList, JsonFutureLogsList,
     JsonStreamLogsList,
@@ -296,18 +296,18 @@ Returns JSON array of recent yield events with timestamps. Use streams first to 
     #[tool(description = r#"Get detailed call/poll logs for a specific future.
 
 Returns JSON array of poll events and completion status. Use futures first to get future IDs, then use this tool to get detailed logs."#)]
-    async fn future_calls(
+    async fn future_logs(
         &self,
         params: Parameters<FutureIdParam>,
     ) -> Result<CallToolResult, McpError> {
         let future_id = &params.0.future_id;
-        log_debug(&format!("Tool called: future_calls({})", future_id));
+        log_debug(&format!("Tool called: future_logs({})", future_id));
 
         let id: u64 = future_id.parse().map_err(|_| {
             McpError::invalid_params(format!("Invalid future_id: {}", future_id), None)
         })?;
 
-        match get_future_calls(id) {
+        match get_future_logs_list(id) {
             Some(calls) => {
                 let formatted = JsonFutureLogsList::from(&calls);
                 Ok(CallToolResult::success(vec![Content::text(to_json(

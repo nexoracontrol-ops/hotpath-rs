@@ -6,7 +6,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use super::{ChannelLogs, DataFlowLogEntry, FutureCalls, FutureLog, StreamLogs, ThreadMetrics};
+use super::{ChannelLogs, DataFlowLogEntry, FutureLog, FutureLogsList, StreamLogs, ThreadMetrics};
 
 use crate::output::{
     format_bytes, format_duration, FunctionLog, FunctionLogsList, MetricType, MetricsProvider,
@@ -624,8 +624,8 @@ impl From<&FutureLog> for JsonFutureLog {
     }
 }
 
-impl From<&FutureCalls> for JsonFutureLogsList {
-    fn from(calls: &FutureCalls) -> Self {
+impl From<&FutureLogsList> for JsonFutureLogsList {
+    fn from(calls: &FutureLogsList) -> Self {
         JsonFutureLogsList {
             id: calls.id.clone(),
             calls: calls.calls.iter().map(JsonFutureLog::from).collect(),

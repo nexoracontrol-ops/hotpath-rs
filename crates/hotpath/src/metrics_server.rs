@@ -29,7 +29,7 @@ pub(crate) static RECV_TIMEOUT_MS: u64 = 250;
 
 use crate::channels::get_channel_logs;
 use crate::data_flow::get_data_flow_json;
-use crate::futures::get_future_calls;
+use crate::futures::get_future_logs_list;
 use crate::streams::get_stream_logs;
 use serde::Serialize;
 use std::fmt::Display;
@@ -145,7 +145,7 @@ fn handle_request(request: Request) {
                 None => respond_error(request, 404, "Stream not found"),
             }
         }
-        Ok(Route::DataFlowFutureLogs { future_id }) => match get_future_calls(future_id) {
+        Ok(Route::DataFlowFutureLogs { future_id }) => match get_future_logs_list(future_id) {
             Some(calls) => {
                 let formatted = JsonFutureLogsList::from(&calls);
                 respond_json(request, &formatted);

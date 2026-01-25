@@ -3,7 +3,7 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::channels::{get_sorted_channel_stats, ChannelStats, START_TIME};
-use crate::futures::{get_sorted_future_stats, FutureStats};
+use crate::futures::{get_sorted_future_stats, FutureEntry};
 use crate::json::{
     DataFlowType, JsonChannelEntry, JsonDataFlowEntry, JsonDataFlowList, JsonFutureEntry,
     JsonStreamEntry,
@@ -56,8 +56,8 @@ impl From<&StreamStats> for JsonDataFlowEntry {
     }
 }
 
-impl From<&FutureStats> for JsonDataFlowEntry {
-    fn from(stats: &FutureStats) -> Self {
+impl From<&FutureEntry> for JsonDataFlowEntry {
+    fn from(stats: &FutureEntry) -> Self {
         let entry: JsonFutureEntry = stats.into();
         JsonDataFlowEntry {
             id: entry.id,

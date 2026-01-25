@@ -181,7 +181,7 @@ impl FutureLog {
 
 /// Serializable response for future calls.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FutureCalls {
+pub struct FutureLogsList {
     pub id: String,
     pub calls: Vec<FutureLog>,
 }

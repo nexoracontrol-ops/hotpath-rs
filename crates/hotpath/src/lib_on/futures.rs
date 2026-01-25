@@ -19,7 +19,7 @@ pub(crate) mod wrapper;
 pub use guard::{FuturesGuard, FuturesGuardBuilder};
 pub use wrapper::{InstrumentedFuture, InstrumentedFutureLog};
 
-pub use crate::json::{FutureCalls, FutureLog, FutureState};
+pub use crate::json::{FutureLog, FutureLogsList, FutureState};
 use crate::json::{JsonFutureEntry, JsonFuturesList};
 pub use crate::Format;
 
@@ -56,38 +56,38 @@ pub(crate) fn get_or_create_future_id(source: &'static str) -> (u64, bool) {
 
 /// Aggregated statistics for a source location.
 #[derive(Debug, Clone)]
-pub struct FutureStats {
+pub struct FutureEntry {
     pub id: u64,
     pub source: &'static str,
     pub label: Option<String>,
-    pub calls: VecDeque<FutureLog>,
-    pub call_count: u64,
+    pub logs: VecDeque<FutureLog>,
+    pub logs_count: u64,
 }
 
-impl FutureStats {
+impl FutureEntry {
     fn new(id: u64, source: &'static str, label: Option<String>) -> Self {
         Self {
             id,
             source,
             label,
-            calls: VecDeque::new(),
-            call_count: 0,
+            logs: VecDeque::new(),
+            logs_count: 0,
         }
     }
 
     /// Total polls across all invocations
     pub fn total_polls(&self) -> u64 {
-        self.calls.iter().map(|c| c.poll_count).sum()
+        self.logs.iter().map(|c| c.poll_count).sum()
     }
 
     /// Find a call by ID
     fn find_call_mut(&mut self, id: u64) -> Option<&mut FutureLog> {
-        self.calls.iter_mut().find(|c| c.id == id)
+        self.logs.iter_mut().find(|c| c.id == id)
     }
 }
 
-impl From<&FutureStats> for JsonFutureEntry {
-    fn from(stats: &FutureStats) -> Self {
+impl From<&FutureEntry> for JsonFutureEntry {
+    fn from(stats: &FutureEntry) -> Self {
         let label = resolve_label(stats.source, stats.label.as_deref(), None);
 
         JsonFutureEntry {
@@ -95,7 +95,7 @@ impl From<&FutureStats> for JsonFutureEntry {
             source: stats.source.to_string(),
             label,
             has_custom_label: stats.label.is_some(),
-            call_count: stats.call_count,
+            call_count: stats.logs_count,
             total_polls: stats.total_polls(),
         }
     }
@@ -139,7 +139,7 @@ pub(crate) enum FutureEvent {
 /// State type: event sender + shared stats map
 pub(crate) type FuturesStatsState = (
     CbSender<FutureEvent>,
-    Arc<RwLock<HashMap<u64, FutureStats>>>,
+    Arc<RwLock<HashMap<u64, FutureEntry>>>,
 );
 
 static FUTURES_STATE: OnceLock<FuturesStatsState> = OnceLock::new();
@@ -153,7 +153,7 @@ pub fn init_futures_state() {
         crate::metrics_server::start_metrics_server_once(*METRICS_SERVER_PORT);
 
         let (event_tx, event_rx) = unbounded::<FutureEvent>();
-        let stats_map = Arc::new(RwLock::new(HashMap::<u64, FutureStats>::new()));
+        let stats_map = Arc::new(RwLock::new(HashMap::<u64, FutureEntry>::new()));
         let stats_map_clone = Arc::clone(&stats_map);
 
         std::thread::Builder::new()
@@ -171,7 +171,7 @@ pub fn init_futures_state() {
 }
 
 /// Process a future event and update stats.
-fn process_future_event(stats_map: &mut HashMap<u64, FutureStats>, event: FutureEvent) {
+fn process_future_event(stats_map: &mut HashMap<u64, FutureEntry>, event: FutureEvent) {
     match event {
         FutureEvent::Created {
             future_id,
@@ -180,18 +180,18 @@ fn process_future_event(stats_map: &mut HashMap<u64, FutureStats>, event: Future
         } => {
             stats_map.insert(
                 future_id,
-                FutureStats::new(future_id, source, display_label),
+                FutureEntry::new(future_id, source, display_label),
             );
         }
         FutureEvent::CallCreated { future_id, call_id } => {
             if let Some(future_stats) = stats_map.get_mut(&future_id) {
-                future_stats.call_count += 1;
+                future_stats.logs_count += 1;
                 let limit = get_log_limit();
-                if future_stats.calls.len() >= limit {
-                    future_stats.calls.pop_front();
+                if future_stats.logs.len() >= limit {
+                    future_stats.logs.pop_front();
                 }
                 future_stats
-                    .calls
+                    .logs
                     .push_back(FutureLog::new(call_id, future_id));
             }
         }
@@ -283,7 +283,7 @@ where
 
 /// Compare two future stats for sorting.
 /// Custom labels come first (sorted alphabetically), then auto-generated labels (sorted by source).
-fn compare_future_stats(a: &FutureStats, b: &FutureStats) -> std::cmp::Ordering {
+fn compare_future_stats(a: &FutureEntry, b: &FutureEntry) -> std::cmp::Ordering {
     let a_has_label = a.label.is_some();
     let b_has_label = b.label.is_some();
 
@@ -295,7 +295,7 @@ fn compare_future_stats(a: &FutureStats, b: &FutureStats) -> std::cmp::Ordering 
     }
 }
 
-fn get_all_future_stats() -> HashMap<u64, FutureStats> {
+fn get_all_future_stats() -> HashMap<u64, FutureEntry> {
     if let Some((_, stats_map)) = FUTURES_STATE.get() {
         stats_map.read().unwrap().clone()
     } else {
@@ -303,8 +303,8 @@ fn get_all_future_stats() -> HashMap<u64, FutureStats> {
     }
 }
 
-pub(crate) fn get_sorted_future_stats() -> Vec<FutureStats> {
-    let mut stats: Vec<FutureStats> = get_all_future_stats().into_values().collect();
+pub(crate) fn get_sorted_future_stats() -> Vec<FutureEntry> {
+    let mut stats: Vec<FutureEntry> = get_all_future_stats().into_values().collect();
     stats.sort_by(compare_future_stats);
     stats
 }
@@ -326,11 +326,11 @@ pub fn get_futures_json() -> JsonFuturesList {
     }
 }
 
-pub fn get_future_calls(future_id: u64) -> Option<FutureCalls> {
+pub fn get_future_logs_list(future_id: u64) -> Option<FutureLogsList> {
     let stats = get_all_future_stats();
-    stats.get(&future_id).map(|s| FutureCalls {
+    stats.get(&future_id).map(|s| FutureLogsList {
         id: future_id.to_string(),
-        calls: s.calls.iter().rev().cloned().collect(),
+        calls: s.logs.iter().rev().cloned().collect(),
     })
 }
 
