@@ -168,7 +168,7 @@ fn render_data_flow_view(frame: &mut Frame, app: &mut App, area: Rect) {
             Line::from(""),
             Line::from("No data flow entries found").yellow().centered(),
             Line::from(""),
-            Line::from("Make sure channels, streams, or futures are instrumented").centered(),
+            Line::from("Use channel!, stream!, or future! macros").centered(),
         ];
 
         let block = Block::bordered().border_set(border::THICK);
