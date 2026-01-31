@@ -1,4 +1,4 @@
-pub use hotpath_macros::{main, measure, measure_all, skip};
+pub use hotpath_macros::{future_fn, main, measure, measure_all, skip};
 
 #[macro_export]
 macro_rules! measure_block {
@@ -211,7 +211,40 @@ pub trait Reporter: Send + Sync {
     ) -> Result<(), Box<dyn std::error::Error>>;
 }
 
-pub trait MetricsProvider<'a> {}
+pub use crate::shared::{MetricType, ProfilingMode};
+
+pub trait MetricsProvider<'a> {
+    fn description(&self) -> String {
+        String::new()
+    }
+    fn profiling_mode(&self) -> ProfilingMode {
+        ProfilingMode::Timing
+    }
+    fn headers(&self) -> Vec<String> {
+        vec![]
+    }
+    fn percentiles(&self) -> Vec<u8> {
+        vec![]
+    }
+    fn metric_data(&self) -> Vec<(String, Vec<MetricType>)> {
+        vec![]
+    }
+    fn sort_key(&self, _metrics: &[MetricType]) -> f64 {
+        0.0
+    }
+    fn has_unsupported_async(&self) -> bool {
+        false
+    }
+    fn entry_counts(&self) -> (usize, usize) {
+        (0, 0)
+    }
+    fn total_elapsed(&self) -> u64 {
+        0
+    }
+    fn caller_name(&self) -> &str {
+        ""
+    }
+}
 
 pub struct FunctionsGuardBuilder {}
 

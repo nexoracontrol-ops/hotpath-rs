@@ -76,6 +76,9 @@ jobs:
       - name: Run CLI tests
         run: |
           cargo test -p hotpath --bin hotpath --features=tui
+      - name: Verify noop types
+        run: |
+          cargo run --example csv_file_reporter
       - name: Run functions tests
         run: |
           cargo test --features hotpath --test functions -- --nocapture --test-threads=1

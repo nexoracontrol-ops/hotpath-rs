@@ -1,12 +1,55 @@
-use serde::{ser::Serializer, Deserialize, Serialize};
+use serde::ser::Serializer;
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "hotpath")]
 use std::collections::HashMap;
-use std::fmt;
 #[cfg(feature = "hotpath")]
 use std::time::Duration;
 
 #[cfg(feature = "hotpath")]
 use crate::FunctionStats;
+
+pub use crate::shared::{format_bytes, format_duration, MetricType, ProfilingMode};
+
+impl Serialize for MetricType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            MetricType::CallsCount(count) => serializer.serialize_u64(*count),
+            MetricType::DurationNs(ns) => serializer.serialize_u64(*ns),
+            MetricType::Alloc(bytes, _count) => serializer.serialize_u64(*bytes),
+            MetricType::Percentage(basis_points) => serializer.serialize_u64(*basis_points),
+            MetricType::Unsupported => serializer.serialize_none(),
+        }
+    }
+}
+
+impl Serialize for ProfilingMode {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            ProfilingMode::Timing => serializer.serialize_str("timing"),
+            ProfilingMode::Alloc => serializer.serialize_str("alloc"),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for ProfilingMode {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        match s.as_str() {
+            "timing" => Ok(ProfilingMode::Timing),
+            "alloc" => Ok(ProfilingMode::Alloc),
+            _ => Err(serde::de::Error::unknown_variant(&s, &["timing", "alloc"])),
+        }
+    }
+}
 
 /// Find the nearest valid char boundary at or before `index`.
 /// Used to safely truncate UTF-8 strings from the right.
@@ -36,93 +79,6 @@ pub fn truncate_result(s: String) -> String {
     } else {
         let end = floor_char_boundary(&s, MAX_RESULT_LEN.saturating_sub(3));
         format!("{}...", &s[..end])
-    }
-}
-
-/// Represents different types of profiling metrics with their values.
-///
-/// This enum wraps metric values with type information, allowing the reporting
-/// system to format and display them appropriately. Values are stored in their
-/// raw form and formatted when displayed.
-///
-/// # Variants
-///
-/// * `CallsCount(u64)` - Number of function calls
-/// * `DurationNs(u64)` - Duration in nanoseconds (formatted as human-readable time)
-/// * `AllocBytes(u64)` - Bytes allocated (formatted with KB/MB/GB units)
-/// * `AllocCount(u64)` - Allocation count
-/// * `Percentage(u64)` - Percentage as basis points (1% = 100, formatted as percentage)
-/// * `Unsupported` - For N/A values (e.g., async functions when allocation profiling not supported)
-///
-/// # Examples
-///
-/// ```rust
-/// use hotpath::MetricType;
-///
-/// let duration = MetricType::DurationNs(1_500_000); // 1.5ms
-/// let memory = MetricType::AllocBytes(2048); // 2KB
-/// let percent = MetricType::Percentage(9500); // 95.00%
-///
-/// println!("{}", duration); // Displays: "1.50ms"
-/// println!("{}", memory);   // Displays: "2.0 KB"
-/// println!("{}", percent);  // Displays: "95.00%"
-/// ```
-#[derive(Debug, Clone)]
-pub enum MetricType {
-    CallsCount(u64), // Number of function calls
-    DurationNs(u64), // Duration in nanoseconds
-    Alloc(u64, u64), // Bytes allocated, objects allocated
-    Percentage(u64), // Percentage as basis points (1% = 100)
-    Unsupported,     // For N/A values (async functions when not supported)
-}
-
-impl Serialize for MetricType {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        match self {
-            MetricType::CallsCount(count) => serializer.serialize_u64(*count),
-            MetricType::DurationNs(ns) => serializer.serialize_u64(*ns),
-            MetricType::Alloc(bytes, _count) => serializer.serialize_u64(*bytes),
-            MetricType::Percentage(basis_points) => serializer.serialize_u64(*basis_points),
-            MetricType::Unsupported => serializer.serialize_none(),
-        }
-    }
-}
-
-impl fmt::Display for MetricType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            MetricType::CallsCount(count) => {
-                write!(f, "{}", count)
-            }
-            MetricType::DurationNs(ns) => {
-                write!(f, "{}", format_duration(*ns))
-            }
-            MetricType::Alloc(bytes, _count) => {
-                write!(f, "{}", format_bytes(*bytes))
-            }
-            MetricType::Percentage(basis_points) => {
-                write!(f, "{:.2}%", *basis_points as f64 / 100.0)
-            }
-            MetricType::Unsupported => {
-                write!(f, "N/A*")
-            }
-        }
-    }
-}
-
-/// Formats a duration in nanoseconds into a human-readable string with appropriate units.
-pub fn format_duration(ns: u64) -> String {
-    if ns < 1_000 {
-        format!("{} ns", ns)
-    } else if ns < 1_000_000 {
-        format!("{:.2} µs", ns as f64 / 1_000.0)
-    } else if ns < 1_000_000_000 {
-        format!("{:.2} ms", ns as f64 / 1_000_000.0)
-    } else {
-        format!("{:.2} s", ns as f64 / 1_000_000_000.0)
     }
 }
 
@@ -167,32 +123,6 @@ pub trait Reporter: Send + Sync {
         &self,
         metrics_provider: &dyn MetricsProvider<'_>,
     ) -> Result<(), Box<dyn std::error::Error>>;
-}
-
-/// Profiling mode indicating what type of measurements were collected.
-///
-/// This enum identifies which profiling feature was active when measurements
-/// were collected. It's included in JSON output to help interpret the metrics.
-///
-/// # Variants
-///
-/// * `Timing` - Time-based profiling (execution duration)
-/// * `Alloc` - Combined allocation profiling (both bytes and count)
-#[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "kebab-case")]
-pub enum ProfilingMode {
-    Timing,
-    Alloc,
-}
-
-impl fmt::Display for ProfilingMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ProfilingMode::Timing => write!(f, "timing"),
-            ProfilingMode::Alloc => write!(f, "alloc"),
-        }
-    }
 }
 
 /// A single log entry for a function invocation.
@@ -289,26 +219,6 @@ pub trait MetricsProvider<'a> {
     fn total_elapsed(&self) -> u64;
 
     fn caller_name(&self) -> &str;
-}
-
-/// Formats a byte count into a human-readable string (e.g., "1.5 MB").
-pub fn format_bytes(bytes: u64) -> String {
-    const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
-    const THRESHOLD: f64 = 1024.0;
-
-    if bytes == 0 {
-        return "0 B".to_string();
-    }
-
-    let bytes_f = bytes as f64;
-    let unit_index = (bytes_f.log(THRESHOLD).floor() as usize).min(UNITS.len() - 1);
-    let unit_value = bytes_f / THRESHOLD.powi(unit_index as i32);
-
-    if unit_index == 0 {
-        format!("{} {}", bytes, UNITS[unit_index])
-    } else {
-        format!("{:.1} {}", unit_value, UNITS[unit_index])
-    }
 }
 
 #[cfg(test)]
