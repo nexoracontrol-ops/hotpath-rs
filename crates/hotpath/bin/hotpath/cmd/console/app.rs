@@ -163,7 +163,11 @@ pub(crate) struct App {
 impl App {
     pub(crate) fn new(metrics_host: &str, metrics_port: u16, refresh_interval_ms: u64) -> Self {
         let (request_tx, request_rx) = crossbeam_channel::unbounded();
-        let (event_tx, event_rx) = crossbeam_channel::unbounded();
+        let (event_tx, event_rx) = hotpath::channel!(
+            crossbeam_channel::unbounded::<AppEvent>(),
+            label = "tui_events",
+            log = true
+        );
 
         let base_url = format!("{}:{}", metrics_host.trim_end_matches('/'), metrics_port);
         super::http_worker::spawn_http_worker(request_rx, event_tx.clone(), base_url.clone());
