@@ -161,6 +161,11 @@ hotpath console
 
 The TUI will connect to your running application and display real-time profiling metrics with automatic refresh.
 
+**HTTP Metrics Server:** When profiling is enabled, an HTTP server automatically starts on `127.0.0.1:6770` to expose metrics for the TUI. This server binds to localhost only and requires no authentication.
+
+- `HOTPATH_METRICS_PORT` - Customize the port (default: 6770)
+- `HOTPATH_METRICS_SERVER_OFF=true` - Disable the server entirely
+
 ## Allocation Tracking
 
 In addition to time-based profiling, `hotpath` can track memory allocations. This feature uses a custom global allocator from [allocation-counter crate](https://github.com/fornwall/allocation-counter) to intercept all memory allocations and provides detailed statistics about memory usage per function.
@@ -319,7 +324,7 @@ let s = hotpath::stream!(stream::iter(1..=100), label = "data_stream");
 let s = hotpath::stream!(stream::iter(1..=100), log = true);
 ```
 
-### Viewing Channel and Stream Metrics in TUI
+### Viewing Performance Metrics in TUI
 
 When using the live TUI dashboard, channel and stream statistics are displayed alongside function metrics. The TUI shows:
 
@@ -331,8 +336,10 @@ When using the live TUI dashboard, channel and stream statistics are displayed a
 
 See the [Live Performance Metrics TUI](#live-performance-metrics-tui) section for setup instructions.
 
-**Environment variable:**
+**Environment variables:**
 - `HOTPATH_LOGS_LIMIT` - Maximum number of log entries to keep per channel/stream (default: 50)
+- `HOTPATH_METRICS_PORT` - Port for the HTTP metrics server (default: 6770)
+- `HOTPATH_METRICS_SERVER_OFF` - Set to `true` or `1` to disable the HTTP metrics server entirely
 
 ### How Channel and Stream Monitoring Works
 
@@ -342,7 +349,7 @@ The `stream!` macro wraps streams and tracks items as they are yielded, collecti
 
 **Background processing:** The first invocation of `channel!` or `stream!` automatically starts:
 - A background thread for metrics collection
-- An HTTP server (when `HOTPATH_METRICS_PORT` is set) exposing metrics in JSON format for the TUI
+- An HTTP server exposing metrics in JSON format for the TUI (see [Getting Started with TUI](#getting-started-with-tui))
 
 #### A note on accuracy
 
