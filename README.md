@@ -729,6 +729,12 @@ Supported format options:
 - `"json"` - Compact, oneline JSON format
 - `"json-pretty"` - Pretty-printed JSON format
 
+**Environment variable override:** Set `HOTPATH_OUTPUT_FORMAT` to override the format for all guards (functions, channels, streams, futures). This takes precedence over programmatic `.format()` configuration. Invalid values will cause a panic.
+
+```bash
+HOTPATH_OUTPUT_FORMAT=json cargo run --features hotpath
+```
+
 Example JSON output:
 
 ```json

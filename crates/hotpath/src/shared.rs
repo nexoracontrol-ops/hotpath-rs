@@ -1,5 +1,6 @@
 use std::fmt;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 /// Output format for profiling reports.
 ///
@@ -10,12 +11,48 @@ use std::path::PathBuf;
 /// * `Table` - Human-readable table format (default)
 /// * `Json` - JSON format
 /// * `JsonPretty` - Pretty-printed JSON format
-#[derive(Clone, Copy, Debug, Default)]
+///
+/// # Parsing
+///
+/// Can be parsed from strings via `HOTPATH_OUTPUT_FORMAT` environment variable:
+/// - `"table"` → `Format::Table`
+/// - `"json"` → `Format::Json`
+/// - `"json-pretty"` → `Format::JsonPretty`
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Format {
     #[default]
     Table,
     Json,
     JsonPretty,
+}
+
+impl FromStr for Format {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "table" => Ok(Format::Table),
+            "json" => Ok(Format::Json),
+            "json-pretty" | "jsonpretty" => Ok(Format::JsonPretty),
+            _ => Err(format!(
+                "unknown format '{}', expected: table, json, json-pretty",
+                s
+            )),
+        }
+    }
+}
+
+impl Format {
+    /// Returns the format from `HOTPATH_OUTPUT_FORMAT` env var, or default if not set.
+    /// Panics if the env var contains an invalid value.
+    pub fn from_env() -> Self {
+        match std::env::var("HOTPATH_OUTPUT_FORMAT") {
+            Ok(v) => v
+                .parse()
+                .unwrap_or_else(|e| panic!("HOTPATH_OUTPUT_FORMAT: {}", e)),
+            Err(_) => Format::default(),
+        }
+    }
 }
 
 /// Destination for profiling report output.

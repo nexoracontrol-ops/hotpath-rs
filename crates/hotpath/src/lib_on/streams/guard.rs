@@ -161,7 +161,13 @@ impl Drop for StreamsGuard {
             return;
         }
 
-        match self.format {
+        let format = if std::env::var("HOTPATH_OUTPUT_FORMAT").is_ok() {
+            Format::from_env()
+        } else {
+            self.format
+        };
+
+        match format {
             Format::Table => {
                 let _ = writeln!(
                     writer,

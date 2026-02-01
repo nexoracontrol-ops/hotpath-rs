@@ -606,14 +606,13 @@ impl FunctionsGuard {
         #[cfg(feature = "hotpath-mcp")]
         crate::mcp_server::start_mcp_server_once();
 
-        // Override reporter with JsonReporter when HOTPATH_JSON env var is enabled
-        let reporter: Box<dyn Reporter> = if std::env::var("HOTPATH_JSON")
-            .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
-            .unwrap_or(false)
-        {
-            Box::new(JsonReporter)
-        } else {
-            _reporter
+        let reporter: Box<dyn Reporter> = match std::env::var("HOTPATH_OUTPUT_FORMAT") {
+            Ok(_) => match Format::from_env() {
+                Format::Table => Box::new(TableReporter),
+                Format::Json => Box::new(JsonReporter),
+                Format::JsonPretty => Box::new(JsonPrettyReporter),
+            },
+            Err(_) => _reporter,
         };
 
         let wrapper_guard = MeasurementGuard::build(caller_name, true, false);

@@ -20,7 +20,7 @@ jobs:
 
       - id: head_noop_timing
         env:
-          HOTPATH_JSON: true
+          HOTPATH_OUTPUT_FORMAT: json
         run: |
           # Run head noop benchmark (timing mode)
           {
@@ -31,7 +31,7 @@ jobs:
 
       - id: head_alloc_timing
         env:
-          HOTPATH_JSON: true
+          HOTPATH_OUTPUT_FORMAT: json
         run: |
           # Run head alloc benchmark (timing mode)
           {
@@ -42,7 +42,7 @@ jobs:
 
       - id: head_alloc_alloc
         env:
-          HOTPATH_JSON: true
+          HOTPATH_OUTPUT_FORMAT: json
         run: |
           # Run head alloc benchmark (alloc mode)
           {
@@ -57,7 +57,7 @@ jobs:
 
       - id: base_noop_timing
         env:
-          HOTPATH_JSON: true
+          HOTPATH_OUTPUT_FORMAT: json
         run: |
           # Run base noop benchmark (timing mode)
           {
@@ -68,7 +68,7 @@ jobs:
 
       - id: base_alloc_timing
         env:
-          HOTPATH_JSON: true
+          HOTPATH_OUTPUT_FORMAT: json
         run: |
           # Run base alloc benchmark (timing mode)
           {
@@ -79,7 +79,7 @@ jobs:
 
       - id: base_alloc_alloc
         env:
-          HOTPATH_JSON: true
+          HOTPATH_OUTPUT_FORMAT: json
         run: |
           # Run base alloc benchmark (alloc mode)
           {
