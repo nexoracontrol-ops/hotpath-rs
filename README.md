@@ -3,6 +3,12 @@
 
 hotpath-rs instruments functions, channels, futures, and streams to quickly find bottlenecks and focus optimizations where they matter most. It provides actionable insights into time, memory, and data flow with minimal setup.
 
+Try the TUI demo via SSH - no installation required:
+
+```
+ssh demo@tui.hotpath.rs
+```
+
 Explore the full documentation at [hotpath.rs](https://hotpath.rs).
 
 You can use it to produce one-off performance (timing or memory) reports:
@@ -40,7 +46,7 @@ https://github.com/user-attachments/assets/2e890417-2b43-4b1b-8657-a5ef3b458153
 
 ## Quick Demo
 
-An easy way to quickly try the TUI is to run it in **auto-instrumentation mode**. The TUI process profiles itself and displays its own performance metrics in real time.
+Other then the SSH demo an easy way to quickly try the TUI is to run it in **auto-instrumentation mode**. The TUI process profiles itself and displays its own performance metrics in real time.
 
 First, install `hotpath` CLI with auto-instrumentation enabled:
 
