@@ -6,7 +6,7 @@ hotpath-rs instruments functions, channels, futures, and streams to quickly find
 Try the TUI demo via SSH - no installation required:
 
 ```
-ssh demo@tui.hotpath.rs
+ssh demo.hotpath.rs
 ```
 
 Explore the full documentation at [hotpath.rs](https://hotpath.rs).
