@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2026-02-02
+
+### 🚀 Features
+
+- Support nonlocal metrics host
+- Scaffold MCP implementation
+- Initial mcp tools
+- Add mcp auth middleware
+- Server side sorting
+- More MCP tools and dev logging
+- Customize MCP functions output
+- MCP tools description
+- Add MCP tools with params
+- Improve MCP function logs output
+- Use formatted JSON types for MCP
+- Show total alloc dealloc stats
+- Add initial debug info
+- Initial crashtest TUI app
+- Unify data flow TUI tab
+- Add debug gauge! macro
+- Support excluding wrappers
+- Add file output_path support
+- Support HOTPATH_OUTPUT_FORMAT config
+- Add TUI table descriptions
+- Support output silencing
+
+### 🐛 Bug Fixes
+
+- Val! macro improvements
+- Improve TUI UI
+- Silence stdout
+- Silence dbg! warning
+- Add missing noop traits and types
+- Fix guards completion race condition
+- Fix tui demo build
+
+### 🚜 Refactor
+
+- Rename and cleanup http
+- Unify JSON formats
+- Rearrange json modules
+- Rearrange formatted traits
+- Unify futures naming
+- Simplify functions guard
+
+### ⚡ Performance
+
+- Use ids for data flow indexing
+
+### ⚙️ Miscellaneous Tasks
+
+- Annotate CLI tests
+- Instrument tui events channel
+
 ## [0.9.3] - 2026-01-13
 
 ### 🚀 Features
