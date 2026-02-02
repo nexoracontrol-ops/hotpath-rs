@@ -346,7 +346,7 @@ fn render_debug_view(frame: &mut Frame, app: &mut App, area: Rect) {
             Line::from(""),
             Line::from("No debug logs found").yellow().centered(),
             Line::from(""),
-            Line::from("Use hotpath::dbg! macro to log debug values").centered(),
+            Line::from("Use hotpath::dbg!, hotpath::gauge!, or hotpath::val! macros.").centered(),
         ];
 
         let block = Block::bordered().border_set(border::THICK);
