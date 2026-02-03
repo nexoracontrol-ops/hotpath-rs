@@ -65,6 +65,11 @@ const SEO_MAPPINGS: &[SeoConfig] = &[
         title: "GitHub CI Integration - Automated PR Benchmarking | hotpath-rs",
         description: "Integrate hotpath-rs into GitHub CI for automated performance benchmarking. Get performance regression alerts on every pull request.",
     },
+    SeoConfig {
+        path: "/mcp",
+        title: "MCP Integration - Query Profiling Data with LLM Agents | hotpath-rs",
+        description: "Connect LLM agents like Claude Code to your Rust application's profiling data via MCP. Ask natural language questions about performance, memory, and async operations.",
+    },
 ];
 
 const STATIC_EXTENSIONS: &[&str] = &[
