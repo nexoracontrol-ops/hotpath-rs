@@ -85,4 +85,4 @@ See the rest of the docs to learn how to instrument and profile your program:
 - [Channels](./channels.html) - track messages flow and throughput
 - [Streams](./streams.html) - instrument async streams
 - [Threads](./threads.html) - monitor threads usage
-- [GitHub CI integration](./github_ci.html) - benchmark PRs automatically
+- [MCP Server](./mcp.html) - LLM integration via Model Context Protocol 
