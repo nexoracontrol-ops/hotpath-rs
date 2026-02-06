@@ -9,7 +9,7 @@ use axum::{
     routing::get,
 };
 use std::path::PathBuf;
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 const DOC_PAGES: &[&str] = &[
     "sampling_comparison",
@@ -36,11 +36,11 @@ pub fn app() -> Router {
         .nest_service("/assets", ServeDir::new("assets"))
         .route_service(
             "/favicon.ico",
-            tower_http::services::ServeFile::new("assets/favicons/favicon.ico"),
+            ServeFile::new("assets/favicons/favicon.ico"),
         )
         .route_service(
             "/apple-touch-icon.png",
-            tower_http::services::ServeFile::new("assets/favicons/apple-touch-icon.png"),
+            ServeFile::new("assets/favicons/apple-touch-icon.png"),
         )
         .layer(from_fn(set_content_type));
 
@@ -50,7 +50,10 @@ pub fn app() -> Router {
             get(|| async { serve_doc_page("introduction.html").await }),
         )
         .route("/introduction", get(|| async { Redirect::permanent("/") }))
-        .route("/introduction.html", get(|| async { Redirect::permanent("/") }))
+        .route(
+            "/introduction.html",
+            get(|| async { Redirect::permanent("/") }),
+        )
         .route("/index.html", get(|| async { Redirect::permanent("/") }));
 
     for page in DOC_PAGES {
@@ -77,7 +80,7 @@ pub fn app() -> Router {
         .fallback_service(
             ServiceBuilder::new()
                 .layer(from_fn(set_content_type))
-                .service(ServeDir::new("html")),
+                .service(ServeDir::new("html").not_found_service(ServeFile::new("html/404.html"))),
         )
         .layer(from_fn(middleware::seo_titles))
 }
