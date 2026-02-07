@@ -237,7 +237,6 @@ async fn set_content_type(request: Request, next: Next) -> Response {
     let path = request.uri().path().to_string();
     let mut response = next.run(request).await;
 
-    // Only set Content-Type if not already set
     if response.headers().get(header::CONTENT_TYPE).is_none() {
         let content_type = match path.rsplit('.').next() {
             Some("html") => Some("text/html; charset=utf-8"),
@@ -260,6 +259,35 @@ async fn set_content_type(request: Request, next: Next) -> Response {
             response
                 .headers_mut()
                 .insert(header::CONTENT_TYPE, HeaderValue::from_static(ct));
+        }
+    }
+
+    if response.headers().get(header::CACHE_CONTROL).is_none() {
+        let is_static = matches!(
+            path.rsplit('.').next(),
+            Some(
+                "css"
+                    | "js"
+                    | "png"
+                    | "jpg"
+                    | "jpeg"
+                    | "gif"
+                    | "svg"
+                    | "ico"
+                    | "woff"
+                    | "woff2"
+                    | "ttf"
+                    | "eot"
+                    | "mp4"
+                    | "webm"
+            )
+        );
+
+        if is_static {
+            response.headers_mut().insert(
+                header::CACHE_CONTROL,
+                HeaderValue::from_static("public, max-age=31536000"),
+            );
         }
     }
 
