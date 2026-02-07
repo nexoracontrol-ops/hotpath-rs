@@ -23,7 +23,7 @@ struct SeoConfig {
 const SEO_MAPPINGS: &[SeoConfig] = &[
     SeoConfig {
         path: "/",
-        title: "hotpath-rs - Rust Profiler for Performance, Memory & Async",
+        title: "hotpath-rs | Rust Async Profiler for Memory & Performance",
         description: "hotpath-rs is a lightweight Rust profiler for performance, memory, and async data flow. Profile functions, channels, futures, and streams with zero overhead.",
         breadcrumb_label: "Home",
     },
