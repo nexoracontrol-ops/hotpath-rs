@@ -18,15 +18,51 @@ struct SitemapConfig {
 }
 
 const DOC_PAGES: &[SitemapConfig] = &[
-    SitemapConfig { page: "sampling_comparison", priority: "0.9", changefreq: "monthly" },
-    SitemapConfig { page: "profiling_modes", priority: "0.6", changefreq: "monthly" },
-    SitemapConfig { page: "functions", priority: "0.8", changefreq: "monthly" },
-    SitemapConfig { page: "futures", priority: "0.6", changefreq: "monthly" },
-    SitemapConfig { page: "channels", priority: "0.6", changefreq: "monthly" },
-    SitemapConfig { page: "streams", priority: "0.6", changefreq: "monthly" },
-    SitemapConfig { page: "threads", priority: "0.6", changefreq: "monthly" },
-    SitemapConfig { page: "mcp", priority: "0.6", changefreq: "monthly" },
-    SitemapConfig { page: "github_ci", priority: "0.6", changefreq: "monthly" },
+    SitemapConfig {
+        page: "sampling_comparison",
+        priority: "0.9",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "profiling_modes",
+        priority: "0.6",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "functions",
+        priority: "0.8",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "futures",
+        priority: "0.6",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "channels",
+        priority: "0.6",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "streams",
+        priority: "0.6",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "threads",
+        priority: "0.6",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "mcp",
+        priority: "0.6",
+        changefreq: "monthly",
+    },
+    SitemapConfig {
+        page: "github_ci",
+        priority: "0.6",
+        changefreq: "monthly",
+    },
 ];
 
 const BASE_URL: &str = "https://hotpath.rs";

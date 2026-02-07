@@ -25,61 +25,81 @@ const SEO_MAPPINGS: &[SeoConfig] = &[
         path: "/",
         title: "hotpath-rs - Rust Profiler for Performance, Memory & Async",
         description: "hotpath-rs is a lightweight Rust profiler for performance, memory, and async data flow. Profile functions, channels, futures, and streams with zero overhead when disabled.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"SoftwareApplication","name":"hotpath-rs","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","programmingLanguage":"Rust","description":"A real-time Rust profiler for performance, memory allocations, async futures, channels, and streams.","url":"https://hotpath.rs","downloadUrl":"https://crates.io/crates/hotpath","codeRepository":"https://github.com/pawurb/hotpath-rs","license":"https://opensource.org/licenses/MIT","author":{"@type":"Person","name":"Pawel Urbanek","url":"https://pawelurbanek.com"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"SoftwareApplication","name":"hotpath-rs","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","programmingLanguage":"Rust","description":"A real-time Rust profiler for performance, memory allocations, async futures, channels, and streams.","url":"https://hotpath.rs","downloadUrl":"https://crates.io/crates/hotpath","codeRepository":"https://github.com/pawurb/hotpath-rs","license":"https://opensource.org/licenses/MIT","author":{"@type":"Person","name":"Pawel Urbanek","url":"https://pawelurbanek.com"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}"#,
+        ),
     },
     SeoConfig {
         path: "/sampling_comparison",
         title: "Rust Profiler Comparison: Instrumentation vs Sampling | hotpath-rs",
         description: "Compare hotpath-rs instrumentation with sampling profilers like perf, flamegraph, and samply. See how results differ for CPU-bound, blocking I/O, and async Rust workloads.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Profiler Comparison: Instrumentation vs Sampling","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/sampling_comparison","proficiencyLevel":"Intermediate"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Profiler Comparison: Instrumentation vs Sampling","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/sampling_comparison","proficiencyLevel":"Intermediate"}"#,
+        ),
     },
     SeoConfig {
         path: "/profiling_modes",
         title: "Rust Profiling Modes: Static Reports & Live TUI | hotpath-rs",
         description: "Choose between static performance reports and a live TUI dashboard for real-time Rust profiling. Analyze timing, memory, and data flow metrics with hotpath-rs.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Profiling Modes: Static Reports & Live TUI","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/profiling_modes"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Profiling Modes: Static Reports & Live TUI","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/profiling_modes"}"#,
+        ),
     },
     SeoConfig {
         path: "/functions",
         title: "Rust Function Profiler: Timing & Memory Measurement | hotpath-rs",
         description: "Profile Rust functions with precise timing, memory allocation tracking, and percentile statistics. Measure sync and async functions with the hotpath-rs #[measure] macro.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Function Profiler: Timing & Memory Measurement","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/functions"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Function Profiler: Timing & Memory Measurement","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/functions"}"#,
+        ),
     },
     SeoConfig {
         path: "/futures",
         title: "Async Rust Profiler: Futures Monitoring & Poll Tracking | hotpath-rs",
         description: "Monitor async Rust futures with poll counts, completion tracking, and value logging. Debug async bottlenecks and understand future execution patterns with hotpath-rs.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Async Rust Profiler: Futures Monitoring & Poll Tracking","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/futures"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Async Rust Profiler: Futures Monitoring & Poll Tracking","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/futures"}"#,
+        ),
     },
     SeoConfig {
         path: "/channels",
         title: "Rust Channel Profiler: Track Message Flow & Throughput | hotpath-rs",
         description: "Track Rust channel message flow with hotpath-rs. Monitor tokio, crossbeam, futures, and std channels with send/receive counts, queue sizes, and throughput metrics.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Channel Profiler: Track Message Flow & Throughput","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/channels"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Channel Profiler: Track Message Flow & Throughput","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/channels"}"#,
+        ),
     },
     SeoConfig {
         path: "/streams",
         title: "Rust Stream Profiler: Async Stream Monitoring | hotpath-rs",
         description: "Profile async Rust streams with item counts, throughput metrics, and optional item logging. Instrument futures::Stream with the hotpath::stream! macro.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Stream Profiler: Async Stream Monitoring","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/streams"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Stream Profiler: Async Stream Monitoring","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/streams"}"#,
+        ),
     },
     SeoConfig {
         path: "/threads",
         title: "Rust Thread Profiler: CPU & Memory per Thread | hotpath-rs",
         description: "Monitor per-thread CPU and memory usage in Rust applications. Track thread states, allocation counts, and system time with the hotpath-rs TUI dashboard.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Thread Profiler: CPU & Memory per Thread","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/threads"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Thread Profiler: CPU & Memory per Thread","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/threads"}"#,
+        ),
     },
     SeoConfig {
         path: "/github_ci",
         title: "Rust Performance CI: Automated PR Benchmarking | hotpath-rs",
         description: "Automate Rust performance benchmarking in GitHub Actions. Detect performance regressions on every pull request with hotpath-rs CI integration.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Performance CI: Automated PR Benchmarking","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/github_ci"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"Rust Performance CI: Automated PR Benchmarking","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/github_ci"}"#,
+        ),
     },
     SeoConfig {
         path: "/mcp",
         title: "MCP Integration: Query Rust Profiling Data with LLMs | hotpath-rs",
         description: "Connect LLM agents like Claude Code to live Rust profiling data via MCP. Query performance, memory usage, and async operations in natural language.",
-        json_ld: Some(r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"MCP Integration: Query Rust Profiling Data with LLMs","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/mcp"}"#),
+        json_ld: Some(
+            r#"{"@context":"https://schema.org","@type":"TechArticle","headline":"MCP Integration: Query Rust Profiling Data with LLMs","author":{"@type":"Person","name":"Pawel Urbanek"},"publisher":{"@type":"Organization","name":"hotpath-rs"},"mainEntityOfPage":"https://hotpath.rs/mcp"}"#,
+        ),
     },
 ];
 
