@@ -44,7 +44,7 @@ let (tx, rx) = hotpath::channel!(mpsc::channel::<String>(100), log = true);
 
 Label channels to display them on top of the list. By passing `log = true` TUI will display messages that a channel received.
 
-<img src="images/channels-log.png" alt="Channel messages logging">
+<img src="images/channels-log.png" alt="hotpath-rs TUI showing channel message flow monitoring with send and receive logs">
 
 ## Capacity parameter requirement
 

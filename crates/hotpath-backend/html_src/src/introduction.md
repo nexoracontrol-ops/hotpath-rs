@@ -1,7 +1,7 @@
 # Real-time Rust performance, memory and data flow profiler
 
 <div class="hero-row">
-  <img src="images/hotpath-ferris.png" alt="Hotpath Ferris" class="ferris-img-hero">
+  <img src="images/hotpath-ferris.png" alt="hotpath-rs Rust profiler mascot Ferris the crab" class="ferris-img-hero">
   <div class="ssh-demo-container">
     <p class="ssh-demo-label">Try the TUI demo via SSH - no installation required:</p>
     <div class="terminal-shell">
@@ -16,7 +16,7 @@
 
 You can use it to produce one-off performance (timing or memory) reports:
 
-<img src="images/hotpath-alloc-report.png" alt="Hotpath allocations report">
+<img src="images/hotpath-alloc-report.png" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
 
 or use the live TUI dashboard to monitor real-time performance and data flow metrics with debug info:
 

@@ -113,4 +113,4 @@ Once connected, you can ask LLMs questions about your running application:
 
 Agent will use the appropriate MCP tools to query your application's profiling data and provide insights.
 
-<img src="images/mcp-analysis.png" alt="Hotpath mcp analysis report">
+<img src="images/mcp-analysis.png" alt="hotpath-rs MCP integration showing LLM agent querying Rust profiling data">

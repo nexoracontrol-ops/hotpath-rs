@@ -81,7 +81,7 @@ samply record ./target/profiling/examples/profile_cpu
 
 ```
 
-<img src="images/samply-cpu.png" alt="Samply CPU work">
+<img src="images/samply-cpu.png" alt="samply CPU sampling profiler flamegraph for Rust program">
 
 We can see that both `profile_cpu::heavy_work` and `profile_cpu::light_work` have similar ratios of total processing/CPU time regardless of the measurement method. Minor differences are expected from normal execution variability. 
 
@@ -158,7 +158,7 @@ cargo build --example profile_blocking_io --profile profiling
 samply record ./target/profiling/examples/profile_blocking_io
 ```
 
-<img src="images/samply-blocking-io.png" alt="Samply blocking io report">
+<img src="images/samply-blocking-io.png" alt="samply sampling profiler report for Rust blocking I/O workload">
 
 In this example, there's more variation than in the CPU-bound one. But `profile_blocking_io::create_test_file` usually takes 67%-75% and `profile_blocking_io::read_file` 21%-29%. 
 
@@ -238,7 +238,7 @@ Things just got interesting! Apparently, `profile_async_io::create_file` account
 
 Let's compare it to the `samply` report:
 
-<img src="images/samply-async-io.png" alt="Samply async I/O report">
+<img src="images/samply-async-io.png" alt="samply sampling profiler flamegraph for async Rust I/O with tokio">
 
 `samply` output is now significantly more verbose because of the Tokio runtime calls. And we can see that perf numbers are completely different from `hotpath`!
 
@@ -269,7 +269,7 @@ It means that, unlike sampling profilers, `hotpath` calculates the exact time ea
 
 `hotpath`'s [threads monitoring](/threads) feature lets us peek under the hood at how Tokio implements async I/O. Apparently, despite running in a `current_thread` mode, Tokio still spawns multiple worker threads. To confirm it, you can run a [`profile_async_io_long.rs`](https://github.com/pawurb/hotpath-rs/blob/main/crates/test-tokio-async/examples/profile_async_io_long.rs) example, and check its thread usage with the `hotpath console` TUI:
 
-<img src="images/tokio-threads.png" alt="Tokio threads samply report">
+<img src="images/tokio-threads.png" alt="hotpath-rs TUI showing per-thread CPU usage in tokio runtime">
 
 It shows multiple `tokio-runtime-worker` threads somewhat busy (~13% CPU), toggling between `running` and `sleeping` states. I don't have much exp with Tokio internals. But based on my research, Tokio can use separate threads, parking them while waiting for blocking system I/O calls to complete. That's why `profile_async_io::create` took over 400% of the total run time in a supposedly single-threaded context.
 

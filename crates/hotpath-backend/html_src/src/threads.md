@@ -16,4 +16,4 @@ and per-thread metrics:
 - Alloc / Dealloc – Total allocated and deallocated memory attributed to that thread
 - Diff – Net allocation difference (growth or shrinkage in allocated memory since last refresh)
 
-<img src="images/threads-view.png" alt="Thread CPU usage view">
+<img src="images/threads-view.png" alt="hotpath-rs TUI showing per-thread CPU and memory usage monitoring">

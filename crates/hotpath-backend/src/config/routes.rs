@@ -11,16 +11,22 @@ use axum::{
 use std::path::PathBuf;
 use tower_http::services::{ServeDir, ServeFile};
 
-const DOC_PAGES: &[&str] = &[
-    "sampling_comparison",
-    "profiling_modes",
-    "functions",
-    "futures",
-    "channels",
-    "streams",
-    "threads",
-    "mcp",
-    "github_ci",
+struct SitemapConfig {
+    page: &'static str,
+    priority: &'static str,
+    changefreq: &'static str,
+}
+
+const DOC_PAGES: &[SitemapConfig] = &[
+    SitemapConfig { page: "sampling_comparison", priority: "0.9", changefreq: "monthly" },
+    SitemapConfig { page: "profiling_modes", priority: "0.6", changefreq: "monthly" },
+    SitemapConfig { page: "functions", priority: "0.8", changefreq: "monthly" },
+    SitemapConfig { page: "futures", priority: "0.6", changefreq: "monthly" },
+    SitemapConfig { page: "channels", priority: "0.6", changefreq: "monthly" },
+    SitemapConfig { page: "streams", priority: "0.6", changefreq: "monthly" },
+    SitemapConfig { page: "threads", priority: "0.6", changefreq: "monthly" },
+    SitemapConfig { page: "mcp", priority: "0.6", changefreq: "monthly" },
+    SitemapConfig { page: "github_ci", priority: "0.6", changefreq: "monthly" },
 ];
 
 const BASE_URL: &str = "https://hotpath.rs";
@@ -56,10 +62,10 @@ pub fn app() -> Router {
         )
         .route("/index.html", get(|| async { Redirect::permanent("/") }));
 
-    for page in DOC_PAGES {
-        let html_file = format!("{}.html", page);
-        let clean_path = format!("/{}", page);
-        let html_path = format!("/{}.html", page);
+    for entry in DOC_PAGES {
+        let html_file = format!("{}.html", entry.page);
+        let clean_path = format!("/{}", entry.page);
+        let html_path = format!("/{}.html", entry.page);
         let redirect_target = clean_path.clone();
 
         router = router.route(
@@ -104,16 +110,22 @@ async fn robots_txt() -> impl IntoResponse {
 async fn sitemap_xml() -> impl IntoResponse {
     let mut urls = vec![];
 
-    // Home page
     let home_lastmod = get_file_lastmod("html/introduction.html").await;
-    urls.push(format_sitemap_url(&format!("{}/", BASE_URL), home_lastmod));
+    urls.push(format_sitemap_url(
+        &format!("{}/", BASE_URL),
+        home_lastmod,
+        "1.0",
+        "weekly",
+    ));
 
-    for page in DOC_PAGES {
-        let file_path = format!("html/{}.html", page);
+    for entry in DOC_PAGES {
+        let file_path = format!("html/{}.html", entry.page);
         let lastmod = get_file_lastmod(&file_path).await;
         urls.push(format_sitemap_url(
-            &format!("{}/{}", BASE_URL, page),
+            &format!("{}/{}", BASE_URL, entry.page),
             lastmod,
+            entry.priority,
+            entry.changefreq,
         ));
     }
 
@@ -133,14 +145,19 @@ async fn sitemap_xml() -> impl IntoResponse {
     )
 }
 
-fn format_sitemap_url(loc: &str, lastmod: Option<String>) -> String {
-    match lastmod {
-        Some(date) => format!(
-            "  <url>\n    <loc>{}</loc>\n    <lastmod>{}</lastmod>\n  </url>",
-            loc, date
-        ),
-        None => format!("  <url>\n    <loc>{}</loc>\n  </url>", loc),
-    }
+fn format_sitemap_url(
+    loc: &str,
+    lastmod: Option<String>,
+    priority: &str,
+    changefreq: &str,
+) -> String {
+    let lastmod_tag = lastmod
+        .map(|date| format!("\n    <lastmod>{}</lastmod>", date))
+        .unwrap_or_default();
+    format!(
+        "  <url>\n    <loc>{}</loc>{}\n    <changefreq>{}</changefreq>\n    <priority>{}</priority>\n  </url>",
+        loc, lastmod_tag, changefreq, priority
+    )
 }
 
 async fn get_file_lastmod(path: &str) -> Option<String> {

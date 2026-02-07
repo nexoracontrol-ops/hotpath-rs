@@ -12,7 +12,7 @@ Every instrumented program prints a performance report automatically when execut
 cargo run --features=hotpath
 ```
 
-<img src="images/hotpath-timing-report.png" alt="Hotpath timing report">
+<img src="images/hotpath-timing-report.png" alt="hotpath-rs timing profiling report showing per-function execution statistics">
 
 Use `--features='hotpath,hotpath-alloc'` to print memory usage report:
 
@@ -20,7 +20,7 @@ Use `--features='hotpath,hotpath-alloc'` to print memory usage report:
 cargo run --features='hotpath,hotpath-alloc'
 ```
 
-<img src="images/hotpath-alloc-report.png" alt="Hotpath allocations report">
+<img src="images/hotpath-alloc-report.png" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
 
 Enable JSON output by setting `HOTPATH_JSON=true`.
 
