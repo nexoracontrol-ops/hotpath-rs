@@ -3,7 +3,12 @@ use hotpath_backend::config::{cors, middleware, routes::app};
 use reqwest::StatusCode;
 use std::time::Duration;
 use tower_http::{
-    catch_panic::CatchPanicLayer, compression::CompressionLayer, timeout::TimeoutLayer,
+    catch_panic::CatchPanicLayer,
+    compression::{
+        CompressionLayer,
+        predicate::{DefaultPredicate, NotForContentType, Predicate},
+    },
+    timeout::TimeoutLayer,
 };
 
 fn build_app() -> Router {
@@ -13,7 +18,10 @@ fn build_app() -> Router {
             StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(10),
         ))
-        .layer(CompressionLayer::new())
+        .layer(
+            CompressionLayer::new()
+                .compress_when(DefaultPredicate::new().and(NotForContentType::new("video/"))),
+        )
         .layer(CatchPanicLayer::new())
         .layer(from_fn(middleware::security_headers))
         .layer(cors())

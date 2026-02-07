@@ -251,6 +251,8 @@ async fn set_content_type(request: Request, next: Next) -> Response {
             Some("jpg") | Some("jpeg") => Some("image/jpeg"),
             Some("gif") => Some("image/gif"),
             Some("webp") => Some("image/webp"),
+            Some("mp4") => Some("video/mp4"),
+            Some("webm") => Some("video/webm"),
             Some("svg") => Some("image/svg+xml"),
             Some("ico") => Some("image/x-icon"),
             Some("woff") => Some("font/woff"),

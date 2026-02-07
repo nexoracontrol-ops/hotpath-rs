@@ -42,7 +42,7 @@ hotpath console
 
 Then launch your instrumented application (with `hotpath` feature enabled) in a separate terminal to see live performance metrics.
 
-<video width="100%" loop muted playsinline controls>
+<video width="100%" loop muted playsinline controls poster="{{#asset-hash images/hotpath-live-dashboard-poster.jpg}}">
   <source src="{{#asset-hash videos/hotpath-live-dashboard.mp4}}" type="video/mp4">
 </video>
 

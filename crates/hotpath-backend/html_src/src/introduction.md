@@ -50,7 +50,7 @@ You can use it to produce one-off performance (timing or memory) reports:
 
 or use the live TUI dashboard to monitor real-time performance and data flow metrics with debug info:
 
-<video width="100%" loop muted playsinline controls>
+<video width="100%" loop muted playsinline controls poster="{{#asset-hash images/hotpath-live-dashboard-poster.jpg}}">
   <source src="{{#asset-hash videos/hotpath-live-dashboard.mp4}}" type="video/mp4">
 </video>
 
