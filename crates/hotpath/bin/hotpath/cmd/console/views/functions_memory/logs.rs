@@ -1,4 +1,5 @@
-use super::super::super::widgets::formatters::truncate_right;
+use crate::cmd::console::views::common_styles;
+use crate::cmd::console::widgets::formatters::truncate_right;
 use hotpath::json::JsonFunctionAllocLogsList;
 use ratatui::{
     layout::{Constraint, Rect},
@@ -37,7 +38,7 @@ pub(crate) fn render_function_logs_panel(
         .border_style(if is_focused {
             Style::default()
         } else {
-            Style::default().fg(Color::DarkGray)
+            common_styles::UNFOCUSED_BORDER_STYLE
         })
         .title(Span::styled(
             title,
@@ -52,37 +53,14 @@ pub(crate) fn render_function_logs_panel(
     let result_width = (inner_width.saturating_sub(fixed_width) as usize).max(10);
 
     if let Some(function_logs_data) = current_function_logs {
+        let header_style = common_styles::TITLE_STYLE_YELLOW;
         let headers = Row::new(vec![
-            Cell::from("Index").style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Cell::from("Mem").style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Cell::from("Objects").style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Cell::from("Ago").style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Cell::from("TID").style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Cell::from("Return").style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
+            Cell::from("Index").style(header_style),
+            Cell::from("Mem").style(header_style),
+            Cell::from("Objects").style(header_style),
+            Cell::from("Ago").style(header_style),
+            Cell::from("TID").style(header_style),
+            Cell::from("Return").style(header_style),
         ]);
 
         let rows: Vec<Row> = function_logs_data
@@ -96,7 +74,7 @@ pub(crate) fn render_function_logs_panel(
                 let result_truncated = truncate_right(result_str, result_width);
 
                 Row::new(vec![
-                    Cell::from(format!("{}", entry.invocation)),
+                    Cell::from(entry.invocation.to_string()),
                     Cell::from(entry.bytes.clone()),
                     Cell::from(obj_str),
                     Cell::from(entry.ago.clone()),
@@ -116,15 +94,11 @@ pub(crate) fn render_function_logs_panel(
         ]
         .as_slice();
 
-        let selected_row_style = Style::default()
-            .add_modifier(Modifier::REVERSED)
-            .add_modifier(Modifier::BOLD);
-
         let table = Table::new(rows, widths)
             .header(headers)
             .block(block)
             .column_spacing(2)
-            .row_highlight_style(selected_row_style)
+            .row_highlight_style(common_styles::SELECTED_ROW_STYLE)
             .highlight_symbol(">> ")
             .highlight_spacing(HighlightSpacing::Always);
 
