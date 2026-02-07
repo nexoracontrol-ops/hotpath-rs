@@ -21,7 +21,7 @@ async fn instrumented_fetch() -> Vec<u8> {
 
 By passing `log = true` TUI will display values that future resolved to: 
 
-<img src="images/futures-log.png" alt="hotpath-rs TUI showing async futures poll tracking and value logging">
+<img src="{{#asset-hash images/futures-log.png}}" alt="hotpath-rs TUI showing async futures poll tracking and value logging">
 
 
 

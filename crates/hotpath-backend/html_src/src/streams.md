@@ -30,4 +30,4 @@ let s = hotpath::stream!(stream::iter(1..=100), log = true);
 
 Label streams to display them on top of the list. By passing `log = true` TUI will display values that a stream yielded.
 
-<img src="images/streams-log.png" alt="hotpath-rs TUI showing async stream item monitoring and throughput">
+<img src="{{#asset-hash images/streams-log.png}}" alt="hotpath-rs TUI showing async stream item monitoring and throughput">

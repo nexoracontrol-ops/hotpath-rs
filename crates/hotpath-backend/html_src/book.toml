@@ -20,4 +20,6 @@ enable = false
 [output.html.playground]
 runnable = false
 
+[preprocessor.assets-hash]
+
 [preprocessor.reading-time]

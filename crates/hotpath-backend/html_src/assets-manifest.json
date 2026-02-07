@@ -1,0 +1,58 @@
+{
+  "images/samply-async-io.png": {
+    "hash": "55fe660f",
+    "hashed_path": "images/samply-async-io.55fe660f.png"
+  },
+  "images/tokio-threads.png": {
+    "hash": "0fb3c8ea",
+    "hashed_path": "images/tokio-threads.0fb3c8ea.png"
+  },
+  "images/channels-log.png": {
+    "hash": "35cb2dd8",
+    "hashed_path": "images/channels-log.35cb2dd8.png"
+  },
+  "images/threads-view.png": {
+    "hash": "c5354828",
+    "hashed_path": "images/threads-view.c5354828.png"
+  },
+  "images/mevlog-enable-cache.png": {
+    "hash": "e921d5ce",
+    "hashed_path": "images/mevlog-enable-cache.e921d5ce.png"
+  },
+  "images/hotpath-alloc-report.png": {
+    "hash": "e8f25fac",
+    "hashed_path": "images/hotpath-alloc-report.e8f25fac.png"
+  },
+  "images/functions-log.png": {
+    "hash": "6c4ca450",
+    "hashed_path": "images/functions-log.6c4ca450.png"
+  },
+  "images/mcp-analysis.png": {
+    "hash": "d0119bf3",
+    "hashed_path": "images/mcp-analysis.d0119bf3.png"
+  },
+  "images/streams-log.png": {
+    "hash": "cd023bff",
+    "hashed_path": "images/streams-log.cd023bff.png"
+  },
+  "images/hotpath-timing-report.png": {
+    "hash": "2c7a34c6",
+    "hashed_path": "images/hotpath-timing-report.2c7a34c6.png"
+  },
+  "images/samply-blocking-io.png": {
+    "hash": "47b452c0",
+    "hashed_path": "images/samply-blocking-io.47b452c0.png"
+  },
+  "images/hotpath-ferris.webp": {
+    "hash": "a3e737a6",
+    "hashed_path": "images/hotpath-ferris.a3e737a6.webp"
+  },
+  "images/futures-log.png": {
+    "hash": "00addfc4",
+    "hashed_path": "images/futures-log.00addfc4.png"
+  },
+  "images/samply-cpu.png": {
+    "hash": "9f7ebcb0",
+    "hashed_path": "images/samply-cpu.9f7ebcb0.png"
+  }
+}

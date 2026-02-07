@@ -2,7 +2,7 @@
 
 Hotpath includes a `hotpath-ci` CLI that compares profiling metrics between a PR branch and its base, then posts a performance diff as a PR comment. This lets you catch regressions before merging.
 
-<img src="images/mevlog-enable-cache.png" alt="Hotpath CI PR comment showing performance comparison">
+<img src="{{#asset-hash images/mevlog-enable-cache.png}}" alt="Hotpath CI PR comment showing performance comparison">
 
 ## How it works
 
