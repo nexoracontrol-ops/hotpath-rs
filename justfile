@@ -29,9 +29,10 @@ docs:
 deploy: docs
     cd crates/hotpath-backend && ./deploy.sh
 
-# Deploy and restart server
+# Deploy, restart server, and purge cache
 release: deploy
     cd crates/hotpath-backend && ./remote/restart.sh
+    just clean-cache
     echo "Release deployed and server restarted"
 
 # Purge Cloudflare cache

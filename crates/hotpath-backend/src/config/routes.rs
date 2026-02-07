@@ -229,6 +229,10 @@ pub fn html_response(body: String, status: StatusCode) -> Response<Body> {
         "Content-Type",
         HeaderValue::from_static("text/html; charset=utf-8"),
     );
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("public, max-age=3600"),
+    );
     (status, headers, body).into_response()
 }
 
@@ -289,6 +293,11 @@ async fn set_content_type(request: Request, next: Next) -> Response {
             response.headers_mut().insert(
                 header::CACHE_CONTROL,
                 HeaderValue::from_static("public, max-age=31536000, immutable"),
+            );
+        } else {
+            response.headers_mut().insert(
+                header::CACHE_CONTROL,
+                HeaderValue::from_static("public, max-age=3600"),
             );
         }
     }
