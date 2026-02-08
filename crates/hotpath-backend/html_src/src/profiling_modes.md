@@ -12,7 +12,7 @@ Every instrumented program prints a performance report automatically when execut
 cargo run --features=hotpath
 ```
 
-<img src="{{#asset-hash images/hotpath-timing-report.png}}" alt="hotpath-rs timing profiling report showing per-function execution statistics">
+<img loading="lazy" src="{{#asset-hash images/hotpath-timing-report.png}}" alt="hotpath-rs timing profiling report showing per-function execution statistics">
 
 Use `--features='hotpath,hotpath-alloc'` to print memory usage report:
 
@@ -20,7 +20,7 @@ Use `--features='hotpath,hotpath-alloc'` to print memory usage report:
 cargo run --features='hotpath,hotpath-alloc'
 ```
 
-<img src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
+<img loading="lazy" src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
 
 Enable JSON output by setting `HOTPATH_JSON=true`.
 
@@ -42,7 +42,7 @@ hotpath console
 
 Then launch your instrumented application (with `hotpath` feature enabled) in a separate terminal to see live performance metrics.
 
-<video width="100%" loop muted playsinline controls poster="{{#asset-hash images/hotpath-live-dashboard-poster.jpg}}">
+<video loading="lazy" width="100%" loop muted playsinline controls poster="{{#asset-hash images/hotpath-live-dashboard-poster.jpg}}">
   <source src="{{#asset-hash videos/hotpath-live-dashboard.mp4}}" type="video/mp4">
 </video>
 

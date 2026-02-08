@@ -1,4 +1,4 @@
-# Real-time Rust performance, memory, channels and runtime profiler
+# Rust Performance & Memory Profiler
 
 <div class="hero-row">
   <img src="{{#asset-hash images/hotpath-ferris.webp}}" alt="hotpath-rs Rust profiler mascot Ferris the crab" class="ferris-img-hero">
@@ -46,11 +46,11 @@
 
 You can use it to produce one-off performance (timing or memory) reports:
 
-<img src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
+<img loading="lazy" src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
 
 or use the live TUI dashboard to monitor real-time performance and data flow metrics with debug info:
 
-<video width="100%" loop muted playsinline controls poster="{{#asset-hash images/hotpath-live-dashboard-poster.jpg}}">
+<video loading="lazy" width="100%" loop muted playsinline controls poster="{{#asset-hash images/hotpath-live-dashboard-poster.jpg}}">
   <source src="{{#asset-hash videos/hotpath-live-dashboard.mp4}}" type="video/mp4">
 </video>
 

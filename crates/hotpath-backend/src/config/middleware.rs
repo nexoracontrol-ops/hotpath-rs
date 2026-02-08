@@ -8,7 +8,6 @@ use axum::{
 use http_body_util::BodyExt;
 use regex::Regex;
 use std::time::Instant;
-use tower_http::cors::{Any, CorsLayer};
 use tracing::Instrument;
 use tracing::info_span;
 use uuid::Uuid;
@@ -147,18 +146,6 @@ pub async fn security_headers(request: Request, next: Next) -> Response {
     );
 
     response
-}
-
-pub fn cors() -> CorsLayer {
-    CorsLayer::new()
-        .allow_methods([
-            axum::http::Method::GET,
-            axum::http::Method::POST,
-            axum::http::Method::PUT,
-            axum::http::Method::DELETE,
-        ])
-        .allow_origin(Any)
-        .allow_headers(Any)
 }
 
 pub fn init_logs() {

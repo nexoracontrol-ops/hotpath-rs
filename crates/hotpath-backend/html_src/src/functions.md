@@ -78,7 +78,7 @@ fn compute() -> i32 {
 }
 ```
 
-<img src="{{#asset-hash images/functions-log.png}}" alt="hotpath-rs TUI showing function return value logging">
+<img loading="lazy" src="{{#asset-hash images/functions-log.png}}" alt="hotpath-rs TUI showing function return value logging">
 
 ## `#[hotpath::measure_all]` macro
 
@@ -153,7 +153,7 @@ Run your program with the allocation tracking feature to print a similar report:
 cargo run --features='hotpath,hotpath-alloc'
 ```
 
-![hotpath-rs memory allocation profiling report showing per-function byte counts]({{#asset-hash images/hotpath-alloc-report.png}})
+<img loading="lazy" src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
 
 ### Async support
 

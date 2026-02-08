@@ -1,5 +1,5 @@
 use axum::{Router, middleware::from_fn};
-use hotpath_backend::config::{cors, middleware, routes::app};
+use hotpath_backend::config::{middleware, routes::app};
 use reqwest::StatusCode;
 use std::time::Duration;
 use tower_http::{
@@ -24,7 +24,6 @@ fn build_app() -> Router {
         )
         .layer(CatchPanicLayer::new())
         .layer(from_fn(middleware::security_headers))
-        .layer(cors())
 }
 
 #[tokio::main]
