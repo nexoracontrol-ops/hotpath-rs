@@ -1,4 +1,4 @@
-# Real-time Rust performance, memory and data flow profiler
+# Real-time Rust performance, memory, channels and runtime profiler
 
 <div class="hero-row">
   <img src="{{#asset-hash images/hotpath-ferris.webp}}" alt="hotpath-rs Rust profiler mascot Ferris the crab" class="ferris-img-hero">
@@ -11,7 +11,7 @@
   </div>
 </div>
 
-[hotpath-rs](https://github.com/pawurb/hotpath-rs) is a simple async Rust profiler. It instruments functions, channels, futures, and streams to quickly find bottlenecks and focus optimizations where they matter most. `hotpath` can provide actionable insights into time, memory, and data flow with minimal setup.
+[hotpath-rs](https://github.com/pawurb/hotpath-rs) is a Rust performance profiler that instruments functions, channels, futures, and streams. It helps you find runtime bottlenecks and optimize where it matters most, with detailed metrics for time, memory, and async data flow monitoring.
 <div style="clear: both;"></div>
 
 <div class="trusted-by">
@@ -58,7 +58,7 @@ or use the live TUI dashboard to monitor real-time performance and data flow met
 
 - **Zero-cost when disabled** - fully gated by a feature flag.
 - **Low-overhead** profiling for both sync and async code.
-- **Live TUI dashboard** - real-time monitoring of performance data flow metrics in TUI dashboard (built with [ratatui.rs](https://ratatui.rs/)).
+- **Live TUI dashboard** - real-time performance monitoring of runtime metrics and data flow in a TUI dashboard (built with [ratatui.rs](https://ratatui.rs/)).
 - **Static reports for one-off programs** - alternatively print profiling summaries without running the TUI.
 - **Memory allocation tracking** - track bytes allocated and allocation counts per function.
 - **Channels, futures and streams monitoring** - track messages flow and throughput.

@@ -1,10 +1,10 @@
-# `hotpath-rs` and Sampling Profilers comparison
+# Instrumentation vs sampling: choosing a Rust performance profiler
 
 _Reading time: {{ #reading_time }}_
 
-In this section, we'll compare `hotpath` with established sampling profilers such as [`perf`](https://perf.wiki.kernel.org/index.php/Main_Page), [`flamegraph`](https://github.com/flamegraph-rs/flamegraph), and [`samply`](https://github.com/mstange/samply). 
+In this section, we'll compare `hotpath` with established sampling profilers such as [`perf`](https://perf.wiki.kernel.org/index.php/Main_Page), [`flamegraph`](https://github.com/flamegraph-rs/flamegraph), and [`samply`](https://github.com/mstange/samply).
 
-We'll walk through three common scenarios - **CPU-bound code**, **blocking I/O**, and **async I/O** - to show how the output of sampling profilers differs from `hotpath` instrumentation (in some cases, the results are completely different!).
+We'll walk through three common Rust performance profiling scenarios - **CPU-bound code**, **blocking I/O**, and **async I/O** - to show how the runtime metrics from sampling profilers differ from `hotpath` instrumentation (in some cases, the results are completely different).
 
 To make sense of these differences, we'll go beyond the profiling output itself. We'll briefly dig into how Rust I/O works under the hood, how parked threads spend time waiting, and how the Tokio runtime schedules and wakes async tasks.
 

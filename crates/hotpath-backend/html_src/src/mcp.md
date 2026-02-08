@@ -1,6 +1,6 @@
-# MCP integration
+# AI-powered Rust profiling: query performance metrics with LLMs via MCP
 
-The Model Context Protocol (MCP) integration allows LLM agents like Claude Code to query your Rust application's profiling data in real-time. Instead of manually reading performance reports, you can ask questions like:
+The Model Context Protocol (MCP) integration allows LLM agents like Claude Code to query your Rust application's performance metrics in real-time. Instead of manually reading profiling reports, you can ask questions like:
 
 - `"Which functions dominate total execution time right now?"`
 - `"Where is most of my memory being allocated?"`

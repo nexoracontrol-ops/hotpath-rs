@@ -1,4 +1,4 @@
-# Futures monitoring
+# Async futures monitoring: poll tracking and performance metrics
 
 The `future!` macro and `#[future_fn]` attribute instrument any async function or piece of code or to track poll counts and future lifecycle:
 

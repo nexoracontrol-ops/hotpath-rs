@@ -23,68 +23,68 @@ struct SeoConfig {
 const SEO_MAPPINGS: &[SeoConfig] = &[
     SeoConfig {
         path: "/",
-        title: "hotpath-rs | Rust Async Profiler for Memory & Performance",
-        description: "hotpath-rs is a lightweight Rust profiler for performance, memory, and async data flow. Profile functions, channels, futures, and streams with zero overhead.",
+        title: "hotpath-rs | Rust Performance & Memory Profiler (Async Runtime)",
+        description: "Lightweight Rust profiler for performance metrics, memory allocations, channels and runtime monitoring. Profile functions, channels, futures, streams and threads with low overhead.",
         breadcrumb_label: "Home",
     },
     SeoConfig {
         path: "/sampling_comparison",
-        title: "Rust Profiler Comparison: Instrumentation vs Sampling | hotpath-rs",
-        description: "Compare hotpath-rs with sampling profilers like perf, flamegraph, and samply. See how results differ for CPU-bound, blocking I/O, and async Rust workloads.",
+        title: "Rust Performance Profiling: Instrumentation vs Sampling Profilers | hotpath-rs",
+        description: "Compare instrumentation and sampling approaches to Rust performance profiling. See how hotpath-rs differs from perf, flamegraph, and samply for CPU-bound, blocking I/O, and async workloads.",
         breadcrumb_label: "Sampling Comparison",
     },
     SeoConfig {
         path: "/profiling_modes",
-        title: "Rust Profiling Modes: Static Reports & Live TUI | hotpath-rs",
-        description: "Choose between static performance reports and a live TUI dashboard for real-time Rust profiling. Analyze timing, memory, and data flow metrics with hotpath-rs.",
+        title: "Rust Profiling Modes: Static Reports & Live Monitoring Dashboard | hotpath-rs",
+        description: "Two ways to profile Rust performance: static reports for one-off analysis and a live monitoring dashboard for real-time runtime metrics. Track timing, memory, and data flow with hotpath-rs.",
         breadcrumb_label: "Profiling Modes",
     },
     SeoConfig {
         path: "/functions",
-        title: "Rust Function Profiler: Timing & Memory Measurement | hotpath-rs",
-        description: "Profile Rust functions with precise timing, memory allocation tracking, and percentile statistics. Measure sync and async functions with the #[measure] macro.",
+        title: "Rust Function Performance Profiler: Timing & Memory Metrics | hotpath-rs",
+        description: "Profile Rust function performance with precise timing metrics, memory allocation tracking, and percentile statistics. Measure sync and async functions to find and optimize runtime bottlenecks.",
         breadcrumb_label: "Functions",
     },
     SeoConfig {
         path: "/futures",
-        title: "Async Rust Profiler: Futures Monitoring & Poll Tracking | hotpath-rs",
-        description: "Monitor async Rust futures with poll counts, completion tracking, and value logging. Debug async bottlenecks and understand future execution patterns.",
+        title: "Async Rust Performance Profiler: Future Monitoring & Poll Metrics | hotpath-rs",
+        description: "Monitor async Rust futures with poll counts, completion tracking, and performance metrics. Debug async bottlenecks and optimize future execution patterns with hotpath-rs.",
         breadcrumb_label: "Futures",
     },
     SeoConfig {
         path: "/channels",
-        title: "Rust Channel Profiler: Track Message Flow & Throughput | hotpath-rs",
-        description: "Track Rust channel message flow with hotpath-rs. Monitor tokio, crossbeam, futures, and std channels with send/receive counts, queue sizes, and throughput.",
+        title: "Rust Channels Performance Monitoring: Message Flow & Throughput Metrics | hotpath-rs",
+        description: "Monitor Rust channels performance with hotpath-rs. Track tokio, crossbeam, futures, and std channel metrics including send/receive counts, queue sizes, and throughput.",
         breadcrumb_label: "Channels",
     },
     SeoConfig {
         path: "/streams",
-        title: "Rust Stream Profiler: Async Stream Monitoring | hotpath-rs",
-        description: "Profile async Rust streams with item counts, throughput metrics, and optional item logging. Instrument futures::Stream with the hotpath::stream! macro.",
+        title: "Rust Async Stream Profiler: Performance Monitoring & Throughput Metrics | hotpath-rs",
+        description: "Profile async Rust streams with throughput metrics, item counts, and optional item logging. Monitor futures::Stream performance with the hotpath::stream! macro.",
         breadcrumb_label: "Streams",
     },
     SeoConfig {
         path: "/threads",
-        title: "Rust Thread Profiler: CPU & Memory per Thread | hotpath-rs",
-        description: "Monitor per-thread CPU and memory usage in Rust applications. Track thread states, allocation counts, and system time with the hotpath-rs TUI dashboard.",
+        title: "Rust Thread Performance Monitoring: Per-Thread CPU & Memory Metrics | hotpath-rs",
+        description: "Monitor per-thread CPU usage and memory allocation metrics in Rust applications. Track thread states, allocation counts, and system time in the hotpath-rs monitoring dashboard.",
         breadcrumb_label: "Threads",
     },
     SeoConfig {
         path: "/tokio_runtime",
-        title: "Rust Tokio Runtime Monitoring: Worker, Tasks, Stats and Metrics | hotpath-rs",
-        description: "Monitor Tokio runtime internals with hotpath-rs. Track worker thread utilization, task scheduling, queue depths, and I/O driver metrics in real time.",
+        title: "Tokio Runtime Performance Monitoring: Worker Stats, Task Metrics & Scheduling | hotpath-rs",
+        description: "Monitor Tokio runtime performance with hotpath-rs. Track worker thread utilization, task scheduling, queue depths, and I/O driver metrics for real-time Rust application monitoring.",
         breadcrumb_label: "Tokio Runtime",
     },
     SeoConfig {
         path: "/github_ci",
-        title: "Rust Performance CI: Automated PR Benchmarking | hotpath-rs",
-        description: "Automate Rust performance benchmarking in GitHub Actions. Detect performance regressions on every pull request with hotpath-rs CI integration.",
+        title: "Rust Performance CI: Automated Benchmarking & Regression Detection | hotpath-rs",
+        description: "Automate Rust performance benchmarking in GitHub Actions. Detect runtime regressions on every pull request with detailed metrics comparison using hotpath-rs CI integration.",
         breadcrumb_label: "GitHub CI",
     },
     SeoConfig {
         path: "/mcp",
-        title: "MCP Integration: Query Rust Profiling Data with LLMs | hotpath-rs",
-        description: "Connect LLM agents like Claude Code to live Rust profiling data via MCP. Query performance, memory usage, and async operations in natural language.",
+        title: "AI-Powered Rust Profiling: Query Performance Metrics with LLMs via MCP | hotpath-rs",
+        description: "Connect LLM agents like Claude Code to live Rust performance metrics via MCP. Query runtime profiling data, memory usage, and async operations in natural language.",
         breadcrumb_label: "MCP Integration",
     },
 ];
@@ -96,7 +96,7 @@ const STATIC_EXTENSIONS: &[&str] = &[
 
 const BASE_URL: &str = "https://hotpath.rs";
 const OG_IMAGE: &str = "https://hotpath.rs/images/hotpath-ferris.png";
-const SOFTWARE_APP_JSON_LD: &str = r#"{"@context":"https://schema.org","@type":"SoftwareApplication","name":"hotpath-rs","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","programmingLanguage":"Rust","description":"A real-time Rust profiler for performance, memory allocations, async futures, channels, and streams.","url":"https://hotpath.rs","downloadUrl":"https://crates.io/crates/hotpath","codeRepository":"https://github.com/pawurb/hotpath-rs","license":"https://opensource.org/licenses/MIT","author":{"@type":"Person","name":"Pawel Urbanek","url":"https://pawelurbanek.com"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}"#;
+const SOFTWARE_APP_JSON_LD: &str = r#"{"@context":"https://schema.org","@type":"SoftwareApplication","name":"hotpath-rs","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","programmingLanguage":"Rust","description":"A Rust performance profiler for runtime metrics, memory allocations, and async data flow monitoring. Profile functions, channels, futures, and streams.","url":"https://hotpath.rs","downloadUrl":"https://crates.io/crates/hotpath","codeRepository":"https://github.com/pawurb/hotpath-rs","license":"https://opensource.org/licenses/MIT","author":{"@type":"Person","name":"Pawel Urbanek","url":"https://pawelurbanek.com"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}"#;
 
 pub async fn request_tracing(request: Request, next: Next) -> Response {
     let path = request.uri().path().to_string();

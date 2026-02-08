@@ -1,8 +1,8 @@
-# Channels monitoring
+# Channel performance monitoring: message flow and throughput metrics
 
 ## hotpath::channel! macro 
 
-This macro wraps channel creation to automatically track usage statistics and data flow:
+This macro wraps channel creation to automatically track performance metrics and data flow:
 
 ```rust
 use tokio::sync::mpsc;

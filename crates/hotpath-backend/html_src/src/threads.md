@@ -1,6 +1,6 @@
-# Threads monitoring
+# Thread performance monitoring: CPU and memory metrics per thread
 
-It's enabled by default via `threads` feature flag. TUI dashboard displays displays real-time information about all active and sleeping threads in the instrumented process. For each thread, you can observe:
+It's enabled by default via `threads` feature flag. The monitoring dashboard displays real-time performance metrics for all active and sleeping threads in the instrumented process. For each thread, you can observe:
 
 - PID – Process identifier
 - Total Alloc – Dealloc – Aggregate allocation delta for all threads

@@ -1,6 +1,6 @@
-# GitHub CI integration
+# GitHub CI: automated performance benchmarking and regression detection
 
-Hotpath includes a `hotpath-ci` CLI that compares profiling metrics between a PR branch and its base, then posts a performance diff as a PR comment. This lets you catch regressions before merging.
+Hotpath includes a `hotpath-ci` CLI that compares performance metrics between a PR branch and its base, then posts a profiling diff as a PR comment. This lets you catch runtime regressions before merging.
 
 <img src="{{#asset-hash images/mevlog-enable-cache.png}}" alt="Hotpath CI PR comment showing performance comparison">
 

@@ -1,6 +1,6 @@
-# Tokio Runtime monitoring
+# Tokio runtime performance monitoring: worker stats and task metrics
 
-`hotpath` can monitor Tokio runtime internals by polling [`tokio::runtime::RuntimeMetrics`](https://docs.rs/tokio/latest/tokio/runtime/struct.RuntimeMetrics.html) on a dedicated background thread. This gives you visibility into worker thread utilization, task scheduling, and queue depths without modifying your async code.
+`hotpath` can monitor Tokio runtime performance by polling [`tokio::runtime::RuntimeMetrics`](https://docs.rs/tokio/latest/tokio/runtime/struct.RuntimeMetrics.html) on a dedicated background thread. This gives you visibility into worker thread utilization, task scheduling metrics, and queue depths without modifying your async code.
 
 ## Setup
 

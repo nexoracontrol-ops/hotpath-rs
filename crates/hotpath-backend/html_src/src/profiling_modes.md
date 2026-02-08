@@ -1,6 +1,6 @@
-# Profiling modes
+# Profiling modes: static reports and live monitoring
 
-`hotpath` supports two complementary approaches to performance monitoring.
+`hotpath` supports two complementary approaches to Rust performance profiling and runtime monitoring.
 
 ## Static reports
 
@@ -26,7 +26,7 @@ Enable JSON output by setting `HOTPATH_JSON=true`.
 
 ## Live TUI dashboard 
 
-Best for long-running processes like HTTP servers, or background workers. It continuously displays functions performance, allocation counters, and channel/stream throughput while the application is running. This mode helps diagnose runtime bottlenecks, queue buildup, and data flow issues that are not visible in static summaries.
+Best for long-running processes like HTTP servers, or background workers. It continuously displays function performance metrics, allocation counters, and channel/stream throughput while the application is running. This mode helps diagnose runtime bottlenecks, queue buildup, and data flow issues that are not visible in static summaries.
 
 Install the TUI with:
 

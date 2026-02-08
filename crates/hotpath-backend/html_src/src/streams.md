@@ -1,8 +1,8 @@
-# Streams monitoring
+# Async stream profiling: throughput monitoring and performance metrics
 
 ## hotpath::stream! macro
 
-This macro instruments async streams to track items yielded:
+This macro instruments async streams to track performance metrics and items yielded:
 
 ```rust
 use futures::stream::{self, StreamExt};
