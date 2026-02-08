@@ -45,7 +45,7 @@ impl SelectedTab {
             SelectedTab::DataFlow => "Data Flow",
             SelectedTab::Threads => "Threads",
             SelectedTab::Debug => "Debug",
-            SelectedTab::Runtime => "Runtime",
+            SelectedTab::Runtime => "Tokio",
         }
     }
 }

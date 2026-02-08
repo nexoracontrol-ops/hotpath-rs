@@ -66,7 +66,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-hotpath = "0.9"
+hotpath = "0.10"
 
 [features]
 hotpath = ["hotpath/hotpath"]
@@ -492,6 +492,57 @@ async fn main() {
 let _guard = hotpath::ChannelsGuardBuilder::new()
     .format(hotpath::Format::Json)
     .build();
+```
+
+## Tokio Runtime Monitoring
+
+`hotpath` can monitor Tokio runtime internals by polling [`tokio::runtime::RuntimeMetrics`](https://docs.rs/tokio/latest/tokio/runtime/struct.RuntimeMetrics.html) on a dedicated background thread. This gives you visibility into worker thread utilization, task scheduling, and queue depths without modifying your async code.
+
+### Setup
+
+Enable the `tokio` feature:
+
+```toml
+[dependencies]
+hotpath = { version = "0.10", features = ["tokio"] }
+```
+
+Then call `tokio_runtime!()` inside your async main:
+
+```rust
+#[tokio::main]
+#[hotpath::main]
+async fn main() {
+    hotpath::tokio_runtime!();
+
+    // ...
+}
+```
+
+You can also pass an explicit handle if you're not inside a Tokio context:
+
+```rust
+let handle = tokio::runtime::Handle::current();
+hotpath::tokio_runtime!(&handle);
+```
+
+### Metrics collected
+
+**Always available** (stable Tokio API):
+- Number of workers
+- Number of alive tasks
+- Global queue depth
+- Per-worker park count and busy duration
+
+**With `tokio_unstable` cfg flag** (additional metrics):
+- Per-worker: poll count, steal count, steal operations, overflow count, local queue depth, mean poll time
+- Global: blocking threads (total and idle), blocking queue depth, spawned tasks count, remote schedule count
+- IO driver: registered/deregistered FD count, ready count
+
+To enable unstable metrics, build with:
+
+```bash
+RUSTFLAGS="--cfg tokio_unstable" cargo run --features='hotpath'
 ```
 
 ## How It Works
