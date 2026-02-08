@@ -102,16 +102,13 @@ pub mod tests {
         for _attempt in 0..12 {
             sleep(Duration::from_millis(500));
 
-            match agent.get("http://localhost:6784/tokio_runtime").call() {
-                Ok(mut resp) => {
-                    status = resp.status().as_u16();
-                    body = resp
-                        .body_mut()
-                        .read_to_string()
-                        .expect("Failed to read response body");
-                    break;
-                }
-                Err(_) => {}
+            if let Ok(mut resp) = agent.get("http://localhost:6784/tokio_runtime").call() {
+                status = resp.status().as_u16();
+                body = resp
+                    .body_mut()
+                    .read_to_string()
+                    .expect("Failed to read response body");
+                break;
             }
         }
 

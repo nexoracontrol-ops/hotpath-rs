@@ -1,4 +1,4 @@
-# <img src="hotpath-logo2.png" alt="hotpath-rs logo" width="80px" align="left"> hotpath - real-time Rust performance, memory and data flow profiler
+# <img src="media/hotpath-logo2.png" alt="hotpath-rs logo" width="80px" align="left"> hotpath - real-time Rust performance, memory and data flow profiler
 [![Latest Version](https://img.shields.io/crates/v/hotpath.svg)](https://crates.io/crates/hotpath) [![GH Actions](https://github.com/pawurb/hotpath/actions/workflows/ci.yml/badge.svg)](https://github.com/pawurb/hotpath/actions)
 
 hotpath-rs instruments functions, channels, futures, and streams to quickly find bottlenecks and focus optimizations where they matter most. It provides actionable insights into time, memory, and data flow with minimal setup.
@@ -13,7 +13,7 @@ Explore the full documentation at [hotpath.rs](https://hotpath.rs).
 
 You can use it to produce one-off performance (timing or memory) reports:
 
-![hotpath alloc report](hotpath-alloc-report.png)
+![hotpath alloc report](media/hotpath-alloc-report.png)
 
 or use the live TUI dashboard to monitor real-time performance metrics with debug info:
 
