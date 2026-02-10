@@ -58,14 +58,14 @@ or use the live TUI dashboard to monitor real-time performance and data flow met
 
 - **Zero-cost when disabled** - fully gated by a feature flag.
 - **Low-overhead** profiling for both sync and async code.
-- **Live TUI dashboard** - real-time monitoring of performance data flow metrics in TUI dashboard (built with [ratatui.rs](https://ratatui.rs/)).
+- **Live TUI dashboard** - real-time monitoring of performance data flow metrics in TUI dashboard (built with <a href="https://ratatui.rs/" target="_blank">ratatui.rs</a>).
 - **Static reports for one-off programs** - alternatively print profiling summaries without running the TUI.
 - **Memory allocation tracking** - track bytes allocated and allocation counts per function.
 - **Channel and stream monitoring** - instrument channels and streams to track message flow and throughput.
 - **Futures instrumentation** - monitor any async piece of code to track poll counts, lifecycle and resolved values.
 - **Detailed stats**: avg, total time, call count, % of total runtime, and configurable percentiles (p95, p99, etc.).
 - **Tokio runtime monitoring** - track worker thread utilization, task scheduling, and queue depths.
-- **MCP server for AI agents** - built-in [Model Context Protocol](https://modelcontextprotocol.io/) server that lets LLMs query profiling data in real-time.
+- **MCP server for AI agents** - built-in <a href="https://modelcontextprotocol.io/" target="_blank">Model Context Protocol</a> server that lets LLMs query profiling data in real-time.
 - **GitHub Actions integration** - configure CI to automatically benchmark your program against a base branch for each PR.
 
 ## Quick demo

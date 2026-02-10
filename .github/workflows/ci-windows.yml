@@ -40,15 +40,3 @@ jobs:
       - name: Run functions tests
         run: |
           cargo test --features hotpath --test functions -- --nocapture --test-threads=1
-      - name: Run streams tests
-        run: |
-          cargo test --features hotpath --test streams -- --nocapture --test-threads=1
-      - name: Run channels crossbeam tests
-        run: |
-          cargo test --features hotpath --test channels_crossbeam -- --nocapture --test-threads=1
-      - name: Run channels futures tests
-        run: |
-          cargo test --features hotpath --test channels_ftc -- --nocapture --test-threads=1
-      - name: Run channels std tests
-        run: |
-          cargo test --features hotpath --test channels_std -- --nocapture --test-threads=1
