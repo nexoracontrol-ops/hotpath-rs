@@ -47,6 +47,30 @@
     "hash": "9f7ebcb0",
     "hashed_path": "images/samply-cpu.9f7ebcb0.png"
   },
+  "images/stars-apache-horaedb.svg": {
+    "hash": "86fd4b85",
+    "hashed_path": "images/stars-apache-horaedb.86fd4b85.svg"
+  },
+  "images/stars-apache-opendal.svg": {
+    "hash": "d07dfd87",
+    "hashed_path": "images/stars-apache-opendal.d07dfd87.svg"
+  },
+  "images/stars-marc2332-freya.svg": {
+    "hash": "4c08b2d9",
+    "hashed_path": "images/stars-marc2332-freya.4c08b2d9.svg"
+  },
+  "images/stars-nyudenkov-pysentry.svg": {
+    "hash": "ce285a89",
+    "hashed_path": "images/stars-nyudenkov-pysentry.ce285a89.svg"
+  },
+  "images/stars-tqwewe-kameo.svg": {
+    "hash": "e52e7b0f",
+    "hashed_path": "images/stars-tqwewe-kameo.e52e7b0f.svg"
+  },
+  "images/stars-tryandromeda-andromeda.svg": {
+    "hash": "65a17a30",
+    "hashed_path": "images/stars-tryandromeda-andromeda.65a17a30.svg"
+  },
   "images/streams-log.png": {
     "hash": "cd023bff",
     "hashed_path": "images/streams-log.cd023bff.png"

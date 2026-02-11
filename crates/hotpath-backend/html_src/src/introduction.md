@@ -19,27 +19,27 @@
   <div class="trusted-by-grid">
     <a href="https://github.com/apache/opendal" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">apache/opendal</span>
-      <img src="https://img.shields.io/github/stars/apache/opendal?style=social&cacheSeconds=7200" alt="opendal GitHub stars">
+      <img src="{{#asset-hash images/stars-apache-opendal.svg}}" alt="opendal GitHub stars">
     </a>
     <a href="https://github.com/apache/horaedb" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">apache/horaedb</span>
-      <img src="https://img.shields.io/github/stars/apache/horaedb?style=social&cacheSeconds=7200" alt="horaedb GitHub stars">
+      <img src="{{#asset-hash images/stars-apache-horaedb.svg}}" alt="horaedb GitHub stars">
     </a>
     <a href="https://github.com/marc2332/freya" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">marc2332/freya</span>
-      <img src="https://img.shields.io/github/stars/marc2332/freya?style=social&cacheSeconds=7200" alt="freya GitHub stars">
+      <img src="{{#asset-hash images/stars-marc2332-freya.svg}}" alt="freya GitHub stars">
     </a>
     <a href="https://github.com/tqwewe/kameo" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">tqwewe/kameo</span>
-      <img src="https://img.shields.io/github/stars/tqwewe/kameo?style=social&cacheSeconds=7200" alt="kameo GitHub stars">
+      <img src="{{#asset-hash images/stars-tqwewe-kameo.svg}}" alt="kameo GitHub stars">
     </a>
     <a href="https://github.com/tryandromeda/andromeda" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">tryandromeda/andromeda</span>
-      <img src="https://img.shields.io/github/stars/tryandromeda/andromeda?style=social&cacheSeconds=7200" alt="andromeda GitHub stars">
+      <img src="{{#asset-hash images/stars-tryandromeda-andromeda.svg}}" alt="andromeda GitHub stars">
     </a>
     <a href="https://github.com/nyudenkov/pysentry" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">nyudenkov/pysentry</span>
-      <img src="https://img.shields.io/github/stars/nyudenkov/pysentry?style=social&cacheSeconds=7200" alt="pysentry GitHub stars">
+      <img src="{{#asset-hash images/stars-nyudenkov-pysentry.svg}}" alt="pysentry GitHub stars">
     </a>
   </div>
 </div>

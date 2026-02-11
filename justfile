@@ -35,6 +35,21 @@ release: deploy
     just clean-cache
     echo "Release deployed and server restarted"
 
+# Fetch GitHub star badges locally for documentation
+fetch-badges:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    DIR="crates/hotpath-backend/html_src/src/images"
+    fetch() { echo "Fetching $2..."; curl -sL "https://img.shields.io/github/stars/${2}?style=social" -o "${DIR}/stars-${1}.svg"; }
+    fetch apache-opendal apache/opendal
+    fetch apache-horaedb apache/horaedb
+    fetch marc2332-freya marc2332/freya
+    fetch tqwewe-kameo tqwewe/kameo
+    fetch tryandromeda-andromeda tryandromeda/andromeda
+    fetch nyudenkov-pysentry nyudenkov/pysentry
+    fetch pawurb-hotpath-rs pawurb/hotpath-rs
+    echo "Badges saved to ${DIR}/"
+
 # Purge Cloudflare cache
 clean-cache:
     #!/usr/bin/env bash
