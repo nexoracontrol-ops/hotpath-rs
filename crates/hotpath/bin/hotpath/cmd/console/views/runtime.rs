@@ -80,10 +80,17 @@ pub(crate) fn render_runtime_panel(
     };
 
     let title = " Tokio Runtime - per-worker metrics. ";
-    let table_block = Block::bordered()
+    let mut table_block = Block::bordered()
         .title(format!(" [{}/{}] ", worker_position, total_workers))
         .title(Span::styled(title, common_styles::TITLE_STYLE_YELLOW))
         .border_set(border::THICK);
+
+    if !has_unstable {
+        table_block = table_block.title_bottom(Line::from(Span::styled(
+            " Use RUSTFLAGS=\"--cfg tokio_unstable\" for more runtime metrics. ",
+            Style::default().fg(Color::DarkGray),
+        )));
+    }
 
     let table = Table::new(rows, widths)
         .header(header)
