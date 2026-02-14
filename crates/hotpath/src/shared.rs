@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use std::time::Duration;
 
 /// Output format for profiling reports.
 ///
@@ -131,5 +132,22 @@ impl IntoF64 for isize {
 impl IntoF64 for usize {
     fn into_f64(self) -> f64 {
         self as f64
+    }
+}
+
+pub(crate) fn resolve_timeout_duration(
+    default_duration: Duration,
+    env_var: &str,
+) -> Option<Duration> {
+    let effective_duration = std::env::var(env_var)
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok())
+        .map(Duration::from_millis)
+        .unwrap_or(default_duration);
+
+    if effective_duration.is_zero() {
+        None
+    } else {
+        Some(effective_duration)
     }
 }

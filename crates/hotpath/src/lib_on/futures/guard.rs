@@ -84,11 +84,22 @@ impl FuturesGuardBuilder {
     /// * `duration` - The duration to wait before dropping the guard and generating the report
     pub fn build_with_timeout(self, duration: std::time::Duration) {
         let guard = self.build();
-        thread::spawn(move || {
-            thread::sleep(duration);
-            drop(guard);
-            std::process::exit(0);
-        });
+        if let Some(timeout) =
+            crate::shared::resolve_timeout_duration(duration, "HOTPATH_FUTURES_TIMEOUT_MS")
+        {
+            thread::spawn(move || {
+                thread::sleep(timeout);
+                drop(guard);
+                std::process::exit(0);
+            });
+        } else {
+            thread::spawn(move || {
+                let _guard = guard;
+                loop {
+                    thread::park();
+                }
+            });
+        }
     }
 }
 
