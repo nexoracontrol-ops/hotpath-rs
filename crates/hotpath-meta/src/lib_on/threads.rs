@@ -13,6 +13,9 @@ mod collector;
 #[path = "threads/collector_linux.rs"]
 mod collector;
 
+pub mod guard;
+pub use guard::{ThreadsGuard, ThreadsGuardBuilder};
+
 pub use crate::json::ThreadMetrics;
 use crate::json::{format_bytes_signed, JsonThreadEntry, JsonThreadsList};
 use crate::output::format_bytes;

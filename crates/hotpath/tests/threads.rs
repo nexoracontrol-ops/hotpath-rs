@@ -95,4 +95,37 @@ pub mod tests {
         let _ = child.kill();
         let _ = child.wait();
     }
+
+    // cargo run -p test-tokio-async --example guard_timeout_threads --features hotpath
+    #[test]
+    fn test_guard_timeout_output() {
+        let output = Command::new("cargo")
+            .args([
+                "run",
+                "-p",
+                "test-tokio-async",
+                "--example",
+                "guard_timeout_threads",
+                "--features",
+                "hotpath",
+            ])
+            .output()
+            .expect("Failed to execute command");
+
+        assert!(
+            output.status.success(),
+            "Process did not exit successfully.\n\nstderr:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let expected_content = ["Thread Statistics", "Threads (", "RSS:"];
+
+        for expected in expected_content {
+            assert!(
+                stdout.contains(expected),
+                "Expected:\n{expected}\n\nGot:\n{stdout}",
+            );
+        }
+    }
 }

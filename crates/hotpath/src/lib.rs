@@ -62,6 +62,8 @@ pub use lib_off::channels;
 pub use lib_off::futures;
 #[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
 pub use lib_off::streams;
+#[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
+pub use lib_off::threads;
 
 mod shared;
 pub use shared::{Format, IntoF64};

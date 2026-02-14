@@ -356,6 +356,58 @@ pub mod streams {
     }
 }
 
+pub mod threads {
+    use super::Format;
+
+    pub struct ThreadsGuardBuilder;
+
+    impl ThreadsGuardBuilder {
+        pub fn new() -> Self {
+            Self
+        }
+        pub fn format(self, _format: Format) -> Self {
+            self
+        }
+        pub fn output_path(self, _path: impl AsRef<std::path::Path>) -> Self {
+            self
+        }
+        pub fn build(self) -> ThreadsGuard {
+            ThreadsGuard
+        }
+        pub fn build_with_timeout(self, _duration: std::time::Duration) {}
+    }
+
+    impl Default for ThreadsGuardBuilder {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
+    pub struct ThreadsGuard;
+
+    impl ThreadsGuard {
+        pub fn new() -> Self {
+            Self
+        }
+        pub fn format(self, _format: Format) -> Self {
+            self
+        }
+        pub fn output_path(self, _path: impl AsRef<std::path::Path>) -> Self {
+            self
+        }
+    }
+
+    impl Default for ThreadsGuard {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
+    impl Drop for ThreadsGuard {
+        fn drop(&mut self) {}
+    }
+}
+
 pub mod futures {
     use super::Format;
 
