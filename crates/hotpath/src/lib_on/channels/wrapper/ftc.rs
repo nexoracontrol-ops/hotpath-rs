@@ -20,6 +20,8 @@ where
     F: FnMut(&T) -> Option<String> + Send + 'static + Clone,
 {
     let (inner_tx, mut inner_rx) = inner;
+    #[cfg(feature = "hotpath-meta")]
+    let mut inner_rx = hotpath_meta::stream!(inner_rx, label = "hp-ftc-bounded-rx");
     let (mut proxy_tx, proxy_rx) = mpsc::channel::<T>(1);
 
     let RegisteredChannel { id, stats_tx } =
@@ -88,6 +90,8 @@ where
     F: FnMut(&T) -> Option<String> + Send + 'static + Clone,
 {
     let (inner_tx, mut inner_rx) = inner;
+    #[cfg(feature = "hotpath-meta")]
+    let mut inner_rx = hotpath_meta::stream!(inner_rx, label = "hp-ftc-unbounded-rx");
     let (proxy_tx, proxy_rx) = mpsc::unbounded::<T>();
 
     let RegisteredChannel { id, stats_tx } =

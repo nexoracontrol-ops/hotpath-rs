@@ -189,10 +189,11 @@ pub fn init_futures_state() {
                         recv(event_rx) -> result => {
                             match result {
                                 Ok(event) => {
-                                    process_future_event(&mut local_stats, event);
-                                    if let Ok(mut shared) = stats_map_clone.write() {
-                                        *shared = local_stats.clone();
-                                    }
+                                    process_and_sync_future_event(
+                                        &mut local_stats,
+                                        &stats_map_clone,
+                                        event,
+                                    );
                                 }
                                 Err(_) => break,
                             }
@@ -284,6 +285,18 @@ fn process_future_event(stats_map: &mut HashMap<u64, FutureEntry>, event: Future
                 }
             }
         }
+    }
+}
+
+#[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
+fn process_and_sync_future_event(
+    local_stats: &mut HashMap<u64, FutureEntry>,
+    stats_map: &Arc<RwLock<HashMap<u64, FutureEntry>>>,
+    event: FutureEvent,
+) {
+    process_future_event(local_stats, event);
+    if let Ok(mut shared) = stats_map.write() {
+        *shared = local_stats.clone();
     }
 }
 

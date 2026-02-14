@@ -148,6 +148,18 @@ fn process_stream_event(stats: &mut HashMap<u64, StreamStats>, event: StreamEven
     }
 }
 
+#[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
+fn process_and_sync_stream_event(
+    local_stats: &mut HashMap<u64, StreamStats>,
+    stats_map: &Arc<RwLock<HashMap<u64, StreamStats>>>,
+    event: StreamEvent,
+) {
+    process_stream_event(local_stats, event);
+    if let Ok(mut shared) = stats_map.write() {
+        *shared = local_stats.clone();
+    }
+}
+
 /// Initialize the stream statistics collection system (called on first instrumented stream).
 /// Returns a reference to the global state.
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure)]
@@ -186,10 +198,11 @@ pub(crate) fn init_streams_state() -> &'static StreamStatsState {
                         recv(event_rx) -> result => {
                             match result {
                                 Ok(event) => {
-                                    process_stream_event(&mut local_stats, event);
-                                    if let Ok(mut shared) = stats_map_clone.write() {
-                                        *shared = local_stats.clone();
-                                    }
+                                    process_and_sync_stream_event(
+                                        &mut local_stats,
+                                        &stats_map_clone,
+                                        event,
+                                    );
                                 }
                                 Err(_) => break,
                             }

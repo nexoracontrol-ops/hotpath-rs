@@ -307,6 +307,18 @@ fn process_channel_event(stats: &mut HashMap<u64, ChannelEntry>, event: ChannelE
     }
 }
 
+#[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
+fn process_and_sync_channel_event(
+    local_stats: &mut HashMap<u64, ChannelEntry>,
+    stats_map: &Arc<RwLock<HashMap<u64, ChannelEntry>>>,
+    event: ChannelEvent,
+) {
+    process_channel_event(local_stats, event);
+    if let Ok(mut shared) = stats_map.write() {
+        *shared = local_stats.clone();
+    }
+}
+
 /// Initialize the channel statistics collection system (called on first instrumented channel).
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure)]
 pub(crate) fn init_channels_state() -> &'static ChannelStatsState {
@@ -344,10 +356,11 @@ pub(crate) fn init_channels_state() -> &'static ChannelStatsState {
                         recv(event_rx) -> result => {
                             match result {
                                 Ok(event) => {
-                                    process_channel_event(&mut local_stats, event);
-                                    if let Ok(mut shared) = stats_map_clone.write() {
-                                        *shared = local_stats.clone();
-                                    }
+                                    process_and_sync_channel_event(
+                                        &mut local_stats,
+                                        &stats_map_clone,
+                                        event,
+                                    );
                                 }
                                 Err(_) => break,
                             }

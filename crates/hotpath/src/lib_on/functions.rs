@@ -111,6 +111,7 @@ pub fn measure_with_log<T: std::fmt::Debug, F: FnOnce() -> T>(
 /// Measure an async function and log its return value.
 #[doc(hidden)]
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
+#[cfg_attr(feature = "hotpath-meta", hotpath_meta::future_fn(log = true))]
 pub async fn measure_with_log_async<T: std::fmt::Debug, F, Fut>(name: &'static str, f: F) -> T
 where
     F: FnOnce() -> Fut,
