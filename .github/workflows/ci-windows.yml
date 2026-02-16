@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  if: false
   build:
+    if: false
     name: test ${{ matrix.rust }}
     runs-on: windows-latest
     timeout-minutes: 18
