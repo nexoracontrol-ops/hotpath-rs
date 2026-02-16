@@ -29,7 +29,7 @@ pub struct ConsoleArgs {
     )]
     pub metrics_host: String,
 
-    #[arg(long, default_value_t = 500, help = "Refresh interval in milliseconds")]
+    #[arg(long, default_value_t = default_refresh_interval(), help = "Refresh interval in milliseconds (env: HOTPATH_TUI_REFRESH_INTERVAL_MS)")]
     pub refresh_interval: u64,
 }
 
@@ -91,7 +91,7 @@ impl Default for ConsoleArgs {
         Self {
             metrics_port: default_metrics_port(),
             metrics_host: default_metrics_host(),
-            refresh_interval: 500,
+            refresh_interval: default_refresh_interval(),
         }
     }
 }
@@ -101,6 +101,13 @@ fn default_metrics_port() -> u16 {
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(6770)
+}
+
+fn default_refresh_interval() -> u64 {
+    std::env::var("HOTPATH_TUI_REFRESH_INTERVAL_MS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(500)
 }
 
 fn default_metrics_host() -> String {
