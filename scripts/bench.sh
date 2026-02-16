@@ -11,7 +11,7 @@ LABEL="$BRANCH ($REF)"
 OUTPUT="tmp/bench.txt"
 
 bench_env=(
-    HOTPATH_TUI_TAB=3
+    HOTPATH_TUI_TAB=${HOTPATH_TUI_TAB:-1}
     HOTPATH_META_REPORT='functions-timing,functions-alloc,threads'
     HOTPATH_META_OUTPUT_PATH="$OUTPUT"
     HOTPATH_META_SHUTDOWN_MS=10000

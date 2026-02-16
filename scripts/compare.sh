@@ -21,7 +21,7 @@ run_bench() {
     echo "==> Checking out $ref"
     git checkout "$ref"
     local -a bench_env=(
-        HOTPATH_TUI_TAB=3
+        HOTPATH_TUI_TAB=${HOTPATH_TUI_TAB:-1}
         HOTPATH_META_REPORT='functions-timing,functions-alloc,threads'
         HOTPATH_META_OUTPUT_PATH="$output"
         HOTPATH_META_SHUTDOWN_MS=10000
