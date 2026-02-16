@@ -44,6 +44,8 @@ struct ThreadsState {
     sample_interval: Duration,
     /// Start time for elapsed calculation
     start_time: Instant,
+    /// Peak CPU percentage per thread (keyed by os_tid)
+    max_cpu_percent: HashMap<u64, f64>,
 }
 
 type ThreadsStateRef = Arc<RwLock<ThreadsState>>;
@@ -70,6 +72,7 @@ pub fn init_threads_monitoring() {
             last_sample_time: start_time,
             sample_interval,
             start_time,
+            max_cpu_percent: HashMap::new(),
         }));
 
         let state_clone = Arc::clone(&state);
@@ -112,6 +115,21 @@ fn collector_loop(state: ThreadsStateRef, interval: Duration) {
                         m_with_percent.alloc_bytes = Some(alloc);
                         m_with_percent.dealloc_bytes = Some(dealloc);
                         m_with_percent.mem_diff = Some(alloc as i64 - dealloc as i64);
+                    }
+
+                    if let Some(pct) = m_with_percent.cpu_percent {
+                        let max = state_guard
+                            .max_cpu_percent
+                            .entry(m_with_percent.os_tid)
+                            .or_insert(0.0);
+                        if pct > *max {
+                            *max = pct;
+                        }
+                        m_with_percent.cpu_percent_max = Some(*max);
+                    } else if let Some(&max) =
+                        state_guard.max_cpu_percent.get(&m_with_percent.os_tid)
+                    {
+                        m_with_percent.cpu_percent_max = Some(max);
                     }
 
                     new_metrics.push(m_with_percent);
@@ -185,13 +203,26 @@ pub fn get_threads_json() -> JsonThreadsList {
                 (None, None, None)
             };
 
+            let mut sorted_metrics: Vec<&ThreadMetrics> =
+                state_guard.current_metrics.iter().collect();
+
+            #[cfg(feature = "hotpath-alloc-meta")]
+            sorted_metrics
+                .sort_by(|a, b| b.alloc_bytes.unwrap_or(0).cmp(&a.alloc_bytes.unwrap_or(0)));
+
+            #[cfg(not(feature = "hotpath-alloc-meta"))]
+            sorted_metrics.sort_by(|a, b| {
+                b.cpu_percent_max
+                    .unwrap_or(0.0)
+                    .total_cmp(&a.cpu_percent_max.unwrap_or(0.0))
+            });
+
             return JsonThreadsList {
                 current_elapsed_ns,
                 sample_interval_ms: state_guard.sample_interval.as_millis() as u64,
-                data: state_guard
-                    .current_metrics
+                data: sorted_metrics
                     .iter()
-                    .map(JsonThreadEntry::from)
+                    .map(|m| JsonThreadEntry::from(*m))
                     .collect(),
                 thread_count: state_guard.current_metrics.len(),
                 rss_bytes: rss_bytes.map(format_bytes),
