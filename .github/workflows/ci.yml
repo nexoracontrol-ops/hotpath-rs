@@ -73,6 +73,9 @@ jobs:
       - name: Check TUI build
         run: |
           cargo check -p hotpath --bin hotpath --features=tui
+      - name: Check meta TUI build
+        run: |
+          cargo check --features='tui,hotpath,hotpath-meta,hotpath-alloc-meta,hotpath-mcp,hotpath-mcp-meta,dev' --bin hotpath
       - name: Check CI build
         run: |
           cargo check -p hotpath --bin hotpath-ci --features=ci
