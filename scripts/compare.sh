@@ -22,7 +22,7 @@ run_bench() {
     git checkout "$ref"
     local -a bench_env=(
         HOTPATH_TUI_TAB=${HOTPATH_TUI_TAB:-1}
-        HOTPATH_TUI_REFRESH_INTERVAL_MS=${HOTPATH_TUI_REFRESH_INTERVAL_MS:-50}
+        HOTPATH_TUI_REFRESH_INTERVAL_MS=${HOTPATH_TUI_REFRESH_INTERVAL_MS:-10}
         HOTPATH_META_REPORT='functions-timing,functions-alloc,threads'
         HOTPATH_META_OUTPUT_PATH="$output"
         HOTPATH_META_SHUTDOWN_MS=10000
