@@ -3,6 +3,7 @@ name = "test-tokio-async"
 version = "0.0.0"
 publish = false
 edition = "2021"
+description = "Integration tests and examples using the Tokio runtime."
 
 [dependencies]
 hotpath = { path = "../hotpath", features = ["tokio"] }

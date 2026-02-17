@@ -3,6 +3,7 @@ name = "test-channels-tokio"
 version = "0.0.0"
 publish = false
 edition = "2021"
+description = "Tests for Tokio channels instrumentation."
 
 [dependencies]
 console-subscriber = { version = "0.5.0", optional = true }

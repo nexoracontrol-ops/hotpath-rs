@@ -3,6 +3,7 @@ name = "hotpath-backend"
 version = "0.0.0"
 publish = false
 edition = "2024"
+description = "Axum web server with mdbook for the hotpath.rs documentation site."
 
 [dependencies]
 url = "2.5.0"

@@ -3,6 +3,7 @@ name = "test-channels-crossbeam"
 version = "0.1.0"
 edition = "2021"
 publish = false
+description = "Tests for crossbeam channels instrumentation."
 
 [dependencies]
 hotpath = { workspace = true, features = ["crossbeam"] }

@@ -8,8 +8,8 @@ Hotpath includes a `hotpath-ci` CLI that compares performance metrics between a 
 
 The integration uses two GitHub Actions workflows:
 
-1. **Profile workflow** (`hotpath-profile`) — triggers on `pull_request`, runs your benchmarks on both the head and base commits, and uploads the metrics as an artifact.
-2. **Comment workflow** (`hotpath-comment`) — triggers when the profile workflow completes, downloads the artifact, installs `hotpath-ci`, and posts a comparison comment on the PR.
+1. **Profile workflow** (`hotpath-profile`) - triggers on `pull_request`, runs your benchmarks on both the head and base commits, and uploads the metrics as an artifact.
+2. **Comment workflow** (`hotpath-comment`) - triggers when the profile workflow completes, downloads the artifact, installs `hotpath-ci`, and posts a comparison comment on the PR.
 
 The two-workflow split is required for security because `pull_request` workflows from forks run with read-only permissions. The second workflow runs in the repository's context with `pull-requests: write` access to enable commenting.
 

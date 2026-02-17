@@ -3,6 +3,7 @@ name = "test-futures"
 version = "0.0.0"
 publish = false
 edition = "2021"
+description = "Tests for futures instrumentation."
 
 [dependencies]
 hotpath = { path = "../hotpath" }

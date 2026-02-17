@@ -101,7 +101,7 @@ just test_all
 
 | Crate | Description |
 |-------|-------------|
-| `hotpath` | Core library — profiling runtime, reporting, metrics server, MCP server, TUI binary |
+| `hotpath` | Core library - profiling runtime, reporting, metrics server, MCP server, TUI binary |
 | `hotpath-meta` | Mirror of the `hotpath` library, used to profile the profiler itself. |
 | `hotpath-macros` | Procedural macros (`#[measure]`, `#[main]`, `#[future_fn]`, etc.) |
 | `hotpath-macros-meta` | Mirror of the `hotpath-macros` library, used to profile the profiler itself. |

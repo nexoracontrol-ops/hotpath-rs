@@ -3,6 +3,7 @@ name = "test-channels-std"
 version = "0.0.0"
 publish = false
 edition = "2021"
+description = "Tests for std channels instrumentation."
 
 [dependencies]
 hotpath = { workspace = true }

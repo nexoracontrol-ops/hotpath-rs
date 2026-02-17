@@ -3,6 +3,7 @@ name = "test-streams"
 version = "0.0.0"
 publish = false
 edition = "2021"
+description = "Tests for streams instrumentation."
 
 [dependencies]
 hotpath = { workspace = true, features = ["futures"] }
