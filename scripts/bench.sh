@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BENCH_CMD="cargo run -p hotpath --features=tui,hotpath,hotpath-meta,hotpath-alloc-meta --bin hotpath"
+RELEASE_FLAG=""
+if [ "${HOTPATH_BENCH_RELEASE:-}" = "true" ]; then
+    RELEASE_FLAG="--release"
+fi
+BENCH_CMD="cargo run $RELEASE_FLAG -p hotpath --features=tui,hotpath,hotpath-meta,hotpath-alloc-meta --bin hotpath"
 
 mkdir -p tmp
 
