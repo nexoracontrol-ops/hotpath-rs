@@ -243,10 +243,12 @@ pub fn main_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
         None => quote! {},
     };
 
-    let base_builder = quote! {
+    let caller_name_init = quote! {
         let caller_name: &'static str =
             concat!(module_path!(), "::", stringify!(#fn_name));
+    };
 
+    let builder_chain = quote! {
         hotpath_meta::HotpathGuardBuilder::new(caller_name)
             .percentiles(#percentiles_array)
             .with_functions_limit(#functions_limit)
@@ -258,14 +260,23 @@ pub fn main_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     let guard_init = if let Some(timeout_ms) = timeout {
         quote! {
             let _hotpath = {
-                #base_builder
+                #caller_name_init
+                #builder_chain
                     .build_with_shutdown(std::time::Duration::from_millis(#timeout_ms))
             };
         }
     } else {
         quote! {
-            let _hotpath = {
-                #base_builder.build()
+            let _hotpath: Option<hotpath_meta::HotpathGuard> = {
+                #caller_name_init
+                let builder = #builder_chain;
+                match std::env::var("HOTPATH_META_SHUTDOWN_MS").ok().and_then(|v| v.parse::<u64>().ok()) {
+                    Some(ms) => {
+                        builder.build_with_shutdown(std::time::Duration::from_millis(ms));
+                        None
+                    }
+                    None => Some(builder.build()),
+                }
             };
         }
     };
