@@ -13,6 +13,7 @@ use std::time::Instant;
 pub(crate) mod wrapper;
 
 use crate::channels::resolve_label;
+use crate::data_flow::{WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS};
 pub use crate::json::{ChannelState, DataFlowLogEntry, StreamLogs};
 use crate::json::{JsonStreamEntry, JsonStreamsList};
 use crate::metrics_server::METRICS_SERVER_PORT;
@@ -176,25 +177,54 @@ pub(crate) fn init_streams_state() -> &'static StreamStatsState {
         std::thread::Builder::new()
             .name("hp-streams".into())
             .spawn(move || {
+                let mut local_buffer: Vec<StreamEvent> = Vec::with_capacity(WORKER_BATCH_SIZE);
+                let flush_interval = std::time::Duration::from_millis(WORKER_FLUSH_INTERVAL_MS);
+
                 loop {
                     select! {
                         recv(event_rx) -> result => {
                             match result {
                                 Ok(event) => {
-                                    if let Ok(mut shared) = stats_map_clone.write() {
-                                        process_stream_event(&mut shared, event);
+                                    local_buffer.push(event);
+                                    if local_buffer.len() >= WORKER_BATCH_SIZE {
+                                        if let Ok(mut shared) = stats_map_clone.write() {
+                                            for e in local_buffer.drain(..) {
+                                                process_stream_event(&mut shared, e);
+                                            }
+                                        }
                                     }
                                 }
-                                Err(_) => break,
+                                Err(_) => {
+                                    if !local_buffer.is_empty() {
+                                        if let Ok(mut shared) = stats_map_clone.write() {
+                                            for e in local_buffer.drain(..) {
+                                                process_stream_event(&mut shared, e);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
                             }
                         }
                         recv(shutdown_rx) -> _ => {
                             if let Ok(mut shared) = stats_map_clone.write() {
+                                for e in local_buffer.drain(..) {
+                                    process_stream_event(&mut shared, e);
+                                }
                                 while let Ok(event) = event_rx.try_recv() {
                                     process_stream_event(&mut shared, event);
                                 }
                             }
                             break;
+                        }
+                        default(flush_interval) => {
+                            if !local_buffer.is_empty() {
+                                if let Ok(mut shared) = stats_map_clone.write() {
+                                    for e in local_buffer.drain(..) {
+                                        process_stream_event(&mut shared, e);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

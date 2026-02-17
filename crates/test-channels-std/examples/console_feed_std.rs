@@ -71,7 +71,7 @@ fn main() {
         thread::spawn(move || {
             for j in 0..5 {
                 let _ = tx.send(i * 10 + j);
-                thread::sleep(Duration::from_millis(500));
+                thread::sleep(Duration::from_millis(750));
             }
         });
 
@@ -217,7 +217,7 @@ fn main() {
         let messages = ["tick", "tock", "ping", "pong", "beep", "boop"];
         for i in 0..60 {
             let _ = tx_steady.send(messages[i % messages.len()]);
-            thread::sleep(Duration::from_millis(500));
+            thread::sleep(Duration::from_millis(750));
         }
     });
 

@@ -131,7 +131,7 @@ pub mod tests {
         let mut last_error = None;
 
         for _attempt in 0..12 {
-            sleep(Duration::from_millis(500));
+            sleep(Duration::from_millis(750));
 
             match ureq::get("http://localhost:6775/data_flow").call() {
                 Ok(mut response) => {

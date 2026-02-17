@@ -600,7 +600,7 @@ pub mod tests {
 
         // Give the server some time to start up
         for _attempt in 0..18 {
-            sleep(Duration::from_millis(500));
+            sleep(Duration::from_millis(750));
 
             match ureq::get("http://localhost:6775/functions_timing").call() {
                 Ok(mut response) => {

@@ -27,7 +27,7 @@ pub mod tests {
         let mut last_error = None;
 
         for _attempt in 0..12 {
-            sleep(Duration::from_millis(500));
+            sleep(Duration::from_millis(750));
 
             match ureq::get("http://localhost:6780/debug").call() {
                 Ok(mut response) => {
@@ -111,7 +111,7 @@ pub mod tests {
         let mut last_error = None;
 
         for _attempt in 0..12 {
-            sleep(Duration::from_millis(500));
+            sleep(Duration::from_millis(750));
 
             match ureq::get("http://localhost:6781/debug").call() {
                 Ok(mut response) => {
@@ -219,7 +219,7 @@ pub mod tests {
         let mut last_error = None;
 
         for _attempt in 0..12 {
-            sleep(Duration::from_millis(500));
+            sleep(Duration::from_millis(750));
 
             match ureq::get("http://localhost:6782/debug").call() {
                 Ok(mut response) => {

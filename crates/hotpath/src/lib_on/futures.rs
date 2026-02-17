@@ -13,6 +13,8 @@ use quanta::Instant;
 #[cfg(not(target_os = "linux"))]
 use std::time::Instant;
 
+use crate::data_flow::{WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS};
+
 pub(crate) mod wrapper;
 
 pub use wrapper::{InstrumentedFuture, InstrumentedFutureLog};
@@ -180,25 +182,54 @@ pub fn init_futures_state() {
         std::thread::Builder::new()
             .name("hp-futures".into())
             .spawn(move || {
+                let mut local_buffer: Vec<FutureEvent> = Vec::with_capacity(WORKER_BATCH_SIZE);
+                let flush_interval = std::time::Duration::from_millis(WORKER_FLUSH_INTERVAL_MS);
+
                 loop {
                     select! {
                         recv(event_rx) -> result => {
                             match result {
                                 Ok(event) => {
-                                    if let Ok(mut shared) = stats_map_clone.write() {
-                                        process_future_event(&mut shared, event);
+                                    local_buffer.push(event);
+                                    if local_buffer.len() >= WORKER_BATCH_SIZE {
+                                        if let Ok(mut shared) = stats_map_clone.write() {
+                                            for e in local_buffer.drain(..) {
+                                                process_future_event(&mut shared, e);
+                                            }
+                                        }
                                     }
                                 }
-                                Err(_) => break,
+                                Err(_) => {
+                                    if !local_buffer.is_empty() {
+                                        if let Ok(mut shared) = stats_map_clone.write() {
+                                            for e in local_buffer.drain(..) {
+                                                process_future_event(&mut shared, e);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
                             }
                         }
                         recv(shutdown_rx) -> _ => {
                             if let Ok(mut shared) = stats_map_clone.write() {
+                                for e in local_buffer.drain(..) {
+                                    process_future_event(&mut shared, e);
+                                }
                                 while let Ok(event) = event_rx.try_recv() {
                                     process_future_event(&mut shared, event);
                                 }
                             }
                             break;
+                        }
+                        default(flush_interval) => {
+                            if !local_buffer.is_empty() {
+                                if let Ok(mut shared) = stats_map_clone.write() {
+                                    for e in local_buffer.drain(..) {
+                                        process_future_event(&mut shared, e);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

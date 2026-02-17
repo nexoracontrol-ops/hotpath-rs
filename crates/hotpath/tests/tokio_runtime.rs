@@ -27,7 +27,7 @@ pub mod tests {
         let mut last_error = None;
 
         for _attempt in 0..12 {
-            sleep(Duration::from_millis(500));
+            sleep(Duration::from_millis(750));
 
             match ureq::get("http://localhost:6783/tokio_runtime").call() {
                 Ok(mut response) => {
@@ -100,7 +100,7 @@ pub mod tests {
         let mut body = String::new();
 
         for _attempt in 0..12 {
-            sleep(Duration::from_millis(500));
+            sleep(Duration::from_millis(750));
 
             if let Ok(mut resp) = agent.get("http://localhost:6784/tokio_runtime").call() {
                 status = resp.status().as_u16();

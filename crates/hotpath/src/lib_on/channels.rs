@@ -14,7 +14,7 @@ mod wrapper;
 
 use std::mem;
 
-use crate::data_flow::next_data_flow_id;
+use crate::data_flow::{next_data_flow_id, WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS};
 use crate::json::{format_queue_status, JsonChannelEntry, JsonChannelsList};
 pub use crate::json::{ChannelLogs, ChannelState, DataFlowLogEntry};
 use crate::metrics_server::METRICS_SERVER_PORT;
@@ -330,25 +330,54 @@ pub(crate) fn init_channels_state() -> &'static ChannelStatsState {
         std::thread::Builder::new()
             .name("hp-channels".into())
             .spawn(move || {
+                let mut local_buffer: Vec<ChannelEvent> = Vec::with_capacity(WORKER_BATCH_SIZE);
+                let flush_interval = std::time::Duration::from_millis(WORKER_FLUSH_INTERVAL_MS);
+
                 loop {
                     select! {
                         recv(event_rx) -> result => {
                             match result {
                                 Ok(event) => {
-                                    if let Ok(mut shared) = stats_map_clone.write() {
-                                        process_channel_event(&mut shared, event);
+                                    local_buffer.push(event);
+                                    if local_buffer.len() >= WORKER_BATCH_SIZE {
+                                        if let Ok(mut shared) = stats_map_clone.write() {
+                                            for e in local_buffer.drain(..) {
+                                                process_channel_event(&mut shared, e);
+                                            }
+                                        }
                                     }
                                 }
-                                Err(_) => break,
+                                Err(_) => {
+                                    if !local_buffer.is_empty() {
+                                        if let Ok(mut shared) = stats_map_clone.write() {
+                                            for e in local_buffer.drain(..) {
+                                                process_channel_event(&mut shared, e);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
                             }
                         }
                         recv(shutdown_rx) -> _ => {
                             if let Ok(mut shared) = stats_map_clone.write() {
+                                for e in local_buffer.drain(..) {
+                                    process_channel_event(&mut shared, e);
+                                }
                                 while let Ok(event) = event_rx.try_recv() {
                                     process_channel_event(&mut shared, event);
                                 }
                             }
                             break;
+                        }
+                        default(flush_interval) => {
+                            if !local_buffer.is_empty() {
+                                if let Ok(mut shared) = stats_map_clone.write() {
+                                    for e in local_buffer.drain(..) {
+                                        process_channel_event(&mut shared, e);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
