@@ -66,11 +66,11 @@ impl HotpathGuardBuilder {
             caller_name,
             percentiles: vec![95],
             format: Format::Table,
-            functions_limit: 15,
+            functions_limit: 10,
             channels_limit: 0,
             streams_limit: 0,
             futures_limit: 0,
-            threads_limit: 0,
+            threads_limit: 5,
             output_path: None,
             sections: None,
             before_shutdown: None,
@@ -138,9 +138,9 @@ impl HotpathGuardBuilder {
 
         cfg_if::cfg_if! {
             if #[cfg(feature = "hotpath-alloc")] {
-                vec![Section::FunctionsAlloc]
+                vec![Section::FunctionsTiming, Section::FunctionsAlloc, Section::Threads]
             } else {
-                vec![Section::FunctionsTiming]
+                vec![Section::FunctionsTiming, Section::Threads]
             }
         }
     }
