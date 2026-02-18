@@ -2,6 +2,77 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2026-02-18
+
+### 🚀 Features
+
+- Default to hotpath console cmd
+- Enable custom channels instrumentation [#163]
+- Initial hotpath-meta integration
+- Display profiled program uptime
+- Add timeout to other guard types
+- Support configurable guard timeouts
+- Add threads guard
+- Use unified reporting guard
+- Support labels for future! macro
+- Add HOTPATH_TUI_TAB for profiling support
+- Show channels max queue
+- Add before_report callback
+- Configurable limits per section
+- Show max CPU
+- Add HOTPATH_FOCUS config
+- Add bench script
+- Add HOTPATH_TUI_REFRESH_INTERVAL_MS config
+- Add HOTPATH_BENCH_RELEASE for bench scripts
+- Add HOTPATH_SHUTDOWN_MS macro support
+- Show cpu baseline
+
+### 🐛 Bug Fixes
+
+- Display tokio metrics hint
+- Improve tokio metrics hint
+- Sorted thread metrics
+- Unify logs env config
+- Fix meta build
+- Init race condition crash
+- Flaky tests
+- Sitemap.xml lastmod
+- Pass args to default cmd
+- Unify static reports format
+- Fix ssl CI error
+- Use CPU time for baseline and sample results
+
+### 🚜 Refactor
+
+- Use ids for functions lookup
+- Rename timeout to shutdown
+
+### ⚡ Performance
+
+- Fix channels instrumentation memory bloat
+- Fix futures instrumentation memory bloat
+- Fix streams instrumentation memory bloat
+- Optimize debug logs memory
+- Cache static ENV values
+- U32 IDs and less string allocs
+- Optimize data flow logs fetch
+- Batch RwLock writes
+- Prioritize function data queries and shutdown
+- Cache functions query tx
+- Cache alloc calculations
+
+### ⚙️ Miscellaneous Tasks
+
+- Add hotpath-meta to workspace
+- Expand meta instrumentation
+- Instrument meta hotpaths
+- Sync meta crate
+- Use unpublished meta crates
+- Add CONTRIBUTING.md
+- Sync meta crate
+- Change default static report
+- Release 0.11.0
+
 ## [0.10.1] - 2026-02-08
 
 ### 🚀 Features
