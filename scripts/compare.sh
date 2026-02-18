@@ -13,7 +13,7 @@ RELEASE_FLAG=""
 if [ "${HOTPATH_BENCH_RELEASE:-}" = "true" ]; then
     RELEASE_FLAG="--release"
 fi
-BENCH_CMD="cargo run $RELEASE_FLAG -p hotpath --features=tui,hotpath,hotpath-meta,hotpath-alloc-meta --bin hotpath"
+BENCH_CMD="cargo run $RELEASE_FLAG -p hotpath --features=tui,hotpath,hotpath-meta,hotpath-alloc --bin hotpath"
 
 run_bench() {
     local ref="$1"
@@ -29,8 +29,8 @@ run_bench() {
         HOTPATH_TUI_REFRESH_INTERVAL_MS=${HOTPATH_TUI_REFRESH_INTERVAL_MS:-10}
         HOTPATH_META_REPORT='functions-timing,functions-alloc,threads'
         HOTPATH_META_OUTPUT_PATH="$output"
-        HOTPATH_META_SHUTDOWN_MS=10000
-        HOTPATH_META_TIMEOUT_MS=10000
+        HOTPATH_META_SHUTDOWN_MS=5000
+        HOTPATH_META_TIMEOUT_MS=5000
         HOTPATH_META_EXCLUDE_WRAPPER=true
         RUSTFLAGS='--cfg tokio_unstable'
     )
