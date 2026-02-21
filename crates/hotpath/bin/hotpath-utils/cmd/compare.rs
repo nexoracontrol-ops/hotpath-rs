@@ -4,6 +4,8 @@ use hotpath::json::JsonReport;
 use prettytable::{Cell, Row, Table};
 use std::fs;
 
+use hotpath::shorten_function_name;
+
 use crate::cmd::shared::{compare_reports, JsonReportDiff, MetricsComparison};
 
 #[derive(Debug, Parser)]
@@ -86,12 +88,13 @@ fn print_comparison_table(comparison: &MetricsComparison) {
     table.add_row(Row::new(header_cells));
 
     for func_diff in &comparison.function_diffs {
+        let short_name = shorten_function_name(&func_diff.function_name);
         let name = if func_diff.is_removed {
-            format!("[removed] {}", func_diff.function_name)
+            format!("[removed] {}", short_name)
         } else if func_diff.is_new {
-            format!("[new] {}", func_diff.function_name)
+            format!("[new] {}", short_name)
         } else {
-            func_diff.function_name.clone()
+            short_name
         };
 
         let mut row_cells = vec![Cell::new(&name)];

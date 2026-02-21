@@ -5,6 +5,7 @@ use clap::Parser;
 use comment::upsert_pr_comment;
 use eyre::Result;
 use hotpath::json::JsonFunctionsList;
+use hotpath::shorten_function_name;
 use prettytable::{Cell, Row, Table};
 use std::env;
 
@@ -135,12 +136,13 @@ fn format_comparison_markdown(
     table.add_row(Row::new(header_cells));
 
     for func_diff in &comparison.function_diffs {
+        let short_name = shorten_function_name(&func_diff.function_name);
         let function_display = if func_diff.is_removed {
-            format!("️🗑️ {}", func_diff.function_name)
+            format!("️🗑️ {}", short_name)
         } else if func_diff.is_new {
-            format!("🆕 {}", func_diff.function_name)
+            format!("🆕 {}", short_name)
         } else {
-            func_diff.function_name.clone()
+            short_name
         };
 
         let mut row_cells = vec![Cell::new(&function_display)];
