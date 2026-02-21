@@ -337,3 +337,174 @@ pub fn compare_metrics(
         function_diffs,
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::cmd::shared::{compare_metrics, compare_reports};
+    use hotpath::json::{JsonFunctionEntry, JsonFunctionsList, JsonReport};
+    use std::collections::HashMap;
+
+    fn make_function_data(
+        name: &str,
+        calls: u64,
+        avg: u64,
+        p95: u64,
+        total: u64,
+        percent: u64,
+    ) -> JsonFunctionEntry {
+        let mut percentiles = HashMap::new();
+        percentiles.insert("p95".to_string(), hotpath::format_duration(p95));
+
+        JsonFunctionEntry {
+            id: 0,
+            name: name.to_string(),
+            calls,
+            avg: hotpath::format_duration(avg),
+            percentiles,
+            total: hotpath::format_duration(total),
+            percent_total: format!("{:.2}%", percent as f64 / 100.0),
+        }
+    }
+
+    fn make_metrics(data: Vec<JsonFunctionEntry>, total_elapsed_ns: u64) -> JsonFunctionsList {
+        JsonFunctionsList {
+            hotpath_profiling_mode: hotpath::ProfilingMode::Timing,
+            time_elapsed: hotpath::format_duration(total_elapsed_ns),
+            total_elapsed_ns,
+            total_allocated: None,
+            description: "Time metrics".to_string(),
+            caller_name: "test::main".to_string(),
+            percentiles: vec![95],
+            data,
+        }
+    }
+
+    fn make_alloc_function_data(
+        name: &str,
+        calls: u64,
+        avg_bytes: u64,
+        p95_bytes: u64,
+        total_bytes: u64,
+        percent: u64,
+    ) -> JsonFunctionEntry {
+        let mut percentiles = HashMap::new();
+        percentiles.insert("p95".to_string(), hotpath::format_bytes(p95_bytes));
+
+        JsonFunctionEntry {
+            id: 0,
+            name: name.to_string(),
+            calls,
+            avg: hotpath::format_bytes(avg_bytes),
+            percentiles,
+            total: hotpath::format_bytes(total_bytes),
+            percent_total: format!("{:.2}%", percent as f64 / 100.0),
+        }
+    }
+
+    fn make_alloc_metrics(
+        data: Vec<JsonFunctionEntry>,
+        total_elapsed_ns: u64,
+    ) -> JsonFunctionsList {
+        JsonFunctionsList {
+            hotpath_profiling_mode: hotpath::ProfilingMode::Alloc,
+            time_elapsed: hotpath::format_duration(total_elapsed_ns),
+            total_elapsed_ns,
+            total_allocated: Some("10.00 MB".to_string()),
+            description: "Alloc metrics".to_string(),
+            caller_name: "test::main".to_string(),
+            percentiles: vec![95],
+            data,
+        }
+    }
+
+    fn make_report(
+        timing: Option<JsonFunctionsList>,
+        alloc: Option<JsonFunctionsList>,
+    ) -> JsonReport {
+        JsonReport {
+            label: None,
+            functions_timing: timing,
+            functions_alloc: alloc,
+            channels: None,
+            streams: None,
+            futures: None,
+            threads: None,
+            cpu_baseline: None,
+        }
+    }
+
+    #[test]
+    fn test_compare_metrics_new_removed_unchanged() {
+        let after_data = vec![
+            make_function_data("test::function_a", 100, 1000000, 1100000, 100000000, 7000),
+            make_function_data("test::function_c", 40, 400000, 450000, 16000000, 1500),
+        ];
+        let after_metrics = make_metrics(after_data, 140000000);
+
+        let before_data = vec![
+            make_function_data("test::function_a", 90, 900000, 1000000, 81000000, 8000),
+            make_function_data("test::function_b", 30, 300000, 350000, 9000000, 1200),
+        ];
+        let before_metrics = make_metrics(before_data, 120000000);
+
+        let comparison = compare_metrics(&before_metrics, &after_metrics);
+
+        assert_eq!(comparison.function_diffs.len(), 3);
+        assert!(comparison
+            .function_diffs
+            .iter()
+            .any(|f| f.function_name == "test::function_b" && f.is_removed));
+        assert!(comparison
+            .function_diffs
+            .iter()
+            .any(|f| f.function_name == "test::function_c" && f.is_new));
+        assert!(comparison
+            .function_diffs
+            .iter()
+            .any(|f| f.function_name == "test::function_a" && !f.is_new && !f.is_removed));
+    }
+
+    #[test]
+    fn test_compare_reports_timing_and_alloc() {
+        let before_timing = make_metrics(
+            vec![make_function_data(
+                "fn_a", 100, 1000000, 1100000, 100000000, 10000,
+            )],
+            100000000,
+        );
+        let after_timing = make_metrics(
+            vec![make_function_data(
+                "fn_a", 120, 1200000, 1300000, 144000000, 10000,
+            )],
+            144000000,
+        );
+        let before_alloc = make_alloc_metrics(
+            vec![make_alloc_function_data(
+                "fn_a", 100, 1024, 2048, 102400, 10000,
+            )],
+            100000000,
+        );
+        let after_alloc = make_alloc_metrics(
+            vec![make_alloc_function_data(
+                "fn_a", 120, 2048, 4096, 245760, 10000,
+            )],
+            144000000,
+        );
+
+        let before = make_report(Some(before_timing), Some(before_alloc));
+        let after = make_report(Some(after_timing), Some(after_alloc));
+
+        let diff = compare_reports(&before, &after);
+
+        assert!(diff.functions_timing.is_some());
+        assert!(diff.functions_alloc.is_some());
+
+        let timing = diff.functions_timing.unwrap();
+        assert_eq!(timing.function_diffs.len(), 1);
+        assert_eq!(timing.function_diffs[0].function_name, "fn_a");
+
+        let alloc = diff.functions_alloc.unwrap();
+        assert_eq!(alloc.function_diffs.len(), 1);
+        assert_eq!(alloc.function_diffs[0].function_name, "fn_a");
+    }
+}
