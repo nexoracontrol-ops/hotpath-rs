@@ -94,25 +94,28 @@ const SEO_MAPPINGS: &[SeoConfig] = &[
         ],
     },
     SeoConfig {
-        path: "/futures",
-        title: "Async Rust Performance Profiler: Future Monitoring & Poll Metrics | hotpath-rs",
-        description: "Monitor async Rust futures with poll counts, completion tracking, and performance metrics. Debug async bottlenecks and optimize future execution patterns with hotpath-rs.",
-        breadcrumb_label: "Futures",
-        faqs: &[],
-    },
-    SeoConfig {
-        path: "/channels",
-        title: "Rust Channels Performance Monitoring: Message Flow & Throughput Metrics | hotpath-rs",
-        description: "Monitor Rust channels performance with hotpath-rs. Track tokio, crossbeam, futures, and std channel metrics including send/receive counts, queue sizes, and throughput.",
-        breadcrumb_label: "Channels",
-        faqs: &[],
-    },
-    SeoConfig {
-        path: "/streams",
-        title: "Rust Async Stream Profiler: Performance Monitoring & Throughput Metrics | hotpath-rs",
-        description: "Profile async Rust streams with throughput metrics, item counts, and optional item logging. Monitor futures::Stream performance with the hotpath::stream! macro.",
-        breadcrumb_label: "Streams",
-        faqs: &[],
+        path: "/data_flow",
+        title: "Rust Async Data Flow Profiling - Functions, Channels & Streams Monitoring | hotpath-rs",
+        description: "Profile async data flow in Rust with hotpath-rs. Measure function latency, memory allocations, channel throughput, and stream performance. Monitor messages flow and identify async bottlenecks in real time.",
+        breadcrumb_label: "Async Data Flow",
+        faqs: &[
+            Faq {
+                question: "How do I monitor and profile async Rust programs?",
+                answer: "Traditional sampling profilers miss time spent in await points because no CPU work occurs there. hotpath-rs solves this by instrumenting async primitives directly: annotate functions with #[hotpath::measure] for wall-clock timing, wrap channels with hotpath::channel!() to track message throughput and queue backpressure, use hotpath::stream!() to monitor item flow, and hotpath::future!() to count polls and detect slow futures. All metrics are visible in a live TUI dashboard or as static reports.",
+            },
+            Faq {
+                question: "What is async data flow monitoring in hotpath-rs?",
+                answer: "Async data flow monitoring lets you observe channels, streams, and futures in real time. hotpath-rs instruments these primitives with zero-cost macros (channel!, stream!, future!) to track message counts, queue sizes, items yielded, and poll counts. All entries share a unified timeline with monotonic IDs so you can see the order data flows through your async pipeline.",
+            },
+            Faq {
+                question: "Which channel types does hotpath-rs support?",
+                answer: "hotpath-rs supports tokio::sync::mpsc (bounded and unbounded), tokio::sync::oneshot, futures_channel::mpsc (bounded and unbounded), futures_channel::oneshot, crossbeam_channel (bounded and unbounded), and std::sync::mpsc. Enable the corresponding Cargo feature (tokio, futures, crossbeam) for non-std channels. Each channel tracks sent/received counts, current and max queue size, queued bytes, and channel state.",
+            },
+            Faq {
+                question: "How does hotpath-rs track futures and streams?",
+                answer: "The stream! macro wraps any futures::Stream to count items yielded and track stream state (active or closed). The future! macro and #[future_fn] attribute track poll counts and completion status of individual futures. Both support optional label and log parameters for identification and value logging in the TUI dashboard.",
+            },
+        ],
     },
     SeoConfig {
         path: "/threads",
