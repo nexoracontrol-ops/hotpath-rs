@@ -233,7 +233,7 @@ fn format_sitemap_url(
     )
 }
 
-async fn get_file_lastmod(path: &str) -> Option<String> {
+pub(crate) async fn get_file_lastmod(path: &str) -> Option<String> {
     let metadata = tokio::fs::metadata(path).await.ok()?;
     let modified = metadata.modified().ok()?;
     let duration = modified.duration_since(std::time::UNIX_EPOCH).ok()?;

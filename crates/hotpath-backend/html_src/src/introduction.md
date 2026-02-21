@@ -201,9 +201,7 @@ Explore the docs for customization options and advanced profiling features.
 - [Sampling Comparison](./sampling_comparison.html) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](./profiling_modes.html) - static reports vs live TUI dashboard
 - [Functions](./functions.html) - measure execution time and memory allocations
-- [Futures](./futures.html) - monitor async code, poll counts, and resolved values
-- [Channels](./channels.html) - track messages flow and throughput
-- [Streams](./streams.html) - instrument async streams
+- [Async Data Flow](./data_flow.html) - monitor channels, streams, and futures
 - [Threads](./threads.html) - monitor threads usage
 - [Tokio Runtime](./tokio_runtime.html) - monitor Tokio runtime worker stats and task scheduling
 - [MCP Server](./mcp.html) - LLM integration via Model Context Protocol

@@ -301,10 +301,11 @@ pub async fn seo_titles(request: Request, next: Next) -> Response {
         breadcrumb
     ));
 
+    let date_modified = get_source_lastmod(config.path).await;
     let entity_json_ld = if config.path == "/" {
         SOFTWARE_APP_JSON_LD.to_string()
     } else {
-        build_tech_article_json_ld(config, &canonical_url)
+        build_tech_article_json_ld(config, &canonical_url, &date_modified)
     };
     json_ld_block.push_str(&format!(
         r#"<script type="application/ld+json">{}</script>"#,
@@ -322,6 +323,18 @@ pub async fn seo_titles(request: Request, next: Next) -> Response {
     let modified = modified.replace("</head>", &format!("{}</head>", json_ld_block));
 
     Response::from_parts(parts, Body::from(modified)).into_response()
+}
+
+async fn get_source_lastmod(path: &str) -> String {
+    let filename = if path == "/" {
+        "introduction"
+    } else {
+        path.trim_start_matches('/')
+    };
+    let file_path = format!("html_src/src/{}.md", filename);
+    crate::config::routes::get_file_lastmod(&file_path)
+        .await
+        .unwrap_or_else(|| "2025-01-15".to_string())
 }
 
 fn build_breadcrumb_json_ld(label: &str, canonical_url: &str, is_home: bool) -> String {
@@ -355,10 +368,14 @@ fn build_faq_page_json_ld(faqs: &[Faq]) -> String {
     )
 }
 
-fn build_tech_article_json_ld(config: &SeoConfig, canonical_url: &str) -> String {
+fn build_tech_article_json_ld(
+    config: &SeoConfig,
+    canonical_url: &str,
+    date_modified: &str,
+) -> String {
     let headline = config.title.split(" | ").next().unwrap_or(config.title);
     format!(
-        r#"{{"@context":"https://schema.org","@type":"TechArticle","headline":"{}","description":"{}","image":"{}","datePublished":"2025-01-15","dateModified":"2026-02-07","author":{{"@type":"Person","name":"Pawel Urbanek"}},"publisher":{{"@type":"Organization","name":"hotpath-rs"}},"mainEntityOfPage":"{}"}}"#,
-        headline, config.description, OG_IMAGE, canonical_url
+        r#"{{"@context":"https://schema.org","@type":"TechArticle","headline":"{}","description":"{}","image":"{}","datePublished":"2025-01-15","dateModified":"{}","author":{{"@type":"Person","name":"Pawel Urbanek"}},"publisher":{{"@type":"Organization","name":"hotpath-rs"}},"mainEntityOfPage":"{}"}}"#,
+        headline, config.description, OG_IMAGE, date_modified, canonical_url
     )
 }
