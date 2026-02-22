@@ -85,8 +85,9 @@ fn print_diff(diff: &JsonReportDiff) {
         if threads.thread_diffs.is_empty() {
             println!("No threads to compare.");
         } else {
-            if let Some(globals) = format_threads_globals(threads, None) {
-                println!("{}", globals);
+            let globals = format_threads_globals(threads, None);
+            if !globals.is_empty() {
+                println!("{}", globals.join(" | "));
             }
             build_threads_table(threads, None).printstd();
         }

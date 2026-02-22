@@ -572,14 +572,21 @@ pub fn build_threads_table(threads: &ThreadsComparison, emoji_threshold: Option<
             .unwrap_or_default()
     };
 
+    let has_alloc = threads
+        .thread_diffs
+        .iter()
+        .any(|d| d.alloc_bytes.is_some() || d.dealloc_bytes.is_some() || d.mem_diff.is_some());
+
     let mut table = Table::new();
-    table.add_row(Row::new(vec![
-        Cell::new("Thread"),
-        Cell::new("CPU % Max"),
-        Cell::new("Alloc"),
-        Cell::new("Dealloc"),
-        Cell::new("Mem Diff"),
-    ]));
+    let mut header = vec![Cell::new("Thread"), Cell::new("CPU % Max")];
+    if has_alloc {
+        header.extend([
+            Cell::new("Alloc"),
+            Cell::new("Dealloc"),
+            Cell::new("Mem Diff"),
+        ]);
+    }
+    table.add_row(Row::new(header));
 
     for diff in &threads.thread_diffs {
         let name = if diff.is_removed {
@@ -590,13 +597,15 @@ pub fn build_threads_table(threads: &ThreadsComparison, emoji_threshold: Option<
             diff.thread_name.clone()
         };
 
-        table.add_row(Row::new(vec![
-            Cell::new(&name),
-            Cell::new(&fmt(&diff.cpu_percent_max)),
-            Cell::new(&fmt(&diff.alloc_bytes)),
-            Cell::new(&fmt(&diff.dealloc_bytes)),
-            Cell::new(&fmt(&diff.mem_diff)),
-        ]));
+        let mut row = vec![Cell::new(&name), Cell::new(&fmt(&diff.cpu_percent_max))];
+        if has_alloc {
+            row.extend([
+                Cell::new(&fmt(&diff.alloc_bytes)),
+                Cell::new(&fmt(&diff.dealloc_bytes)),
+                Cell::new(&fmt(&diff.mem_diff)),
+            ]);
+        }
+        table.add_row(Row::new(row));
     }
 
     table
@@ -605,27 +614,20 @@ pub fn build_threads_table(threads: &ThreadsComparison, emoji_threshold: Option<
 pub fn format_threads_globals(
     threads: &ThreadsComparison,
     emoji_threshold: Option<u32>,
-) -> Option<String> {
-    let has_globals = threads.total_alloc_diff.is_some()
-        || threads.total_dealloc_diff.is_some()
-        || threads.total_mem_diff_diff.is_some();
-
-    if !has_globals {
-        return None;
-    }
-
-    let fmt = |m: &Option<MetricDiff>| {
+) -> Vec<String> {
+    let fmt = |label: &str, m: &Option<MetricDiff>| {
         m.as_ref()
-            .map(|d| d.format_with_emoji(emoji_threshold))
-            .unwrap_or_default()
+            .map(|d| format!("{}: {}", label, d.format_with_emoji(emoji_threshold)))
     };
 
-    Some(format!(
-        "Total Alloc: {}  |  Total Dealloc: {}  |  Mem Diff: {}",
-        fmt(&threads.total_alloc_diff),
-        fmt(&threads.total_dealloc_diff),
-        fmt(&threads.total_mem_diff_diff),
-    ))
+    [
+        fmt("Total Alloc", &threads.total_alloc_diff),
+        fmt("Total Dealloc", &threads.total_dealloc_diff),
+        fmt("Mem Diff", &threads.total_mem_diff_diff),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
 }
 
 #[cfg(test)]

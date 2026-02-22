@@ -184,8 +184,10 @@ fn format_diff_markdown(
         if threads.thread_diffs.is_empty() {
             markdown.push_str("*No threads to compare*\n");
         } else {
-            if let Some(globals) = format_threads_globals(threads, emoji_threshold) {
-                markdown.push_str(&format!("**{}**\n", globals));
+            let globals = format_threads_globals(threads, emoji_threshold);
+            if !globals.is_empty() {
+                markdown.push_str(&globals.join("\n"));
+                markdown.push('\n');
             }
             markdown.push_str(&format!(
                 "```\n{}```\n",
