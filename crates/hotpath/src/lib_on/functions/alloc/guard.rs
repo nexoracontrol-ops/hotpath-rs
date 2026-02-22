@@ -55,8 +55,9 @@ impl Drop for MeasurementGuard {
         }
 
         let duration = self.start.elapsed();
+        let cross_thread = crate::tid::current_tid() != self.tid;
 
-        let (bytes_total, count_total) = if self.is_async {
+        let (bytes_total, count_total) = if self.is_async || cross_thread {
             (None, None)
         } else {
             super::core::ALLOCATIONS.with(|stack| {
@@ -144,8 +145,9 @@ impl MeasurementGuardWithLog {
         let result_str = crate::output::format_debug_truncated(result);
 
         let duration = self.start.elapsed();
+        let cross_thread = crate::tid::current_tid() != self.tid;
 
-        let (bytes_total, count_total) = if self.is_async {
+        let (bytes_total, count_total) = if self.is_async || cross_thread {
             (None, None)
         } else {
             super::core::ALLOCATIONS.with(|stack| {
@@ -197,8 +199,9 @@ impl Drop for MeasurementGuardWithLog {
         }
 
         let duration = self.start.elapsed();
+        let cross_thread = crate::tid::current_tid() != self.tid;
 
-        let (bytes_total, count_total) = if self.is_async {
+        let (bytes_total, count_total) = if self.is_async || cross_thread {
             (None, None)
         } else {
             super::core::ALLOCATIONS.with(|stack| {
