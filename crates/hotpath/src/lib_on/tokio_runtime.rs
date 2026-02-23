@@ -13,7 +13,6 @@ pub fn init_runtime_monitoring(handle: &Handle) {
     let handle = handle.clone();
     RUNTIME_STATE.get_or_init(|| {
         let interval_ms = std::env::var("HOTPATH_TOKIO_RUNTIME_INTERVAL")
-            .or_else(|_| std::env::var("HOTPATH_RUNTIME_INTERVAL"))
             .ok()
             .and_then(|s| s.parse().ok())
             .unwrap_or(DEFAULT_RUNTIME_INTERVAL_MS);
