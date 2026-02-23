@@ -48,6 +48,10 @@ You can use it to produce one-off performance (timing or memory) reports:
 
 <img loading="lazy" src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
 
+compare performance between different app versions:
+
+<img loading="lazy" src="{{#asset-hash images/compare-perf.png}}" alt="hotpath-rs showing performance diff between different git commits">
+
 or use the live TUI dashboard to monitor real-time performance and data flow metrics with debug info:
 
 <video loading="lazy" width="100%" loop muted playsinline controls poster="{{#asset-hash images/hotpath-live-dashboard-poster.jpg}}">
