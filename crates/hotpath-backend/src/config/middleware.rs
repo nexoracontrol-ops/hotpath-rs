@@ -132,6 +132,26 @@ const SEO_MAPPINGS: &[SeoConfig] = &[
         ],
     },
     SeoConfig {
+        path: "/debug",
+        title: "Rust Debug Helpers & Custom Metrics: dbg!, val!, gauge! Macros | hotpath-rs",
+        description: "Track values and log debug info during Rust profiling with hotpath::dbg!, hotpath::val!, and hotpath::gauge! macros. View real-time metrics in the TUI Data Flow tab or query via HTTP API and MCP.",
+        breadcrumb_label: "Debug & Metrics",
+        faqs: &[
+            Faq {
+                question: "What debug macros does hotpath-rs provide?",
+                answer: "hotpath-rs provides three debug macros: hotpath::dbg!() works like std::dbg!() but sends output to the profiler grouped by source location, hotpath::val!() tracks named key-value pairs across code locations, and hotpath::gauge!() tracks numeric values with set/increment/decrement operations showing current value, min, max, and update history.",
+            },
+            Faq {
+                question: "How do I view debug output from hotpath macros?",
+                answer: "Debug entries from dbg!, val!, and gauge! macros appear in the TUI Data Flow tab. You can also query them via the HTTP API at /debug endpoint, or use the MCP integration to let AI agents query gauge values with the gauges and gauge_logs tools.",
+            },
+            Faq {
+                question: "Do hotpath debug macros have runtime overhead when disabled?",
+                answer: "No. All hotpath debug macros (dbg!, val!, gauge!) are no-op when the hotpath feature flag is not enabled. They compile to zero-cost stubs with no runtime or compile-time overhead.",
+            },
+        ],
+    },
+    SeoConfig {
         path: "/threads",
         title: "Rust Thread Performance Monitoring: Per-Thread CPU & Memory Metrics | hotpath-rs",
         description: "Monitor per-thread CPU usage and memory allocation metrics in Rust applications. Track thread states, allocation counts, and system time in the hotpath-rs monitoring dashboard.",

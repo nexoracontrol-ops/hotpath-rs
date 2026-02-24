@@ -44,6 +44,11 @@ const DOC_PAGES: &[SitemapConfig] = &[
         changefreq: "weekly",
     },
     SitemapConfig {
+        page: "debug",
+        priority: "0.8",
+        changefreq: "weekly",
+    },
+    SitemapConfig {
         page: "configuration",
         priority: "0.7",
         changefreq: "weekly",

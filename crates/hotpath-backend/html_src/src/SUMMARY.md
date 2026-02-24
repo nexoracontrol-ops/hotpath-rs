@@ -6,6 +6,7 @@
 - [Functions](./functions.md)
 - [A/B benchmarks](./benchmarks.md)
 - [Async Data Flow](./data_flow.md)
+- [Debug & Metrics](./debug.md)
 - [Threads](./threads.md)
 - [Tokio Runtime](./tokio_runtime.md)
 - [MCP integration](./mcp.md)

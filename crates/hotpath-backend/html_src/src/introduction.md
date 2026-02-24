@@ -206,6 +206,7 @@ Explore the docs for customization options and advanced profiling features.
 - [Profiling modes](./profiling_modes.html) - static reports vs live TUI dashboard
 - [Functions](./functions.html) - measure execution time and memory allocations
 - [Async Data Flow](./data_flow.html) - monitor channels, streams, and futures
+- [Debug & Metrics](./debug.html) - track values with dbg!, val!, and gauge! macros
 - [Threads](./threads.html) - monitor threads usage
 - [Tokio Runtime](./tokio_runtime.html) - monitor Tokio runtime worker stats and task scheduling
 - [MCP Server](./mcp.html) - LLM integration via Model Context Protocol

@@ -11,7 +11,9 @@ Project maintains a complete copy of `hotpath` (`hotpath-meta`) and `hotpath-mac
 
 A full copy is needed because a crate cannot depend on itself. Extracting shared core is also impractical, because `hotpath` uses a custom instrumentation logic (like `#[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure_all)]` calls). If you have ideas for a cleaner way to implement self-profiling without full crate duplication, I'm open to suggestions.
 
-### Benchmarking `hotpath` 
+## Benchmarking `hotpath` 
+
+### Self benchmarks
 
 Install [just](https://github.com/casey/just) and run:
 
@@ -31,6 +33,33 @@ Benchmarks two versions of the library (branch names or commit SHAs are supporte
 - `HOTPATH_BENCH_RELEASE` - set to `true` to run benchmarks with `--release` profile (default `false`)
 - `HOTPATH_TUI_REFRESH_INTERVAL_MS` - configure data refresh interval, lower values will produce more data (default `10`)
 - `HOTPATH_META_FOCUS` - filter which methods appear in the benchmark report by name. Plain text does substring matching; wrap in `/pattern/` for regex (e.g. `HOTPATH_META_FOCUS="/^(compute|process)/"`).
+
+### Hyperfine benchmarks
+
+Benchmark `hotpath` overhead of profiling 100k method calls with [hyperfine](https://github.com/sharkdp/hyperfine):
+
+Timing:
+```bash
+# With instrumentation
+cargo build --example benchmark_noop --features hotpath --release
+hyperfine --warmup 3 './target/release/examples/benchmark_noop'
+
+# Without instrumentation
+cargo build --example benchmark_noop --release
+hyperfine --warmup 3 './target/release/examples/benchmark_noop'
+```
+
+Allocations:
+
+```bash
+# With instrumentation
+cargo build --example benchmark_alloc --features='hotpath,hotpath-alloc' --release
+hyperfine --warmup 3 './target/release/examples/benchmark_alloc'
+
+# Without instrumentation
+cargo build --example benchmark_alloc --release
+hyperfine --warmup 3 './target/release/examples/benchmark_alloc'
+```
 
 ## Running documentation server
 
