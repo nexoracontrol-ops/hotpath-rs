@@ -10,13 +10,13 @@ use crate::json::{
 };
 use crate::streams::{get_sorted_stream_stats, StreamStats};
 
-pub static DATA_FLOW_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
+pub(crate) static DATA_FLOW_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
 
-pub const WORKER_BATCH_SIZE: usize = 100;
-pub const WORKER_FLUSH_INTERVAL_MS: u64 = 50;
+pub(crate) const WORKER_BATCH_SIZE: usize = 100;
+pub(crate) const WORKER_FLUSH_INTERVAL_MS: u64 = 50;
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn next_data_flow_id() -> u32 {
+pub(crate) fn next_data_flow_id() -> u32 {
     DATA_FLOW_ID_COUNTER.fetch_add(1, Ordering::Relaxed)
 }
 
@@ -115,7 +115,7 @@ impl From<&FutureEntry> for JsonDataFlowEntry {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_data_flow_json() -> JsonDataFlowList {
+pub(crate) fn get_data_flow_json() -> JsonDataFlowList {
     let mut entries: Vec<JsonDataFlowEntry> = Vec::new();
 
     for stats in get_sorted_channel_entries() {

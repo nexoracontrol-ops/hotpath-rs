@@ -46,9 +46,9 @@ pub mod dbg;
 pub mod gauge;
 pub mod val;
 
-pub use dbg::{get_dbg_logs, get_debug_entries_json, log_dbg};
-pub use gauge::{get_debug_gauge_entries_json, get_debug_gauge_logs, GaugeHandle};
-pub use val::{get_val_logs, ValHandle};
+pub use dbg::log_dbg;
+pub use gauge::GaugeHandle;
+pub use val::ValHandle;
 
 #[derive(Debug, Clone)]
 pub struct DbgEntry {

@@ -18,7 +18,7 @@ use crate::json::{format_bytes_signed, JsonThreadEntry, JsonThreadsList};
 use crate::output::format_bytes;
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn thread_metrics_with_percentage(
+pub(crate) fn thread_metrics_with_percentage(
     mut metrics: ThreadMetrics,
     prev: Option<&ThreadMetrics>,
     elapsed_secs: f64,
@@ -173,7 +173,7 @@ fn get_rss_bytes() -> Option<u64> {
 
 /// Get current thread metrics as JSON
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_threads_json() -> JsonThreadsList {
+pub(crate) fn get_threads_json() -> JsonThreadsList {
     let rss_bytes = get_rss_bytes();
 
     if let Some(state) = THREADS_STATE.get() {

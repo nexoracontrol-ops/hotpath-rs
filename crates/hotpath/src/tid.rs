@@ -20,7 +20,7 @@ thread_local! {
 ///
 /// This function will fail to compile on unsupported platforms.
 #[inline]
-pub fn current_tid() -> u64 {
+pub(crate) fn current_tid() -> u64 {
     CACHED_TID.with(|cached| {
         let tid = cached.get();
         if tid != 0 {

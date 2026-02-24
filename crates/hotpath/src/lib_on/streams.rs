@@ -382,7 +382,7 @@ pub(crate) fn get_sorted_stream_stats() -> Vec<StreamStats> {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_streams_json() -> JsonStreamsList {
+pub(crate) fn get_streams_json() -> JsonStreamsList {
     let data = get_sorted_stream_stats()
         .iter()
         .map(JsonStreamEntry::from)
@@ -401,7 +401,7 @@ pub fn get_streams_json() -> JsonStreamsList {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_stream_logs(stream_id: &str) -> Option<StreamLogs> {
+pub(crate) fn get_stream_logs(stream_id: &str) -> Option<StreamLogs> {
     let id = stream_id.parse::<u32>().ok()?;
     let state = STREAMS_STATE.get()?;
     let streams_data = state.stats_map.read().unwrap();

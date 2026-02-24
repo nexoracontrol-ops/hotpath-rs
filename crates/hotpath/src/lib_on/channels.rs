@@ -94,13 +94,13 @@ pub(crate) struct ChannelEntry {
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure_all)]
 impl ChannelEntry {
-    pub fn queued(&self) -> u64 {
+    pub(crate) fn queued(&self) -> u64 {
         self.sent_count
             .saturating_sub(self.received_count)
             .saturating_sub(1)
     }
 
-    pub fn queued_bytes(&self) -> u64 {
+    pub(crate) fn queued_bytes(&self) -> u64 {
         self.queued() * self.type_size as u64
     }
 }
@@ -416,7 +416,7 @@ pub(crate) fn resolve_label(id: &'static str, provided: Option<&str>, iter: Opti
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn extract_filename(path: &str) -> String {
+pub(crate) fn extract_filename(path: &str) -> String {
     let components: Vec<&str> = path.split('/').collect();
     if components.len() >= 2 {
         format!(
@@ -459,7 +459,7 @@ pub trait InstrumentChannelLog {
 
 cfg_if::cfg_if! {
     if #[cfg(any(feature = "tokio", feature = "futures"))] {
-        pub static RT: std::sync::LazyLock<tokio::runtime::Runtime> = std::sync::LazyLock::new(|| {
+        pub(crate) static RT: std::sync::LazyLock<tokio::runtime::Runtime> = std::sync::LazyLock::new(|| {
             tokio::runtime::Builder::new_multi_thread()
                 .enable_time()
                 .build()
@@ -674,7 +674,7 @@ pub(crate) fn get_sorted_channel_entries() -> Vec<ChannelEntry> {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_channels_json() -> JsonChannelsList {
+pub(crate) fn get_channels_json() -> JsonChannelsList {
     let data = get_sorted_channel_entries()
         .iter()
         .map(JsonChannelEntry::from)
@@ -693,7 +693,7 @@ pub fn get_channels_json() -> JsonChannelsList {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_channel_logs(channel_id: &str) -> Option<ChannelLogs> {
+pub(crate) fn get_channel_logs(channel_id: &str) -> Option<ChannelLogs> {
     let id = channel_id.parse::<u32>().ok()?;
     let state = CHANNELS_STATE.get()?;
     let channels_data = state.stats_map.read().unwrap();

@@ -392,7 +392,7 @@ pub(crate) fn get_sorted_future_stats() -> Vec<FutureEntry> {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_futures_json() -> JsonFuturesList {
+pub(crate) fn get_futures_json() -> JsonFuturesList {
     let data = get_sorted_future_stats()
         .iter()
         .map(JsonFutureEntry::from)
@@ -410,7 +410,7 @@ pub fn get_futures_json() -> JsonFuturesList {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_future_logs_list(future_id: u32) -> Option<FutureLogsList> {
+pub(crate) fn get_future_logs_list(future_id: u32) -> Option<FutureLogsList> {
     let state = FUTURES_STATE.get()?;
     let futures_data = state.stats_map.read().unwrap();
     futures_data.get(&future_id).map(|s| FutureLogsList {

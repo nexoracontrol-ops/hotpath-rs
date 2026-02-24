@@ -41,7 +41,7 @@ pub fn log_dbg<T: Debug>(id: u32, source: &'static str, expression: &'static str
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_debug_entries_json() -> JsonDebugList {
+pub(crate) fn get_debug_entries_json() -> JsonDebugList {
     let dbg_stats = get_sorted_debug_dbg_entries();
     let val_stats = get_sorted_debug_val_entries();
     let gauge_stats = get_sorted_debug_gauge_entries();
@@ -70,7 +70,7 @@ pub fn get_debug_entries_json() -> JsonDebugList {
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
-pub fn get_dbg_logs(id: u32) -> Option<JsonDebugDbgLogs> {
+pub(crate) fn get_dbg_logs(id: u32) -> Option<JsonDebugDbgLogs> {
     let current_elapsed_ns = START_TIME
         .get()
         .map(|t| t.elapsed().as_nanos() as u64)

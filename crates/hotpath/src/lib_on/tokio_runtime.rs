@@ -108,6 +108,6 @@ fn get_snapshot_lock() -> &'static std::sync::RwLock<Option<JsonRuntimeSnapshot>
     LATEST_SNAPSHOT.get_or_init(|| std::sync::RwLock::new(None))
 }
 
-pub fn get_runtime_json() -> Option<JsonRuntimeSnapshot> {
+pub(crate) fn get_runtime_json() -> Option<JsonRuntimeSnapshot> {
     get_snapshot_lock().read().ok()?.clone()
 }

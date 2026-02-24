@@ -160,12 +160,12 @@ impl fmt::Display for ProfilingMode {
 static USE_COLORS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
 
 #[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
-pub fn set_use_colors(value: bool) {
+pub(crate) fn set_use_colors(value: bool) {
     let _ = USE_COLORS.set(value);
 }
 
 #[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
-pub fn use_colors() -> bool {
+pub(crate) fn use_colors() -> bool {
     *USE_COLORS.get().unwrap_or(&false)
 }
 
