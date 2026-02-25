@@ -1,4 +1,4 @@
-# Instrumentation vs sampling and flame graphs: choosing a Rust performance profiler
+# Instrumentation vs sampling & flame graphs: picking the right Rust profiler
 
 _Reading time: {{ #reading_time }}_
 

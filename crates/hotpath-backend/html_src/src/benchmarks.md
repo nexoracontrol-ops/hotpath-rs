@@ -1,4 +1,4 @@
-# Benchmark Rust Apps and Compare Performance Between Git Commits
+# How to benchmark Rust applications and track performance changes
 
 `hotpath` provides a simple way to execute benchmarks and compare results between app versions.
 
