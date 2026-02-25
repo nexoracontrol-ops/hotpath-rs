@@ -7,7 +7,7 @@
 Start with installing the `hotpath-utils` CLI:
 
 ```bash
-cargo install hotpath --bin hotpath-utils --version '^0.12' --features utils
+cargo install hotpath --bin hotpath-utils --version '^0.13' --features utils
 ```
 
 This CLI needs JSON files with `hotpath` performance metrics as an input. See [Profiling modes](/profiling_modes) for more detailed info on how to generate these, and customize report sections.
