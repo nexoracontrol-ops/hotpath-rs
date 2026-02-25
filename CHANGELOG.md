@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.13.0] - 2026-02-25
+
+### 🚀 Features
+
+- Rename config vars
+
+### 🐛 Bug Fixes
+
+- Remove unused feature flag
+- Set default docs.rs flag
+- Dont expose internal methods
+- Fix default docs.rs flags
+- Redefine mcp helper methods
+- Fix docs and CI
+- Fix outdated docs and invalid trait
+
+### ⚙️ Miscellaneous Tasks
+
+- Update docs
+- Release 0.13.0
+
 ## [0.12.0] - 2026-02-23
 
 ### 🚀 Features
