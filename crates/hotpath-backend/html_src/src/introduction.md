@@ -11,7 +11,7 @@
   </div>
 </div>
 
-[hotpath-rs](https://github.com/pawurb/hotpath-rs) is a Rust performance profiler that instruments functions, channels, futures, and streams. It helps you find runtime bottlenecks and optimize where it matters most, with detailed metrics for time, memory, and async data flow monitoring.
+[hotpath-rs](https://github.com/pawurb/hotpath-rs) is an easy-to-configure Rust performance profiler that shows exactly where your code spends time and allocates. Instrument functions, channels, futures, and streams to quickly find bottlenecks and focus optimizations where they matter most. Get actionable insights into time, memory, and async data flow with minimal setup.
 <div style="clear: both;"></div>
 
 <div class="trusted-by">
@@ -134,7 +134,7 @@ async fn async_function(sleep: u64) {
 #[tokio::main]
 #[hotpath::main]
 async fn main() {
-    for i in 0..10000 {
+    for i in 0..1000 {
         sync_function(i);
         async_function(i * 2).await;
 
