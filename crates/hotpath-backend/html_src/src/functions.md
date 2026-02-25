@@ -58,9 +58,10 @@ Output:
 Attribute macro that initializes the background measurement processing when applied. Supports parameters:
 
 - `percentiles = [50, 95, 99]` - Custom percentiles to display (defaults to `[95]`)
-- `format = "json"` - Output format `"table"`, `"json"`, `"json-pretty"`, (defaults to `table`)
+- `format = "json"` - Output format `"table"`, `"json"`, `"json-pretty"`, `"none"` (defaults to `table`)
 - `limit = 20` - Maximum number of functions to display (default: `15`, `0` = show all)
-- `timeout = 5000` - Optional timeout in milliseconds. If specified, the program will print the report and exit after the timeout. Useful for profiling long-running programs like HTTP servers, if you don't want to use live monitoring TUI dashboard.
+- `output_path = "report.json"` - File path for profiling reports (defaults to `stdout`, overridden by `HOTPATH_OUTPUT_PATH` env var)
+- `report = "functions-timing,channels"` - Comma-separated sections to include: `functions-timing`, `functions-alloc`, `channels`, `streams`, `futures`, `threads`, or `all` (overridden by `HOTPATH_REPORT` env var)
 
 ## `#[hotpath::measure]` macro
 
