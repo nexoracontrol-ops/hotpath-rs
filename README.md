@@ -153,3 +153,7 @@ See the full docs and advanced config tutorials at [hotpath.rs](https://hotpath.
 - [MCP Server](https://hotpath.rs/mcp) - LLM integration via Model Context Protocol
 - [GitHub CI](https://hotpath.rs/github_ci) - automated benchmarking and regression detection in CI
 - [Configuration](https://hotpath.rs/configuration) - explore all config options
+
+## Status
+
+This project is under active development. Core public APIs are stable, but implementation details (JSON report formats, TUI/MCP internals, and advanced config options) may change between releases as the project evolves.
