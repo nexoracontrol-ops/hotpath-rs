@@ -63,6 +63,8 @@ pub struct FutureEntry {
     pub label: Option<String>,
     pub logs: VecDeque<FutureLog>,
     pub logs_count: u64,
+    pub total_poll_count: u64,
+    pub total_poll_duration_ns: u64,
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure_all)]
@@ -74,12 +76,17 @@ impl FutureEntry {
             label,
             logs: VecDeque::with_capacity(*LOGS_LIMIT),
             logs_count: 0,
+            total_poll_count: 0,
+            total_poll_duration_ns: 0,
         }
     }
 
-    /// Total polls across all invocations
     pub fn total_polls(&self) -> u64 {
-        self.logs.iter().map(|c| c.poll_count).sum()
+        self.total_poll_count
+    }
+
+    pub fn total_poll_duration_ns(&self) -> u64 {
+        self.total_poll_duration_ns
     }
 
     /// Find a call by ID
@@ -99,6 +106,7 @@ impl From<&FutureEntry> for JsonFutureEntry {
             has_custom_label: stats.label.is_some(),
             call_count: stats.logs_count,
             total_polls: stats.total_polls(),
+            total_poll_duration_ns: stats.total_poll_duration_ns(),
         }
     }
 }
@@ -127,6 +135,7 @@ pub(crate) enum FutureEvent {
         call_id: u32,
         result: PollResult,
         log_message: Option<String>,
+        poll_duration_ns: u64,
     },
     Completed {
         future_id: u32,
@@ -278,10 +287,18 @@ fn process_future_event(stats_map: &mut HashMap<u32, FutureEntry>, event: Future
             call_id,
             result,
             log_message,
+            poll_duration_ns,
         } => {
             if let Some(future_stats) = stats_map.get_mut(&future_id) {
+                future_stats.total_poll_count += 1;
+                future_stats.total_poll_duration_ns += poll_duration_ns;
                 if let Some(call) = future_stats.find_call_mut(call_id) {
                     call.poll_count += 1;
+                    call.total_poll_duration_ns += poll_duration_ns;
+                    call.last_poll_duration_ns = poll_duration_ns;
+                    if poll_duration_ns > call.max_poll_duration_ns {
+                        call.max_poll_duration_ns = poll_duration_ns;
+                    }
                     match result {
                         PollResult::Pending => {
                             call.state = FutureState::Suspended;
@@ -397,6 +414,9 @@ pub(crate) fn get_future_logs_list(future_id: u32) -> Option<FutureLogsList> {
     let futures_data = state.stats_map.read().unwrap();
     futures_data.get(&future_id).map(|s| FutureLogsList {
         id: future_id.to_string(),
+        call_count: s.logs_count,
+        total_polls: s.total_polls(),
+        total_poll_duration_ns: s.total_poll_duration_ns(),
         calls: s.logs.iter().rev().cloned().collect(),
     })
 }

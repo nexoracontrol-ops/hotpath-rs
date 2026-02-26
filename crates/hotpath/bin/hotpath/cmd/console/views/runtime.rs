@@ -39,7 +39,7 @@ pub(crate) fn render_runtime_panel(
             Cell::from("Steal Ops"),
             Cell::from("Overflow"),
             Cell::from("Local Q"),
-            Cell::from("Mean Poll (us)"),
+            Cell::from("Mean Poll (μs)"),
         ]
     } else {
         vec![

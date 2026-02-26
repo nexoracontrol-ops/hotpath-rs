@@ -8,7 +8,7 @@ use crate::json::{
     JsonChannelEntry, JsonChannelsList, JsonFutureEntry, JsonFuturesList, JsonStreamEntry,
     JsonStreamsList,
 };
-use crate::output::format_bytes;
+use crate::output::{format_bytes, format_duration};
 use crate::output_on::write_section_header;
 use crate::streams::{compare_stream_stats, StreamStats, STREAMS_STATE};
 
@@ -233,14 +233,25 @@ pub(crate) fn report_futures_table(
         styled_header("Future"),
         styled_header("Calls"),
         styled_header("Polls"),
+        styled_header("Avg Poll"),
+        styled_header("Total Poll"),
     ]));
 
     for future_stats in futures {
         let label = resolve_label(future_stats.source, future_stats.label.as_deref(), None);
+        let total_polls = future_stats.total_polls();
+        let total_poll_dur = future_stats.total_poll_duration_ns();
+        let avg_poll = if total_polls > 0 {
+            format_duration(total_poll_dur / total_polls)
+        } else {
+            "-".to_string()
+        };
         table.add_row(Row::new(vec![
             Cell::new(&label),
             Cell::new(&future_stats.logs_count.to_string()),
-            Cell::new(&future_stats.total_polls().to_string()),
+            Cell::new(&total_polls.to_string()),
+            Cell::new(&avg_poll),
+            Cell::new(&format_duration(total_poll_dur)),
         ]));
     }
 

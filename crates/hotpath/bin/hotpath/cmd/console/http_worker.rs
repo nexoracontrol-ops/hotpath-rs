@@ -92,7 +92,12 @@ pub(crate) fn spawn_http_worker(
             let event_tx = event_tx.clone();
 
             let handle = rt.spawn(async move {
-                let response = request.to_route().fetch(&client, &base_url).await;
+                let response = hotpath::future!(
+                    request.to_route().fetch(&client, &base_url),
+                    log = true,
+                    label = "tui_request"
+                )
+                .await;
                 let _ = event_tx.send(AppEvent::Data(response));
             });
 
@@ -145,7 +150,8 @@ impl RouteExt for Route {
             }
         };
 
-        let bytes = match resp.bytes().await {
+        let bytes = match hotpath::future!(resp.bytes(), log = true, label = "http_response").await
+        {
             Ok(bytes) => bytes,
             Err(e) => {
                 error!("Read error for {}: {}", url, e);

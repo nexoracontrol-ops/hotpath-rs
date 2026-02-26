@@ -155,6 +155,9 @@ pub struct FutureLog {
     pub future_id: u32,
     pub state: FutureState,
     pub poll_count: u64,
+    pub total_poll_duration_ns: u64,
+    pub max_poll_duration_ns: u64,
+    pub last_poll_duration_ns: u64,
     pub result: Option<String>,
 }
 
@@ -165,6 +168,9 @@ impl FutureLog {
             future_id,
             state: FutureState::default(),
             poll_count: 0,
+            total_poll_duration_ns: 0,
+            max_poll_duration_ns: 0,
+            last_poll_duration_ns: 0,
             result: None,
         }
     }
@@ -174,6 +180,9 @@ impl FutureLog {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FutureLogsList {
     pub id: String,
+    pub call_count: u64,
+    pub total_polls: u64,
+    pub total_poll_duration_ns: u64,
     pub calls: Vec<FutureLog>,
 }
 

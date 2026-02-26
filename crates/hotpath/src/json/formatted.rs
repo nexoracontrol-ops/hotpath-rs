@@ -489,6 +489,7 @@ pub struct JsonFutureEntry {
     pub has_custom_label: bool,
     pub call_count: u64,
     pub total_polls: u64,
+    pub total_poll_duration_ns: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -497,6 +498,9 @@ pub struct JsonFutureLog {
     pub future_id: u32,
     pub state: String,
     pub poll_count: u64,
+    pub total_poll_duration_ns: u64,
+    pub max_poll_duration_ns: u64,
+    pub last_poll_duration_ns: u64,
     pub result: Option<String>,
 }
 
@@ -560,6 +564,9 @@ pub struct JsonDataFlowEntry {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonFutureLogsList {
     pub id: String,
+    pub call_count: u64,
+    pub total_polls: u64,
+    pub total_poll_duration_ns: u64,
     pub calls: Vec<JsonFutureLog>,
 }
 
@@ -570,6 +577,9 @@ impl From<&FutureLog> for JsonFutureLog {
             future_id: log.future_id,
             state: log.state.as_str().to_string(),
             poll_count: log.poll_count,
+            total_poll_duration_ns: log.total_poll_duration_ns,
+            max_poll_duration_ns: log.max_poll_duration_ns,
+            last_poll_duration_ns: log.last_poll_duration_ns,
             result: log.result.clone(),
         }
     }
@@ -579,6 +589,9 @@ impl From<&FutureLogsList> for JsonFutureLogsList {
     fn from(calls: &FutureLogsList) -> Self {
         JsonFutureLogsList {
             id: calls.id.clone(),
+            call_count: calls.call_count,
+            total_polls: calls.total_polls,
+            total_poll_duration_ns: calls.total_poll_duration_ns,
             calls: calls.calls.iter().map(JsonFutureLog::from).collect(),
         }
     }

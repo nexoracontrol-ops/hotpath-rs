@@ -86,7 +86,6 @@ fn spawn_tokio_demo() {
 
         rt.block_on(async {
             spawn_streams().await;
-            spawn_futures_demo().await;
             std::future::pending::<()>().await;
         });
     });
@@ -143,59 +142,6 @@ async fn spawn_streams() {
         let mut stream = Box::pin(stream3);
         while let Some(value) = stream.next().await {
             std::hint::black_box(value);
-        }
-    });
-}
-
-async fn spawn_futures_demo() {
-    // Spawn multiple futures that run concurrently
-    tokio::spawn(async {
-        loop {
-            let result = hotpath::future!(
-                async {
-                    sleep_ms(100).await;
-                    42u64
-                },
-                log = true
-            )
-            .await;
-            std::hint::black_box(result);
-            sleep_ms(50).await;
-        }
-    });
-
-    tokio::spawn(async {
-        loop {
-            let result = hotpath::future!(
-                async {
-                    let mut sum = 0u64;
-                    for i in 0..5 {
-                        sleep_ms(50).await;
-                        sum += i;
-                    }
-                    sum
-                },
-                log = true
-            )
-            .await;
-            hotpath::val!("future_sum").set(&result);
-            hotpath::gauge!("future_result").set(result);
-            std::hint::black_box(result);
-            sleep_ms(100).await;
-        }
-    });
-
-    tokio::spawn(async {
-        loop {
-            let result = hotpath::future!(async {
-                tokio::task::yield_now().await;
-                tokio::task::yield_now().await;
-                sleep_ms(30).await;
-                "yielded"
-            })
-            .await;
-            std::hint::black_box(result);
-            sleep_ms(70).await;
         }
     });
 }

@@ -39,8 +39,8 @@ pub mod tests {
         let all_expected = [
             "| labeled_with_log",
             "| my_labeled_future",
-            "| basic_futures::attributed_no_log   | 2     | 4     |",
-            "| basic_futures::attributed_with_log | 2     | 4     |",
+            "| basic_futures::attributed_no_log   | 2     | 4",
+            "| basic_futures::attributed_with_log | 2     | 4",
             futures_path.as_str(),
         ];
 

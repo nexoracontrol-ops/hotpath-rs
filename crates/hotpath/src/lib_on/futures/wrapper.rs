@@ -13,6 +13,12 @@ use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
+#[cfg(target_os = "linux")]
+use quanta::Instant;
+
+#[cfg(not(target_os = "linux"))]
+use std::time::Instant;
+
 struct WakerData {
     inner: Waker,
 }
@@ -115,7 +121,9 @@ impl<F: Future> Future for InstrumentedFuture<F> {
         let instrumented_waker = create_instrumented_waker(cx.waker());
         let mut instrumented_cx = Context::from_waker(&instrumented_waker);
 
+        let start = Instant::now();
         let result = this.inner.poll(&mut instrumented_cx);
+        let poll_duration_ns = start.elapsed().as_nanos() as u64;
 
         let poll_result = match &result {
             Poll::Pending => PollResult::Pending,
@@ -130,6 +138,7 @@ impl<F: Future> Future for InstrumentedFuture<F> {
             call_id,
             result: poll_result,
             log_message: None,
+            poll_duration_ns,
         });
 
         if *this.completed {
@@ -206,7 +215,9 @@ where
         let instrumented_waker = create_instrumented_waker(cx.waker());
         let mut instrumented_cx = Context::from_waker(&instrumented_waker);
 
+        let start = Instant::now();
         let result = this.inner.poll(&mut instrumented_cx);
+        let poll_duration_ns = start.elapsed().as_nanos() as u64;
 
         let (poll_result, log_message) = match &result {
             Poll::Pending => (PollResult::Pending, None),
@@ -221,6 +232,7 @@ where
             call_id,
             result: poll_result,
             log_message,
+            poll_duration_ns,
         });
 
         if *this.completed {

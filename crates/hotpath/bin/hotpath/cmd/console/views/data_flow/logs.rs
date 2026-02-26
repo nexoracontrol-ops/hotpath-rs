@@ -1,12 +1,13 @@
 use crate::cmd::console::app::DataFlowLogs;
 use crate::cmd::console::views::common_styles;
 use crate::cmd::console::widgets::formatters::truncate_message;
-use hotpath::json::DataFlowType;
+use hotpath::json::{format_delay, DataFlowType};
 use ratatui::{
-    layout::{Constraint, Rect},
+    layout::{Constraint, Layout, Rect},
     style::{Color, Style},
     symbols::border,
-    widgets::{Block, Cell, HighlightSpacing, Row, Table, TableState},
+    text::Line,
+    widgets::{Block, Cell, HighlightSpacing, Paragraph, Row, Table, TableState},
     Frame,
 };
 
@@ -143,9 +144,29 @@ pub(crate) fn render_logs_panel(
             frame.render_stateful_widget(table, inner_area, table_state);
         }
         (DataFlowLogs::Future(future_logs), DataFlowType::Future) => {
-            let result_width = (available_width.saturating_sub(25) as usize).max(10);
+            let total_polls = future_logs.total_polls;
+            let total_ns = future_logs.total_poll_duration_ns;
+            let avg = if total_polls > 0 {
+                format_delay(total_ns / total_polls)
+            } else {
+                "-".to_string()
+            };
+            let summary = format!(
+                " calls: {} | polls: {} | total: {} | avg: {}",
+                future_logs.call_count,
+                total_polls,
+                format_delay(total_ns),
+                avg,
+            );
 
-            let header = Row::new(vec!["ID", "State", "Result", "Polls"])
+            let [summary_area, table_area] =
+                Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(inner_area);
+
+            frame.render_widget(Paragraph::new(Line::raw(summary)), summary_area);
+
+            let result_width = (available_width.saturating_sub(41) as usize).max(10);
+
+            let header = Row::new(vec!["State", "Polls", "Avg Poll", "Max Poll", "Result"])
                 .style(common_styles::HEADER_STYLE_CYAN)
                 .height(1);
 
@@ -156,20 +177,33 @@ pub(crate) fn render_logs_panel(
                     let result = call.result.as_deref().unwrap_or("-");
                     let result_text = truncate_message(result, result_width);
 
+                    let avg_poll = if call.poll_count > 0 {
+                        format_delay(call.total_poll_duration_ns / call.poll_count)
+                    } else {
+                        "-".to_string()
+                    };
+                    let max_poll = if call.max_poll_duration_ns > 0 {
+                        format_delay(call.max_poll_duration_ns)
+                    } else {
+                        "-".to_string()
+                    };
+
                     Row::new(vec![
-                        Cell::from(call.id.to_string()),
                         Cell::from(call.state.clone()).style(state_style(&call.state)),
-                        Cell::from(result_text),
                         Cell::from(call.poll_count.to_string()),
+                        Cell::from(avg_poll),
+                        Cell::from(max_poll),
+                        Cell::from(result_text),
                     ])
                 })
                 .collect();
 
             let widths = [
-                Constraint::Length(8), // ID
-                Constraint::Length(9), // State
-                Constraint::Min(10),   // Result
-                Constraint::Length(6), // Polls
+                Constraint::Length(9),  // State
+                Constraint::Length(6),  // Polls
+                Constraint::Length(10), // Avg Poll
+                Constraint::Length(10), // Max Poll
+                Constraint::Min(10),    // Result
             ];
 
             let table = Table::new(rows, widths)
@@ -178,7 +212,7 @@ pub(crate) fn render_logs_panel(
                 .highlight_symbol(">> ")
                 .highlight_spacing(HighlightSpacing::Always);
 
-            frame.render_stateful_widget(table, inner_area, table_state);
+            frame.render_stateful_widget(table, table_area, table_state);
         }
         _ => {}
     }
