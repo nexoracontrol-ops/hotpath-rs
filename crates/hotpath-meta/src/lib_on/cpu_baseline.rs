@@ -34,8 +34,8 @@ fn thread_cpu_time_ns() -> Option<u64> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct CpuBaselineResult {
-    pub avg_ns: u64,
+pub(crate) struct CpuBaselineResult {
+    pub(crate) avg_ns: u64,
 }
 
 #[inline(never)]
@@ -48,7 +48,7 @@ fn baseline_workload() -> u64 {
     x
 }
 
-pub fn init_cpu_baseline() {
+pub(crate) fn init_cpu_baseline() {
     if *CPU_BASELINE_OFF {
         return;
     }
@@ -97,7 +97,7 @@ pub fn init_cpu_baseline() {
     });
 }
 
-pub fn shutdown_cpu_baseline() -> Option<CpuBaselineResult> {
+pub(crate) fn shutdown_cpu_baseline() -> Option<CpuBaselineResult> {
     let handle = CPU_BASELINE_HANDLE.get()?;
     let _ = handle.shutdown_tx.send(());
     handle.completion_rx.recv().ok()

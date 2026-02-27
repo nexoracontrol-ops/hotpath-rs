@@ -135,15 +135,15 @@ impl fmt::Display for ProfilingMode {
     }
 }
 
-#[cfg(all(feature = "hotpath-meta", not(feature = "hotpath-off-meta")))]
+#[cfg(feature = "hotpath-meta")]
 static USE_COLORS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
 
-#[cfg(all(feature = "hotpath-meta", not(feature = "hotpath-off-meta")))]
+#[cfg(feature = "hotpath-meta")]
 pub(crate) fn set_use_colors(value: bool) {
     let _ = USE_COLORS.set(value);
 }
 
-#[cfg(all(feature = "hotpath-meta", not(feature = "hotpath-off-meta")))]
+#[cfg(feature = "hotpath-meta")]
 pub(crate) fn use_colors() -> bool {
     *USE_COLORS.get().unwrap_or(&false)
 }
@@ -184,7 +184,7 @@ impl OutputDestination {
 }
 
 /// Resolves a path, converting relative paths to absolute by joining with cwd.
-pub fn resolve_output_path(path: impl AsRef<std::path::Path>) -> PathBuf {
+pub(crate) fn resolve_output_path(path: impl AsRef<std::path::Path>) -> PathBuf {
     let path = path.as_ref();
     if path.is_absolute() {
         path.to_path_buf()
@@ -250,14 +250,14 @@ pub fn ceil_char_boundary(s: &str, index: usize) -> usize {
 
 pub const MAX_RESULT_LEN: usize = 1536;
 
-#[cfg(all(feature = "hotpath-meta", not(feature = "hotpath-off-meta")))]
+#[cfg(feature = "hotpath-meta")]
 struct TruncatingWriter {
     buf: String,
     limit: usize,
     truncated: bool,
 }
 
-#[cfg(all(feature = "hotpath-meta", not(feature = "hotpath-off-meta")))]
+#[cfg(feature = "hotpath-meta")]
 impl std::fmt::Write for TruncatingWriter {
     fn write_str(&mut self, s: &str) -> std::fmt::Result {
         if self.truncated {
@@ -283,7 +283,7 @@ impl std::fmt::Write for TruncatingWriter {
     }
 }
 
-#[cfg(all(feature = "hotpath-meta", not(feature = "hotpath-off-meta")))]
+#[cfg(feature = "hotpath-meta")]
 pub fn format_debug_truncated(value: &impl std::fmt::Debug) -> String {
     use std::fmt::Write;
     let limit = MAX_RESULT_LEN.saturating_sub(3);
@@ -318,7 +318,8 @@ pub fn shorten_function_name(function_name: &str) -> String {
 /// - `tid` is None if cross-thread execution was detected
 /// - `result` contains the Debug representation of the return value when `log = true`
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FunctionLog {
+#[allow(dead_code)]
+pub(crate) struct FunctionLog {
     /// Measured value (duration in ns for timing, bytes for memory). None if invalid.
     pub value: Option<u64>,
     /// Timestamp when the measurement was taken (nanoseconds since profiler start)
@@ -333,7 +334,8 @@ pub struct FunctionLog {
 
 /// Response containing recent logs for a function
 #[derive(Debug, Clone)]
-pub struct FunctionLogsList {
+#[allow(dead_code)]
+pub(crate) struct FunctionLogsList {
     pub function_name: String,
     pub logs: Vec<FunctionLog>,
     /// Total number of times this function was invoked (used to calculate invocation numbers)

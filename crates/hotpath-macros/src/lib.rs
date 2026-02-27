@@ -1,9 +1,9 @@
 use proc_macro::TokenStream;
 
-#[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
+#[cfg(feature = "hotpath")]
 mod lib_on;
 
-#[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
+#[cfg(not(feature = "hotpath"))]
 mod lib_off;
 
 /// Initializes the hotpath profiling system and generates a performance report on program exit.
@@ -87,11 +87,11 @@ mod lib_off;
 /// * [`HotpathGuardBuilder`](../hotpath/struct.HotpathGuardBuilder.html) - Programmatic alternative to this macro
 #[proc_macro_attribute]
 pub fn main(attr: TokenStream, item: TokenStream) -> TokenStream {
-    #[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
+    #[cfg(feature = "hotpath")]
     {
         lib_on::main_impl(attr, item)
     }
-    #[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
+    #[cfg(not(feature = "hotpath"))]
     {
         lib_off::main_impl(attr, item)
     }
@@ -137,11 +137,11 @@ pub fn main(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// * [`measure_block!`](../hotpath/macro.measure_block.html) - Instruments code blocks
 #[proc_macro_attribute]
 pub fn measure(attr: TokenStream, item: TokenStream) -> TokenStream {
-    #[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
+    #[cfg(feature = "hotpath")]
     {
         lib_on::measure_impl(attr, item)
     }
-    #[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
+    #[cfg(not(feature = "hotpath"))]
     {
         lib_off::measure_impl(attr, item)
     }
@@ -177,11 +177,11 @@ pub fn measure(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// * [`future!`](../hotpath/macro.future.html) - Declarative macro for wrapping future expressions
 #[proc_macro_attribute]
 pub fn future_fn(attr: TokenStream, item: TokenStream) -> TokenStream {
-    #[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
+    #[cfg(feature = "hotpath")]
     {
         lib_on::future_fn_impl(attr, item)
     }
-    #[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
+    #[cfg(not(feature = "hotpath"))]
     {
         lib_off::future_fn_impl(attr, item)
     }
@@ -212,11 +212,11 @@ pub fn future_fn(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// * [`measure`](macro@measure) - Individual function instrumentation
 #[proc_macro_attribute]
 pub fn skip(attr: TokenStream, item: TokenStream) -> TokenStream {
-    #[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
+    #[cfg(feature = "hotpath")]
     {
         lib_on::skip_impl(attr, item)
     }
-    #[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
+    #[cfg(not(feature = "hotpath"))]
     {
         lib_off::skip_impl(attr, item)
     }
@@ -269,11 +269,11 @@ pub fn skip(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// * [`skip`](macro@skip) - Marker to exclude specific functions from measurement
 #[proc_macro_attribute]
 pub fn measure_all(attr: TokenStream, item: TokenStream) -> TokenStream {
-    #[cfg(all(feature = "hotpath", not(feature = "hotpath-off")))]
+    #[cfg(feature = "hotpath")]
     {
         lib_on::measure_all_impl(attr, item)
     }
-    #[cfg(any(not(feature = "hotpath"), feature = "hotpath-off"))]
+    #[cfg(not(feature = "hotpath"))]
     {
         lib_off::measure_all_impl(attr, item)
     }

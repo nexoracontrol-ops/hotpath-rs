@@ -13,7 +13,7 @@ mod collector;
 #[path = "threads/collector_linux.rs"]
 mod collector;
 
-pub use crate::json::ThreadMetrics;
+pub(crate) use crate::json::ThreadMetrics;
 use crate::json::{format_bytes_signed, JsonThreadEntry, JsonThreadsList};
 use crate::output::format_bytes;
 
@@ -56,7 +56,7 @@ const DEFAULT_SAMPLE_INTERVAL_MS: u64 = 1000;
 
 // Initialize thread monitoring worker
 // Call it unless you use channel!, stream!, or #[hotpath_meta::main] macro elsewhere in the code
-pub fn init_threads_monitoring() {
+pub(crate) fn init_threads_monitoring() {
     THREADS_STATE.get_or_init(|| {
         let sample_interval_ms = std::env::var("HOTPATH_META_THREADS_INTERVAL")
             .ok()

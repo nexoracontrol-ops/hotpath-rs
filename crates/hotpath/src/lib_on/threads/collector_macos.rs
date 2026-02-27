@@ -6,12 +6,12 @@ use std::mem;
 // Mach kernel types and constants (using C naming conventions)
 #[allow(non_camel_case_types)]
 mod types {
-    pub type kern_return_t = libc::c_int;
-    pub type mach_port_t = libc::c_uint;
-    pub type thread_act_t = mach_port_t;
-    pub type thread_act_array_t = *mut thread_act_t;
-    pub type mach_msg_type_number_t = libc::c_uint;
-    pub type integer_t = libc::c_int;
+    pub(crate) type kern_return_t = libc::c_int;
+    pub(crate) type mach_port_t = libc::c_uint;
+    pub(crate) type thread_act_t = mach_port_t;
+    pub(crate) type thread_act_array_t = *mut thread_act_t;
+    pub(crate) type mach_msg_type_number_t = libc::c_uint;
+    pub(crate) type integer_t = libc::c_int;
 }
 
 use types::*;

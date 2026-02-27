@@ -49,7 +49,6 @@ hotpath-meta = ["dep:hotpath-meta", "hotpath-meta/hotpath-meta", "hotpath-meta/c
 hotpath-alloc-meta = ["hotpath-meta/hotpath-alloc-meta"]
 hotpath-mcp-meta = ["hotpath-meta/hotpath-mcp-meta"]
 hotpath-alloc = ["dep:tokio"]
-hotpath-off = ["hotpath-macros/hotpath-off"]
 utils = ["dep:serde", "dep:serde_json", "dep:eyre", "dep:clap", "dep:prettytable-rs", "dep:ureq"]
 tui = ["dep:serde", "dep:serde_json", "dep:eyre", "dep:clap", "dep:prettytable-rs", "dep:reqwest", "dep:crossterm", "dep:ratatui", "dep:chrono", "dep:crossbeam-channel", "dep:tokio", "tokio/rt", "dep:tracing", "dep:tracing-subscriber", "dep:time", "crossbeam"]
 tokio = ["dep:tokio", "tokio/sync", "tokio/macros", "tokio/time", "tokio/rt-multi-thread"]

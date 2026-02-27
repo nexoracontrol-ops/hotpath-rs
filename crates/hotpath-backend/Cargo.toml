@@ -49,7 +49,6 @@ http-body-util = "0.1.2"
 [features]
 hotpath = ["hotpath/hotpath"]
 hotpath-alloc = ["hotpath/hotpath-alloc"]
-hotpath-off = ["hotpath/hotpath-off"]
 
 [[bin]]
 name = "server"

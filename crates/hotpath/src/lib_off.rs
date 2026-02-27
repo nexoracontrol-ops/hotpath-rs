@@ -172,8 +172,10 @@ impl MeasurementGuard {
     }
 }
 
-pub struct MeasurementGuardWithLog {}
+#[allow(dead_code)]
+pub(crate) struct MeasurementGuardWithLog {}
 
+#[allow(dead_code)]
 impl MeasurementGuardWithLog {
     pub fn new(_name: &'static str, _wrapper: bool, _is_async: bool) -> Self {
         Self {}
@@ -272,7 +274,8 @@ impl HotpathGuardBuilder {
 }
 
 #[derive(Debug, Clone)]
-pub struct FunctionStats {}
+#[allow(dead_code)]
+pub(crate) struct FunctionStats {}
 
 pub mod channels {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]

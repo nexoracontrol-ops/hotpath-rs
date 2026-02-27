@@ -11,7 +11,6 @@ categories = ["development-tools"]
 [features]
 default = []
 hotpath = ["dep:proc-macro2", "dep:quote", "dep:syn"]
-hotpath-off = []
 
 [lib]
 proc-macro = true

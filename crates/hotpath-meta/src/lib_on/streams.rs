@@ -15,7 +15,7 @@ pub(crate) mod wrapper;
 use crate::channels::{resolve_label, LOGS_LIMIT};
 use crate::data_flow::{WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS};
 use crate::json::JsonStreamEntry;
-pub use crate::json::{ChannelState, DataFlowLogEntry, StreamLogs};
+pub(crate) use crate::json::{ChannelState, DataFlowLogEntry, StreamLogs};
 use crate::metrics_server::METRICS_SERVER_PORT;
 pub use crate::Format;
 

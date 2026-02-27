@@ -10,12 +10,11 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 use crate::channels::ChannelType;
-pub use crate::output::FunctionLogsList;
 
 /// State of a channel or stream.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum ChannelState {
+pub(crate) enum ChannelState {
     #[default]
     Active,
     Closed,
@@ -85,7 +84,7 @@ impl<'de> Deserialize<'de> for ChannelType {
 
 /// A single log entry for a message sent/received or item yielded.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DataFlowLogEntry {
+pub(crate) struct DataFlowLogEntry {
     pub index: u64,
     pub timestamp: u64,
     pub message: Option<String>,
@@ -105,7 +104,7 @@ impl DataFlowLogEntry {
 
 /// Serializable log response containing sent and received logs for channels.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ChannelLogs {
+pub(crate) struct ChannelLogs {
     pub id: String,
     pub sent_logs: Vec<DataFlowLogEntry>,
     pub received_logs: Vec<DataFlowLogEntry>,
@@ -113,7 +112,7 @@ pub struct ChannelLogs {
 
 /// Serializable log response containing yielded logs for streams.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StreamLogs {
+pub(crate) struct StreamLogs {
     pub id: String,
     pub logs: Vec<DataFlowLogEntry>,
 }
@@ -121,7 +120,7 @@ pub struct StreamLogs {
 /// State of an instrumented future.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum FutureState {
+pub(crate) enum FutureState {
     #[default]
     Pending,
     Running,
@@ -150,7 +149,7 @@ impl std::fmt::Display for FutureState {
 
 /// A single invocation/call of a future.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FutureLog {
+pub(crate) struct FutureLog {
     pub id: u32,
     pub future_id: u32,
     pub state: FutureState,
@@ -178,7 +177,7 @@ impl FutureLog {
 
 /// Serializable response for future calls.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FutureLogsList {
+pub(crate) struct FutureLogsList {
     pub id: String,
     pub call_count: u64,
     pub total_polls: u64,
@@ -188,7 +187,7 @@ pub struct FutureLogsList {
 
 /// Thread metrics collected from the OS.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ThreadMetrics {
+pub(crate) struct ThreadMetrics {
     /// Operating system thread ID (Mach port on macOS)
     pub os_tid: u64,
     /// Thread name (if available)

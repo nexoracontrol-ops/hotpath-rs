@@ -49,7 +49,7 @@ impl Drop for MeasurementGuard {
 
 #[doc(hidden)]
 #[must_use = "guard is dropped immediately without measuring anything"]
-pub struct MeasurementGuardWithLog {
+pub(crate) struct MeasurementGuardWithLog {
     name: &'static str,
     start: Instant,
     wrapper: bool,

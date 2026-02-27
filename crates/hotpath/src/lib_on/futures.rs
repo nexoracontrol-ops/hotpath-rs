@@ -20,7 +20,7 @@ pub(crate) mod wrapper;
 pub use wrapper::{InstrumentedFuture, InstrumentedFutureLog};
 
 use crate::json::JsonFutureEntry;
-pub use crate::json::{FutureLog, FutureLogsList, FutureState};
+pub(crate) use crate::json::{FutureLog, FutureLogsList, FutureState};
 pub use crate::Format;
 
 pub(crate) static FUTURE_CALL_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
@@ -57,13 +57,13 @@ pub(crate) fn get_or_create_future_id(source: &'static str) -> (u32, bool) {
 
 /// Aggregated statistics for a source location.
 #[derive(Debug, Clone)]
-pub struct FutureEntry {
-    pub id: u32,
-    pub source: &'static str,
-    pub label: Option<String>,
-    pub logs_count: u64,
-    pub total_poll_count: u64,
-    pub total_poll_duration_ns: u64,
+pub(crate) struct FutureEntry {
+    pub(crate) id: u32,
+    pub(crate) source: &'static str,
+    pub(crate) label: Option<String>,
+    pub(crate) logs_count: u64,
+    pub(crate) total_poll_count: u64,
+    pub(crate) total_poll_duration_ns: u64,
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure_all)]
@@ -79,11 +79,11 @@ impl FutureEntry {
         }
     }
 
-    pub fn total_polls(&self) -> u64 {
+    pub(crate) fn total_polls(&self) -> u64 {
         self.total_poll_count
     }
 
-    pub fn total_poll_duration_ns(&self) -> u64 {
+    pub(crate) fn total_poll_duration_ns(&self) -> u64 {
         self.total_poll_duration_ns
     }
 }

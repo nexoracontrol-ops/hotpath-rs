@@ -10,7 +10,7 @@ use super::{ChannelLogs, DataFlowLogEntry, FutureLog, FutureLogsList, StreamLogs
 
 use crate::output::{format_bytes, format_duration, FunctionLog, FunctionLogsList, ProfilingMode};
 
-pub fn format_time_ago(nanos_ago: u64) -> String {
+pub(crate) fn format_time_ago(nanos_ago: u64) -> String {
     if nanos_ago < 1_000_000_000 {
         "now".to_string()
     } else if nanos_ago < 60_000_000_000 {
@@ -36,11 +36,12 @@ pub fn format_delay(nanos: u64) -> String {
 
 /// Parses a human-readable delay string back to nanoseconds.
 /// Inverse of [`format_delay`].
-pub fn parse_delay(s: &str) -> Option<u64> {
+#[cfg(test)]
+pub(crate) fn parse_delay(s: &str) -> Option<u64> {
     crate::output::parse_duration(s)
 }
 
-pub fn format_queue_status(queued: u64, capacity: Option<usize>) -> String {
+pub(crate) fn format_queue_status(queued: u64, capacity: Option<usize>) -> String {
     match capacity {
         Some(cap) => format!("{}/{}", queued, cap),
         None => format!("{}/∞", queued),
@@ -128,7 +129,7 @@ pub struct JsonFunctionTimingLogsList {
 }
 
 impl JsonFunctionTimingLogsList {
-    pub fn from_logs(json: &FunctionLogsList, current_elapsed_ns: u64) -> Self {
+    pub(crate) fn from_logs(json: &FunctionLogsList, current_elapsed_ns: u64) -> Self {
         let total = json.count;
         let logs_len = json.logs.len();
 
@@ -192,7 +193,7 @@ pub struct JsonFunctionAllocLogsList {
 }
 
 impl JsonFunctionAllocLogsList {
-    pub fn from_logs(json: &FunctionLogsList, current_elapsed_ns: u64) -> Self {
+    pub(crate) fn from_logs(json: &FunctionLogsList, current_elapsed_ns: u64) -> Self {
         let total = json.count;
         let logs_len = json.logs.len();
 
@@ -290,7 +291,7 @@ pub struct JsonChannelLogsList {
 }
 
 impl JsonChannelLogsList {
-    pub fn from_logs(logs: &ChannelLogs, current_elapsed_ns: u64) -> Self {
+    pub(crate) fn from_logs(logs: &ChannelLogs, current_elapsed_ns: u64) -> Self {
         let sent_logs = logs
             .sent_logs
             .iter()
@@ -367,7 +368,7 @@ pub struct JsonStreamLogsList {
 }
 
 impl JsonStreamLogsList {
-    pub fn from_logs(logs: &StreamLogs, current_elapsed_ns: u64) -> Self {
+    pub(crate) fn from_logs(logs: &StreamLogs, current_elapsed_ns: u64) -> Self {
         JsonStreamLogsList {
             id: logs.id.clone(),
             logs: logs

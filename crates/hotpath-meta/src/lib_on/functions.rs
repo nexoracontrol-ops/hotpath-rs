@@ -9,19 +9,19 @@ use crossbeam_channel::{bounded, Sender};
 use crate::json::JsonFunctionsList;
 use crate::lib_on::START_TIME;
 use crate::metrics_server::RECV_TIMEOUT_MS;
-use crate::FunctionLogsList;
+use crate::output::FunctionLogsList;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "hotpath-alloc-meta")] {
         pub mod alloc;
         use alloc::state::FunctionsState;
-        pub use alloc::guard::{MeasurementGuard, MeasurementGuardWithLog};
-        pub use alloc::state::FunctionStats;
+        pub use alloc::guard::MeasurementGuard;
+        pub(crate) use alloc::guard::MeasurementGuardWithLog;
     } else {
         pub mod timing;
         use timing::state::FunctionsState;
-        pub use timing::guard::{MeasurementGuard, MeasurementGuardWithLog};
-        pub use timing::state::FunctionStats;
+        pub use timing::guard::MeasurementGuard;
+        pub(crate) use timing::guard::MeasurementGuardWithLog;
     }
 }
 

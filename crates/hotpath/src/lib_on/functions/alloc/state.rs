@@ -103,15 +103,15 @@ pub(crate) fn flush_batch() {
 }
 
 #[derive(Debug)]
-pub struct Measurement {
-    pub name: &'static str,
-    pub bytes_total: Option<u64>,
-    pub count_total: Option<u64>,
-    pub duration: Duration,
-    pub measurement_time: Instant,
-    pub wrapper: bool,
-    pub tid: Option<u64>,
-    pub result_log: Option<String>,
+pub(crate) struct Measurement {
+    pub(crate) name: &'static str,
+    pub(crate) bytes_total: Option<u64>,
+    pub(crate) count_total: Option<u64>,
+    pub(crate) duration: Duration,
+    pub(crate) measurement_time: Instant,
+    pub(crate) wrapper: bool,
+    pub(crate) tid: Option<u64>,
+    pub(crate) result_log: Option<String>,
 }
 
 type LogEntry = (
@@ -124,20 +124,20 @@ type LogEntry = (
 );
 
 #[derive(Debug, Clone)]
-pub struct FunctionStats {
-    pub id: u32,
-    pub name: &'static str,
-    pub count: u64,
+pub(crate) struct FunctionStats {
+    pub(crate) id: u32,
+    pub(crate) name: &'static str,
+    pub(crate) count: u64,
     bytes_total_hist: Option<Histogram<u64>>,
     count_total_hist: Option<Histogram<u64>>,
     duration_hist: Option<Histogram<u64>>,
-    pub total_bytes_sum: u64,
-    pub total_count_sum: u64,
-    pub total_duration_ns: u64,
-    pub has_data: bool,
-    pub is_async: bool,
-    pub wrapper: bool,
-    pub recent_logs: VecDeque<LogEntry>,
+    pub(crate) total_bytes_sum: u64,
+    pub(crate) total_count_sum: u64,
+    pub(crate) total_duration_ns: u64,
+    pub(crate) has_data: bool,
+    pub(crate) is_async: bool,
+    pub(crate) wrapper: bool,
+    pub(crate) recent_logs: VecDeque<LogEntry>,
 }
 
 impl FunctionStats {
@@ -390,7 +390,7 @@ pub(crate) fn process_measurement(
 
 use super::super::FUNCTIONS_STATE;
 
-pub fn send_alloc_measurement(
+pub(crate) fn send_alloc_measurement(
     name: &'static str,
     bytes_total: Option<u64>,
     count_total: Option<u64>,
@@ -402,7 +402,7 @@ pub fn send_alloc_measurement(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn send_alloc_measurement_with_log(
+pub(crate) fn send_alloc_measurement_with_log(
     name: &'static str,
     bytes_total: Option<u64>,
     count_total: Option<u64>,

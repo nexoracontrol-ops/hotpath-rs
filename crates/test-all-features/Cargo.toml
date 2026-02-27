@@ -8,7 +8,6 @@ description = "Tests with all feature flags enabled."
 [features]
 hotpath = ["hotpath/hotpath"]
 hotpath-alloc = ["hotpath/hotpath-alloc"]
-hotpath-off = ["hotpath/hotpath-off"]
 
 [dependencies]
 hotpath = { path = "../hotpath", features = ["tokio"] }

@@ -20,7 +20,7 @@ fn get_thread_id() -> Option<u64> {
 }
 
 #[derive(Debug, Clone)]
-pub struct GaugeEntry {
+pub(crate) struct GaugeEntry {
     pub id: u32,
     pub key: String,
     pub source: &'static str,
@@ -32,7 +32,7 @@ pub struct GaugeEntry {
 }
 
 #[derive(Debug, Clone)]
-pub struct GaugeLog {
+pub(crate) struct GaugeLog {
     pub index: u64,
     pub timestamp_ns: u64,
     pub value: f64,
@@ -166,7 +166,7 @@ impl From<&GaugeEntry> for JsonDebugEntry {
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure_all)]
 impl JsonDebugGaugeLogs {
-    pub fn from_stats(stats: &GaugeEntry, current_elapsed_ns: u64) -> Self {
+    pub(crate) fn from_stats(stats: &GaugeEntry, current_elapsed_ns: u64) -> Self {
         JsonDebugGaugeLogs {
             key: stats.key.clone(),
             total_logs: stats.update_count,

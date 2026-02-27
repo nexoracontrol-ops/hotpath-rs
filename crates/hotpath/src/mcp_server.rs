@@ -67,7 +67,7 @@ static MCP_SERVER_PORT: LazyLock<u16> = LazyLock::new(|| {
 });
 
 #[derive(Clone)]
-pub struct HotPathMcpServer {
+pub(crate) struct HotPathMcpServer {
     tool_router: ToolRouter<Self>,
 }
 

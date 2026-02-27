@@ -94,7 +94,7 @@ impl Drop for MeasurementGuard {
 }
 
 #[must_use = "guard is dropped immediately without measuring anything"]
-pub struct MeasurementGuardWithLog {
+pub(crate) struct MeasurementGuardWithLog {
     name: &'static str,
     wrapper: bool,
     tid: u64,

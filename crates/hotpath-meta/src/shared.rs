@@ -200,7 +200,7 @@ impl IntoF64 for usize {
     }
 }
 
-#[cfg(all(feature = "hotpath-meta", not(feature = "hotpath-off-meta")))]
+#[cfg(feature = "hotpath-meta")]
 pub(crate) fn resolve_timeout_duration(
     default_duration: std::time::Duration,
     env_var: &str,

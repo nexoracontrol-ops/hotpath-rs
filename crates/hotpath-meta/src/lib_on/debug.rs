@@ -49,7 +49,7 @@ pub use gauge::GaugeHandle;
 pub use val::ValHandle;
 
 #[derive(Debug, Clone)]
-pub struct DbgEntry {
+pub(crate) struct DbgEntry {
     pub id: u32,
     pub source: &'static str,
     pub expression: &'static str,
@@ -58,7 +58,7 @@ pub struct DbgEntry {
 }
 
 #[derive(Debug, Clone)]
-pub struct DbgLog {
+pub(crate) struct DbgLog {
     pub index: u64,
     pub timestamp_ns: u64,
     pub value: String,
@@ -78,7 +78,7 @@ impl DbgEntry {
 }
 
 #[derive(Debug, Clone)]
-pub struct ValEntry {
+pub(crate) struct ValEntry {
     pub id: u32,
     pub key: String,
     pub log_count: u64,
@@ -86,7 +86,7 @@ pub struct ValEntry {
 }
 
 #[derive(Debug, Clone)]
-pub struct ValLog {
+pub(crate) struct ValLog {
     pub index: u64,
     pub timestamp_ns: u64,
     pub value: String,

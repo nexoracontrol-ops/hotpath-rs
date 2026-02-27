@@ -16,7 +16,7 @@ use std::mem;
 
 use crate::data_flow::{next_data_flow_id, WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS};
 use crate::json::{format_queue_status, JsonChannelEntry};
-pub use crate::json::{ChannelLogs, ChannelState, DataFlowLogEntry};
+pub(crate) use crate::json::{ChannelLogs, ChannelState, DataFlowLogEntry};
 use crate::metrics_server::METRICS_SERVER_PORT;
 use crate::output::format_bytes;
 
@@ -24,14 +24,14 @@ pub use crate::Format;
 
 /// Handle returned by [`register_channel`] that gives wrappers the channel's
 /// unique id and a sender to emit [`ChannelEvent`]s to the background worker.
-pub struct RegisteredChannel {
-    pub id: u32,
-    pub stats_tx: CbSender<ChannelEvent>,
+pub(crate) struct RegisteredChannel {
+    pub(crate) id: u32,
+    pub(crate) stats_tx: CbSender<ChannelEvent>,
 }
 
 /// Type of a channel.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ChannelType {
+pub(crate) enum ChannelType {
     Bounded(usize),
     Unbounded,
     Oneshot,
@@ -43,7 +43,7 @@ pub enum ChannelType {
 /// a [`RegisteredChannel`] that wrappers use to report subsequent
 /// send/receive/close events. `T` is the message type carried by the channel
 /// and is used to record the type name and per-message byte size.
-pub fn register_channel<T>(
+pub(crate) fn register_channel<T>(
     source: &'static str,
     label: Option<String>,
     channel_type: ChannelType,
@@ -198,7 +198,7 @@ impl ChannelEntry {
 
 /// Events sent to the background channel statistics collection thread.
 #[derive(Debug)]
-pub enum ChannelEvent {
+pub(crate) enum ChannelEvent {
     Created {
         id: u32,
         source: &'static str,

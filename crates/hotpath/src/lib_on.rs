@@ -32,10 +32,7 @@ pub use streams::{InstrumentStream, InstrumentStreamLog};
 pub mod hotpath_guard;
 pub(crate) mod report;
 
-pub use functions::{
-    measure_with_log, measure_with_log_async, FunctionStats, MeasurementGuard,
-    MeasurementGuardWithLog,
-};
+pub use functions::{measure_with_log, measure_with_log_async, MeasurementGuard};
 pub use hotpath_guard::{HotpathGuard, HotpathGuardBuilder};
 
 cfg_if::cfg_if! {

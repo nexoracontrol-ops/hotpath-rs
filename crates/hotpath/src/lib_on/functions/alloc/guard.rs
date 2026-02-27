@@ -7,7 +7,7 @@ use quanta::Instant;
 use std::time::Instant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AllocMetric {
+pub(crate) enum AllocMetric {
     Bytes,
     Count,
 }
@@ -127,7 +127,7 @@ impl Drop for MeasurementGuard {
 }
 
 #[must_use = "guard is dropped immediately without measuring anything"]
-pub struct MeasurementGuardWithLog {
+pub(crate) struct MeasurementGuardWithLog {
     name: &'static str,
     wrapper: bool,
     tid: u64,

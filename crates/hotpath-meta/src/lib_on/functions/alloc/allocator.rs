@@ -11,7 +11,7 @@
 use std::alloc::{GlobalAlloc, Layout, System};
 
 /// Shared global allocator that dispatches to enabled allocation tracking features
-pub struct CountingAllocator;
+pub(crate) struct CountingAllocator;
 
 unsafe impl GlobalAlloc for CountingAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {

@@ -13,4 +13,3 @@ smol = "2.0"
 default = []
 hotpath = ["hotpath/hotpath"]
 hotpath-alloc = ["hotpath/hotpath-alloc"]
-hotpath-off = ["hotpath/hotpath-off"]

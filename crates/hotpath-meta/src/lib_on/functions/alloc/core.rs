@@ -3,17 +3,17 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::tid::current_tid;
 
-pub const MAX_DEPTH: usize = 64;
+pub(crate) const MAX_DEPTH: usize = 64;
 
 /// Maximum number of threads we can track (fixed size to avoid allocations in allocator)
 const MAX_THREADS: usize = 256;
 
 /// Per-thread allocation statistics (lock-free)
-pub struct ThreadAllocStats {
+pub(crate) struct ThreadAllocStats {
     /// Thread ID (0 means slot is unused)
-    pub tid: AtomicU64,
-    pub alloc_bytes: AtomicU64,
-    pub dealloc_bytes: AtomicU64,
+    pub(crate) tid: AtomicU64,
+    pub(crate) alloc_bytes: AtomicU64,
+    pub(crate) dealloc_bytes: AtomicU64,
 }
 
 impl Default for ThreadAllocStats {
@@ -23,7 +23,7 @@ impl Default for ThreadAllocStats {
 }
 
 impl ThreadAllocStats {
-    pub const fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             tid: AtomicU64::new(0),
             alloc_bytes: AtomicU64::new(0),
@@ -41,12 +41,12 @@ static THREAD_ALLOC_STATS: [ThreadAllocStats; MAX_THREADS] = {
 static THREAD_TRACKING_ENABLED: AtomicU64 = AtomicU64::new(0);
 
 /// Initialize the thread allocation tracking system
-pub fn init_thread_alloc_tracking() {
+pub(crate) fn init_thread_alloc_tracking() {
     THREAD_TRACKING_ENABLED.store(1, Ordering::Release);
 }
 
 /// Get allocation stats for a thread
-pub fn get_thread_alloc_stats(os_tid: u64) -> Option<(u64, u64)> {
+pub(crate) fn get_thread_alloc_stats(os_tid: u64) -> Option<(u64, u64)> {
     if THREAD_TRACKING_ENABLED.load(Ordering::Acquire) == 0 {
         return None;
     }
@@ -89,9 +89,9 @@ fn get_or_create_slot(tid: u64) -> Option<&'static ThreadAllocStats> {
     None
 }
 
-pub struct AllocationInfo {
-    pub bytes_total: Cell<u64>,
-    pub count_total: Cell<u64>,
+pub(crate) struct AllocationInfo {
+    pub(crate) bytes_total: Cell<u64>,
+    pub(crate) count_total: Cell<u64>,
 }
 
 impl std::ops::AddAssign for AllocationInfo {
@@ -103,14 +103,14 @@ impl std::ops::AddAssign for AllocationInfo {
     }
 }
 
-pub struct AllocationInfoStack {
-    pub depth: Cell<u32>,
-    pub elements: [AllocationInfo; MAX_DEPTH],
-    pub tracking_enabled: Cell<bool>,
+pub(crate) struct AllocationInfoStack {
+    pub(crate) depth: Cell<u32>,
+    pub(crate) elements: [AllocationInfo; MAX_DEPTH],
+    pub(crate) tracking_enabled: Cell<bool>,
 }
 
 thread_local! {
-    pub static ALLOCATIONS: AllocationInfoStack = const { AllocationInfoStack {
+    pub(crate) static ALLOCATIONS: AllocationInfoStack = const { AllocationInfoStack {
         depth: Cell::new(0),
         elements: [const { AllocationInfo {
             bytes_total: Cell::new(0),
@@ -121,7 +121,7 @@ thread_local! {
 }
 
 #[inline]
-pub fn track_alloc(size: usize) {
+pub(crate) fn track_alloc(size: usize) {
     ALLOCATIONS.with(|stack| {
         if !stack.tracking_enabled.get() {
             return;
@@ -141,7 +141,7 @@ pub fn track_alloc(size: usize) {
 }
 
 #[inline]
-pub fn track_dealloc(size: usize) {
+pub(crate) fn track_dealloc(size: usize) {
     if THREAD_TRACKING_ENABLED.load(Ordering::Relaxed) != 0 {
         let tid = current_tid();
         if let Some(slot) = get_or_create_slot(tid) {

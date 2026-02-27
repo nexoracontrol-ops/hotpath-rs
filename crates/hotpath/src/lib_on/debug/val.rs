@@ -95,7 +95,7 @@ impl From<&ValEntry> for JsonDebugEntry {
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure_all)]
 impl JsonDebugValLogs {
-    pub fn from_stats(stats: &ValEntry, current_elapsed_ns: u64) -> Self {
+    pub(crate) fn from_stats(stats: &ValEntry, current_elapsed_ns: u64) -> Self {
         JsonDebugValLogs {
             key: stats.key.clone(),
             total_logs: stats.log_count,

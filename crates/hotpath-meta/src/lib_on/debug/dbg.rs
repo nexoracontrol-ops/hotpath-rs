@@ -103,7 +103,7 @@ impl From<&DbgEntry> for JsonDebugEntry {
 }
 
 impl JsonDebugDbgLogs {
-    pub fn from_stats(stats: &DbgEntry, current_elapsed_ns: u64) -> Self {
+    pub(crate) fn from_stats(stats: &DbgEntry, current_elapsed_ns: u64) -> Self {
         JsonDebugDbgLogs {
             source: truncate_source_path(stats.source),
             expression: stats.expression.to_string(),
