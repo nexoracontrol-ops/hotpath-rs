@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use hotpath::{format_debug_truncated, MAX_RESULT_LEN};
+use hotpath::{format_debug_truncated, MAX_LOG_LEN};
 
 const ITERATIONS: usize = 1000;
 
@@ -25,10 +25,10 @@ fn make_payload(i: u64, data_size: usize) -> LargePayload {
 #[hotpath::measure]
 fn format_then_truncate(value: &impl std::fmt::Debug) -> String {
     let s = format!("{:?}", value);
-    if s.len() <= MAX_RESULT_LEN {
+    if s.len() <= *MAX_LOG_LEN {
         s
     } else {
-        let end = hotpath::floor_char_boundary(&s, MAX_RESULT_LEN.saturating_sub(3));
+        let end = hotpath::floor_char_boundary(&s, MAX_LOG_LEN.saturating_sub(3));
         format!("{}...", &s[..end])
     }
 }

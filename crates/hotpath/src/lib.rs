@@ -31,7 +31,7 @@ pub use output::format_debug_truncated;
 pub use output::{
     ceil_char_boundary, floor_char_boundary, format_bytes, format_count, format_duration,
     parse_bytes, parse_count, parse_duration, shorten_function_name, OutputDestination,
-    ProfilingMode, MAX_RESULT_LEN,
+    ProfilingMode, MAX_LOG_LEN,
 };
 
 #[cfg(feature = "hotpath")]

@@ -4,6 +4,15 @@ use std::fmt;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::LazyLock;
+
+const DEFAULT_MAX_LOG_LEN: usize = 1536;
+pub static MAX_LOG_LEN: LazyLock<usize> = LazyLock::new(|| {
+    std::env::var("HOTPATH_META_MAX_LOG_LEN")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(DEFAULT_MAX_LOG_LEN)
+});
 
 /// Destination for profiling report output.
 #[derive(Default)]
@@ -248,8 +257,6 @@ pub fn ceil_char_boundary(s: &str, index: usize) -> usize {
     i
 }
 
-pub const MAX_RESULT_LEN: usize = 1536;
-
 #[cfg(feature = "hotpath-meta")]
 struct TruncatingWriter {
     buf: String,
@@ -286,7 +293,7 @@ impl std::fmt::Write for TruncatingWriter {
 #[cfg(feature = "hotpath-meta")]
 pub fn format_debug_truncated(value: &impl std::fmt::Debug) -> String {
     use std::fmt::Write;
-    let limit = MAX_RESULT_LEN.saturating_sub(3);
+    let limit = MAX_LOG_LEN.saturating_sub(3);
     let mut writer = TruncatingWriter {
         buf: String::with_capacity(64),
         limit,
@@ -348,7 +355,7 @@ mod truncation_tests {
 
     #[test]
     fn test_format_debug_truncated() {
-        let truncate_point = MAX_RESULT_LEN.saturating_sub(3);
+        let truncate_point = MAX_LOG_LEN.saturating_sub(3);
 
         let test_cases: Vec<(&str, String)> = vec![
             (
@@ -370,7 +377,7 @@ mod truncation_tests {
                 "{}: result should have chars",
                 name
             );
-            if input.len() > MAX_RESULT_LEN {
+            if input.len() > *MAX_LOG_LEN {
                 assert!(
                     result.ends_with("..."),
                     "{}: truncated result should end with '...'",

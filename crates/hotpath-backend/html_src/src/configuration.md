@@ -50,4 +50,5 @@
 | `HOTPATH_THREADS_INTERVAL_MS` | Thread monitoring sample interval in milliseconds. (default: `1000`) |
 | `HOTPATH_TOKIO_RUNTIME_INTERVAL_MS` | Tokio runtime metrics sampling interval in milliseconds. (default: `1000`) |
 | `HOTPATH_LOGS_LIMIT` | Maximum number of log entries to keep per channel, stream, or function. (default: `50`) |
+| `HOTPATH_MAX_LOG_LEN` | Maximum character length for logged return values (`log = true`). Values exceeding this limit are truncated with `...`. (default: `1536`) |
 | `HOTPATH_SHUTDOWN_MS` | If set a profiled program will shutdown after the specified ms timeout and print the performance report. (default: `''`). Use `before_shutdown` to specify before shutdown callback. |
