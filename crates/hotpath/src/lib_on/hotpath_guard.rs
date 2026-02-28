@@ -6,6 +6,7 @@ use std::sync::{Arc, LazyLock, Mutex, RwLock};
 use std::thread;
 use std::time::Instant;
 
+pub(crate) const WORKER_SHUTDOWN_DRAIN_LIMIT: usize = 1_000;
 const DEFAULT_LOGS_LIMIT: usize = 50;
 pub(crate) static LOGS_LIMIT: LazyLock<usize> = LazyLock::new(|| {
     std::env::var("HOTPATH_LOGS_LIMIT")
@@ -349,8 +350,11 @@ impl HotpathGuard {
                 loop {
                     select_biased! {
                         recv(shutdown_rx) -> _ => {
-                            while let Ok(measurement) = rx.try_recv() {
-                                process_measurement(&mut local_stats, &mut name_to_id, measurement, worker_start_time);
+                            for _ in 0..WORKER_SHUTDOWN_DRAIN_LIMIT {
+                                match rx.try_recv() {
+                                    Ok(measurement) => process_measurement(&mut local_stats, &mut name_to_id, measurement, worker_start_time),
+                                    Err(_) => break,
+                                }
                             }
                             break;
                         }

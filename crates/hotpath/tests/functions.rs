@@ -752,6 +752,39 @@ pub mod tests {
         }
     }
 
+    // cargo run -p test-tokio-async --example guard_timeout_functions --features hotpath
+    #[test]
+    fn test_guard_timeout_functions_output() {
+        let output = Command::new("cargo")
+            .args([
+                "run",
+                "-p",
+                "test-tokio-async",
+                "--example",
+                "guard_timeout_functions",
+                "--features",
+                "hotpath",
+            ])
+            .output()
+            .expect("Failed to execute command");
+
+        assert!(
+            output.status.success(),
+            "Process did not exit successfully.\n\nstderr:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        let expected_content = ["guard_timeout_functions::looping_function"];
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        for expected in expected_content {
+            assert!(
+                stdout.contains(expected),
+                "Expected:\n{expected}\n\nGot:\n{stdout}",
+            );
+        }
+    }
+
     // HOTPATH_EXCLUDE_WRAPPER=1 cargo run -p test-tokio-async --example basic --features hotpath
     #[test]
     fn test_exclude_wrapper_output() {

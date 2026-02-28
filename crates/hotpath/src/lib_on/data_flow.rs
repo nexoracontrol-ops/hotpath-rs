@@ -14,7 +14,7 @@ pub(crate) static DATA_FLOW_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
 
 pub(crate) const WORKER_BATCH_SIZE: usize = 100;
 pub(crate) const WORKER_FLUSH_INTERVAL_MS: u64 = 50;
-pub(crate) const WORKER_SHUTDOWN_DRAIN_LIMIT: usize = 1_000;
+pub(crate) use crate::lib_on::hotpath_guard::WORKER_SHUTDOWN_DRAIN_LIMIT;
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
 pub(crate) fn next_data_flow_id() -> u32 {

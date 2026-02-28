@@ -414,13 +414,13 @@ pub(crate) fn get_sorted_future_stats() -> Vec<FutureEntry> {
 pub(crate) fn get_future_logs_list(future_id: u32) -> Option<FutureLogsList> {
     let state = FUTURES_STATE.get()?;
     let guard = state.inner.read().unwrap();
+    let stats = guard.stats.get(&future_id)?;
     let entry_logs = guard.logs.get(&future_id)?;
-    let stats = guard.stats.get(&future_id);
     Some(FutureLogsList {
         id: future_id.to_string(),
-        call_count: stats.map_or(0, |s| s.logs_count),
-        total_polls: stats.map_or(0, |s| s.total_polls()),
-        total_poll_duration_ns: stats.map_or(0, |s| s.total_poll_duration_ns()),
+        call_count: stats.logs_count,
+        total_polls: stats.total_polls(),
+        total_poll_duration_ns: stats.total_poll_duration_ns(),
         calls: entry_logs.logs.iter().rev().cloned().collect(),
     })
 }
