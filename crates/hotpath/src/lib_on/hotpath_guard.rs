@@ -279,13 +279,9 @@ impl HotpathGuard {
         futures_limit: usize,
         threads_limit: usize,
     ) -> Self {
+        crate::lib_on::suspend_alloc_tracking();
         #[cfg(feature = "hotpath-alloc")]
-        {
-            crate::functions::alloc::core::ALLOCATIONS.with(|stack| {
-                stack.tracking_enabled.set(false);
-            });
-            crate::functions::alloc::core::init_thread_alloc_tracking();
-        }
+        crate::functions::alloc::core::init_thread_alloc_tracking();
 
         let percentiles = percentiles.to_vec();
 
@@ -507,10 +503,7 @@ impl HotpathGuard {
 
         let wrapper_guard = crate::functions::build_measurement_guard_sync(caller_name, true);
 
-        #[cfg(feature = "hotpath-alloc")]
-        crate::functions::alloc::core::ALLOCATIONS.with(|stack| {
-            stack.tracking_enabled.set(true);
-        });
+        crate::lib_on::resume_alloc_tracking();
 
         Self {
             state: Arc::clone(&state_arc),

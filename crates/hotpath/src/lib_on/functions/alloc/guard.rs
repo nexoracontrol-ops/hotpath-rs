@@ -100,9 +100,7 @@ fn send_alloc_measurement(
     wrapper: bool,
     tid: Option<u64>,
 ) {
-    crate::functions::alloc::core::ALLOCATIONS.with(|stack| {
-        stack.tracking_enabled.set(false);
-    });
+    crate::lib_on::suspend_alloc_tracking();
 
     crate::functions::alloc::state::send_alloc_measurement(
         name,
@@ -113,9 +111,7 @@ fn send_alloc_measurement(
         tid,
     );
 
-    crate::functions::alloc::core::ALLOCATIONS.with(|stack| {
-        stack.tracking_enabled.set(true);
-    });
+    crate::lib_on::resume_alloc_tracking();
 }
 
 #[inline]
@@ -128,9 +124,7 @@ fn send_alloc_measurement_with_log(
     tid: Option<u64>,
     result_log: Option<String>,
 ) {
-    crate::functions::alloc::core::ALLOCATIONS.with(|stack| {
-        stack.tracking_enabled.set(false);
-    });
+    crate::lib_on::suspend_alloc_tracking();
 
     crate::functions::alloc::state::send_alloc_measurement_with_log(
         name,
@@ -142,9 +136,7 @@ fn send_alloc_measurement_with_log(
         result_log,
     );
 
-    crate::functions::alloc::core::ALLOCATIONS.with(|stack| {
-        stack.tracking_enabled.set(true);
-    });
+    crate::lib_on::resume_alloc_tracking();
 }
 
 #[must_use = "guard is dropped immediately without measuring anything"]
