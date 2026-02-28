@@ -214,7 +214,7 @@ impl Default for HotpathGuard {
 }
 
 impl HotpathGuard {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {}
     }
 }

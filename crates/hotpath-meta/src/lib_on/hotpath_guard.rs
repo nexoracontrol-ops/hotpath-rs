@@ -205,7 +205,7 @@ pub struct HotpathGuard {
 
 impl HotpathGuard {
     #[allow(clippy::too_many_arguments)]
-    pub fn new(
+    pub(crate) fn new(
         caller_name: &'static str,
         percentiles: &[u8],
         limit: usize,
