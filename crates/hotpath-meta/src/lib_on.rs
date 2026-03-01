@@ -41,6 +41,26 @@ cfg_if::cfg_if! {
     if #[cfg(all(feature = "hotpath-alloc-meta", not(feature = "hotpath-alloc")))] {
         #[global_allocator]
         static GLOBAL: functions::alloc::allocator::CountingAllocator = functions::alloc::allocator::CountingAllocator {};
+
+        #[inline]
+        pub(crate) fn suspend_alloc_tracking() {
+            functions::alloc::core::ALLOCATIONS.with(|stack| {
+                stack.tracking_enabled.set(false);
+            });
+        }
+
+        #[inline]
+        pub(crate) fn resume_alloc_tracking() {
+            functions::alloc::core::ALLOCATIONS.with(|stack| {
+                stack.tracking_enabled.set(true);
+            });
+        }
+    } else {
+        #[inline]
+        pub(crate) fn suspend_alloc_tracking() {}
+
+        #[inline]
+        pub(crate) fn resume_alloc_tracking() {}
     }
 }
 
