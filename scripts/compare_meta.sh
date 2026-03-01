@@ -13,7 +13,7 @@ RELEASE_FLAG=""
 if [ "${HOTPATH_BENCH_RELEASE:-}" = "true" ]; then
     RELEASE_FLAG="--release"
 fi
-BENCH_CMD="cargo run $RELEASE_FLAG -p hotpath --features=tui,hotpath,hotpath-alloc --bin hotpath"
+BENCH_CMD="cargo run $RELEASE_FLAG -p hotpath --features=tui,hotpath,hotpath-meta,hotpath-alloc-meta --bin hotpath"
 
 run_bench() {
     local ref="$1"
@@ -27,13 +27,13 @@ run_bench() {
     local -a bench_env=(
         HOTPATH_TUI_TAB=${HOTPATH_TUI_TAB:-1}
         HOTPATH_TUI_REFRESH_INTERVAL_MS=${HOTPATH_TUI_REFRESH_INTERVAL_MS:-10}
-        HOTPATH_REPORT='functions-timing,functions-alloc,threads'
-        HOTPATH_OUTPUT_FORMAT=json
-        HOTPATH_OUTPUT_PATH="$output"
-        HOTPATH_SHUTDOWN_MS=5000
-        HOTPATH_TIMEOUT_MS=5000
-        HOTPATH_EXCLUDE_WRAPPER=true
-        HOTPATH_REPORT_LABEL="$label"
+        HOTPATH_META_REPORT='functions-timing,functions-alloc,threads'
+        HOTPATH_META_OUTPUT_FORMAT=json
+        HOTPATH_META_OUTPUT_PATH="$output"
+        HOTPATH_META_SHUTDOWN_MS=5000
+        HOTPATH_META_TIMEOUT_MS=5000
+        HOTPATH_META_EXCLUDE_WRAPPER=true
+        HOTPATH_META_REPORT_LABEL="$label"
         RUSTFLAGS='--cfg tokio_unstable'
     )
     echo "==> Running: ${bench_env[*]} $BENCH_CMD"
@@ -60,4 +60,4 @@ run_bench "$AFTER_REF" "tmp/after.json"
 reset
 
 cargo run $RELEASE_FLAG -p hotpath --features=utils --bin hotpath-utils -- \
-    compare --before-json-path tmp/before.json --after-json-path tmp/after.json
+    compare --before-json-path tmp/before.json --after-json-path tmp/after.json 

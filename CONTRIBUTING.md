@@ -18,13 +18,13 @@ A full copy is needed because a crate cannot depend on itself. Extracting shared
 Install [just](https://github.com/casey/just) and run:
 
 ```
-just bench
+just bench_meta
 ```
 
 Starts a hotpath TUI for 5 seconds, gathers performance metrics and prints the report on exit. 
 
 ```
-just compare main feature_branch
+just compare_meta main feature_branch
 ```
 
 Benchmarks two versions of the library (branch names or commit SHAs are supported) and saves performance reports in `tmp/before.txt` and `tmp/after.txt`. If contributing any performance-related change please include both reports in the PR.
