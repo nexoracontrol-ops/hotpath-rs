@@ -319,7 +319,12 @@ where
             Poll::Pending => (PollResult::Pending, None),
             Poll::Ready(value) => {
                 *this.completed = true;
-                (PollResult::Ready, Some(format_debug_truncated(value)))
+                let log_message = if visible {
+                    Some(format_debug_truncated(value))
+                } else {
+                    None
+                };
+                (PollResult::Ready, log_message)
             }
         };
 
