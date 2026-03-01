@@ -162,7 +162,7 @@ Allocation profiling uses thread-local storage to track memory usage. Since asyn
 
 ## Memory profiling modes
 
-By default, allocation tracking is **cumulative**, meaning that a function's allocation count includes all allocations made by functions it calls (nested calls). Notably, it produces invalid results for recursive functions. To track only **exclusive** allocations (direct allocations made by each function, excluding nested calls), set the `HOTPATH_ALLOC_SELF=true` environment variable when running your program.
+By default, allocation tracking is **cumulative**, meaning that a function's allocation count includes all allocations made by nested instrumented functions it calls. Notably, it produces invalid results for recursive functions. To track only **exclusive** allocations (direct allocations made by each function, excluding nested instrumented calls), set the `HOTPATH_ALLOC_SELF=true` environment variable when running your program.
 
 ## Nightly features
 
