@@ -212,7 +212,7 @@ sudo mkdir -p /run/sshd && sudo chmod 755 /run/sshd
 
 ## Deploy Hotpath Binary
 
-Build from `/root/hotpath-rs/`:
+Build from `/root/hotpath-rs/crates/hotpath/`:
 
 ```bash
 RUSTFLAGS="--cfg tokio_unstable" cargo install --path . --features='tui,hotpath,hotpath-alloc'
