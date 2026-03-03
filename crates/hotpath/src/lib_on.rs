@@ -42,14 +42,23 @@ cfg_if::cfg_if! {
 }
 
 #[must_use = "guard is dropped immediately without suspending tracking"]
-pub(crate) struct SuspendAllocTracking;
+pub(crate) struct SuspendAllocTracking {
+    #[cfg(feature = "hotpath-alloc")]
+    previous_enabled: bool,
+}
 
 impl SuspendAllocTracking {
     #[inline]
     pub(crate) fn new() -> Self {
         #[cfg(feature = "hotpath-alloc")]
-        functions::alloc::core::suspend_alloc_tracking();
-        Self
+        {
+            let previous_enabled = functions::alloc::core::suspend_alloc_tracking();
+            Self { previous_enabled }
+        }
+        #[cfg(not(feature = "hotpath-alloc"))]
+        {
+            Self {}
+        }
     }
 }
 
@@ -57,7 +66,7 @@ impl Drop for SuspendAllocTracking {
     #[inline]
     fn drop(&mut self) {
         #[cfg(feature = "hotpath-alloc")]
-        functions::alloc::core::resume_alloc_tracking();
+        functions::alloc::core::resume_alloc_tracking(self.previous_enabled);
     }
 }
 
@@ -217,12 +226,34 @@ macro_rules! tokio_runtime {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::lib_on::{HotpathGuard, SuspendAllocTracking};
+
+    #[cfg(feature = "hotpath-alloc")]
+    use crate::functions::alloc::core::{alloc_tracking_enabled, set_alloc_tracking_enabled};
 
     fn is_send_sync<T: Send + Sync>() {}
 
     #[test]
     fn test_hotpath_is_send_sync() {
         is_send_sync::<HotpathGuard>();
+    }
+
+    #[cfg(feature = "hotpath-alloc")]
+    #[test]
+    fn test_suspend_alloc_tracking_nested_restore() {
+        let _ = set_alloc_tracking_enabled(true);
+        assert!(alloc_tracking_enabled());
+
+        let outer = SuspendAllocTracking::new();
+        assert!(!alloc_tracking_enabled());
+
+        {
+            let _inner = SuspendAllocTracking::new();
+            assert!(!alloc_tracking_enabled());
+        }
+
+        assert!(!alloc_tracking_enabled());
+        drop(outer);
+        assert!(alloc_tracking_enabled());
     }
 }

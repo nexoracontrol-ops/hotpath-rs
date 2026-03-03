@@ -151,15 +151,26 @@ pub(crate) fn track_dealloc(size: usize) {
 }
 
 #[inline]
-pub(crate) fn suspend_alloc_tracking() {
+pub(crate) fn set_alloc_tracking_enabled(enabled: bool) -> bool {
     ALLOCATIONS.with(|stack| {
-        stack.tracking_enabled.set(false);
-    });
+        let previous = stack.tracking_enabled.get();
+        stack.tracking_enabled.set(enabled);
+        previous
+    })
 }
 
 #[inline]
-pub(crate) fn resume_alloc_tracking() {
-    ALLOCATIONS.with(|stack| {
-        stack.tracking_enabled.set(true);
-    });
+pub(crate) fn suspend_alloc_tracking() -> bool {
+    set_alloc_tracking_enabled(false)
+}
+
+#[inline]
+pub(crate) fn resume_alloc_tracking(previous_enabled: bool) {
+    let _ = set_alloc_tracking_enabled(previous_enabled);
+}
+
+#[cfg(test)]
+#[inline]
+pub(crate) fn alloc_tracking_enabled() -> bool {
+    ALLOCATIONS.with(|stack| stack.tracking_enabled.get())
 }
