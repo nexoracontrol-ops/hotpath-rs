@@ -4,7 +4,7 @@ use futures_channel::oneshot;
 use futures_util::sink::SinkExt;
 
 use crate::channels::{
-    register_channel, ChannelEvent, ChannelType, Instant, RegisteredChannel, RT,
+    register_channel, send_channel_event, ChannelEvent, ChannelType, Instant, RegisteredChannel, RT,
 };
 
 /// Internal implementation for wrapping bounded futures channels with optional logging.
@@ -30,22 +30,28 @@ where
         use futures_util::stream::StreamExt;
         while let Some(msg) = inner_rx.next().await {
             let log = get_msg_log(&msg);
-            let _ = stats_tx.send(ChannelEvent::MessageSent {
-                id,
-                log,
-                timestamp: Instant::now(),
-            });
-            if proxy_tx.send(msg).await.is_ok() {
-                let _ = stats_tx.send(ChannelEvent::MessageReceived {
+            send_channel_event(
+                &stats_tx,
+                ChannelEvent::MessageSent {
                     id,
+                    log,
                     timestamp: Instant::now(),
-                });
+                },
+            );
+            if proxy_tx.send(msg).await.is_ok() {
+                send_channel_event(
+                    &stats_tx,
+                    ChannelEvent::MessageReceived {
+                        id,
+                        timestamp: Instant::now(),
+                    },
+                );
             } else {
                 // proxy_rx dropped
                 break;
             }
         }
-        let _ = stats_tx.send(ChannelEvent::Closed { id });
+        send_channel_event(&stats_tx, ChannelEvent::Closed { id });
     });
 
     // User sends to inner_tx directly, receives from proxy_rx
@@ -98,22 +104,28 @@ where
         use futures_util::stream::StreamExt;
         while let Some(msg) = inner_rx.next().await {
             let log = get_msg_log(&msg);
-            let _ = stats_tx.send(ChannelEvent::MessageSent {
-                id,
-                log,
-                timestamp: Instant::now(),
-            });
-            if proxy_tx.unbounded_send(msg).is_ok() {
-                let _ = stats_tx.send(ChannelEvent::MessageReceived {
+            send_channel_event(
+                &stats_tx,
+                ChannelEvent::MessageSent {
                     id,
+                    log,
                     timestamp: Instant::now(),
-                });
+                },
+            );
+            if proxy_tx.unbounded_send(msg).is_ok() {
+                send_channel_event(
+                    &stats_tx,
+                    ChannelEvent::MessageReceived {
+                        id,
+                        timestamp: Instant::now(),
+                    },
+                );
             } else {
                 // proxy_rx dropped
                 break;
             }
         }
-        let _ = stats_tx.send(ChannelEvent::Closed { id });
+        send_channel_event(&stats_tx, ChannelEvent::Closed { id });
     });
 
     // User sends to inner_tx directly, receives from proxy_rx
@@ -168,14 +180,14 @@ where
                 match msg {
                     Ok(msg) => {
                         let log = get_msg_log(&msg);
-                        let _ = stats_tx.send(ChannelEvent::MessageSent {
+                        send_channel_event(&stats_tx, ChannelEvent::MessageSent {
                             id,
                             log,
                             timestamp: Instant::now(),
                         });
-                        let _ = stats_tx.send(ChannelEvent::Notified { id });
+                        send_channel_event(&stats_tx, ChannelEvent::Notified { id });
                         if proxy_tx.take().unwrap().send(msg).is_ok() {
-                            let _ = stats_tx.send(ChannelEvent::MessageReceived {
+                            send_channel_event(&stats_tx, ChannelEvent::MessageReceived {
                                 id,
                                 timestamp: Instant::now(),
                             });
@@ -194,7 +206,7 @@ where
         }
 
         if !message_completed {
-            let _ = stats_tx.send(ChannelEvent::Closed { id });
+            send_channel_event(&stats_tx, ChannelEvent::Closed { id });
         }
     });
 

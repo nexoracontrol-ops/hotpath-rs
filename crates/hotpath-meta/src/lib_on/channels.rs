@@ -50,19 +50,28 @@ pub(crate) fn register_channel<T>(
     let state = init_channels_state();
     let id = next_data_flow_id();
 
-    let _ = state.event_tx.send(ChannelEvent::Created {
-        id,
-        source,
-        display_label: label,
-        channel_type,
-        type_name,
-        type_size: mem::size_of::<T>(),
-    });
+    send_channel_event(
+        &state.event_tx,
+        ChannelEvent::Created {
+            id,
+            source,
+            display_label: label,
+            channel_type,
+            type_name,
+            type_size: mem::size_of::<T>(),
+        },
+    );
 
     RegisteredChannel {
         id,
         stats_tx: state.event_tx.clone(),
     }
+}
+
+#[inline]
+pub(crate) fn send_channel_event(stats_tx: &CbSender<ChannelEvent>, event: ChannelEvent) {
+    let _suspend = crate::lib_on::SuspendAllocTracking::new();
+    let _ = stats_tx.send(event);
 }
 
 pub(crate) fn timestamp_nanos(timestamp: Instant) -> u64 {
@@ -465,7 +474,7 @@ pub trait InstrumentChannelLog {
 }
 
 cfg_if::cfg_if! {
-    if #[cfg(any(feature = "tokio", feature = "futures"))] {
+    if #[cfg(any(feature = "tokio", feature = "futures", feature = "async-channel"))] {
         pub(crate) static RT: std::sync::LazyLock<tokio::runtime::Runtime> = std::sync::LazyLock::new(|| {
             tokio::runtime::Builder::new_multi_thread()
                 .enable_time()

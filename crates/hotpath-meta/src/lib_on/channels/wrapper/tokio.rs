@@ -3,7 +3,7 @@ use tokio::sync::mpsc::{Receiver, Sender, UnboundedReceiver, UnboundedSender};
 use tokio::sync::oneshot;
 
 use crate::channels::{
-    register_channel, ChannelEvent, ChannelType, Instant, RegisteredChannel, RT,
+    register_channel, send_channel_event, ChannelEvent, ChannelType, Instant, RegisteredChannel, RT,
 };
 
 /// Internal implementation for wrapping bounded Tokio channels with optional logging.
@@ -32,13 +32,13 @@ where
                     match msg {
                         Some(msg) => {
                             let log = log_on_send(&msg);
-                            let _ = stats_tx.send(ChannelEvent::MessageSent {
+                            send_channel_event(&stats_tx, ChannelEvent::MessageSent {
                                 id,
                                 log,
                                 timestamp: Instant::now(),
                             });
                             if proxy_tx.send(msg).await.is_ok() {
-                                let _ = stats_tx.send(ChannelEvent::MessageReceived {
+                                send_channel_event(&stats_tx, ChannelEvent::MessageReceived {
                                     id,
                                     timestamp: Instant::now(),
                                 });
@@ -56,7 +56,7 @@ where
                 }
             }
         }
-        let _ = stats_tx.send(ChannelEvent::Closed { id });
+        send_channel_event(&stats_tx, ChannelEvent::Closed { id });
     });
 
     (inner_tx, proxy_rx)
@@ -109,13 +109,13 @@ where
                     match msg {
                         Some(msg) => {
                             let log = log_on_send(&msg);
-                            let _ = stats_tx.send(ChannelEvent::MessageSent {
+                            send_channel_event(&stats_tx, ChannelEvent::MessageSent {
                                 id,
                                 log,
                                 timestamp: Instant::now(),
                             });
                             if proxy_tx.send(msg).is_ok() {
-                                let _ = stats_tx.send(ChannelEvent::MessageReceived {
+                                send_channel_event(&stats_tx, ChannelEvent::MessageReceived {
                                     id,
                                     timestamp: Instant::now(),
                                 });
@@ -133,7 +133,7 @@ where
                 }
             }
         }
-        let _ = stats_tx.send(ChannelEvent::Closed { id });
+        send_channel_event(&stats_tx, ChannelEvent::Closed { id });
     });
 
     (inner_tx, proxy_rx)
@@ -187,14 +187,14 @@ where
                 match msg {
                     Ok(msg) => {
                         let log = log_on_send(&msg);
-                        let _ = stats_tx.send(ChannelEvent::MessageSent {
+                        send_channel_event(&stats_tx, ChannelEvent::MessageSent {
                             id,
                             log,
                             timestamp: Instant::now(),
                         });
-                        let _ = stats_tx.send(ChannelEvent::Notified { id });
+                        send_channel_event(&stats_tx, ChannelEvent::Notified { id });
                         if proxy_tx.take().unwrap().send(msg).is_ok() {
-                            let _ = stats_tx.send(ChannelEvent::MessageReceived {
+                            send_channel_event(&stats_tx, ChannelEvent::MessageReceived {
                                 id,
                                 timestamp: Instant::now(),
                             });
@@ -213,7 +213,7 @@ where
         }
 
         if !message_completed {
-            let _ = stats_tx.send(ChannelEvent::Closed { id });
+            send_channel_event(&stats_tx, ChannelEvent::Closed { id });
         }
     });
 

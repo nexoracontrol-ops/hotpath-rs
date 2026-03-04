@@ -1,6 +1,8 @@
 use crossbeam_channel::{self, Receiver, Sender};
 
-use crate::channels::{register_channel, ChannelEvent, ChannelType, Instant, RegisteredChannel};
+use crate::channels::{
+    register_channel, send_channel_event, ChannelEvent, ChannelType, Instant, RegisteredChannel,
+};
 
 /// Internal implementation for wrapping bounded crossbeam channels with optional logging.
 fn wrap_bounded_impl<T, F>(
@@ -24,22 +26,28 @@ where
     std::thread::spawn(move || {
         while let Ok(msg) = inner_rx.recv() {
             let log = log_on_send(&msg);
-            let _ = stats_tx.send(ChannelEvent::MessageSent {
-                id,
-                log,
-                timestamp: Instant::now(),
-            });
-            if proxy_tx.send(msg).is_ok() {
-                let _ = stats_tx.send(ChannelEvent::MessageReceived {
+            send_channel_event(
+                &stats_tx,
+                ChannelEvent::MessageSent {
                     id,
+                    log,
                     timestamp: Instant::now(),
-                });
+                },
+            );
+            if proxy_tx.send(msg).is_ok() {
+                send_channel_event(
+                    &stats_tx,
+                    ChannelEvent::MessageReceived {
+                        id,
+                        timestamp: Instant::now(),
+                    },
+                );
             } else {
                 // proxy_rx dropped
                 break;
             }
         }
-        let _ = stats_tx.send(ChannelEvent::Closed { id });
+        send_channel_event(&stats_tx, ChannelEvent::Closed { id });
     });
 
     (inner_tx, proxy_rx)
@@ -90,23 +98,29 @@ where
     std::thread::spawn(move || {
         while let Ok(msg) = inner_rx.recv() {
             let log = log_on_send(&msg);
-            let _ = stats_tx.send(ChannelEvent::MessageSent {
-                id,
-                log,
-                timestamp: Instant::now(),
-            });
+            send_channel_event(
+                &stats_tx,
+                ChannelEvent::MessageSent {
+                    id,
+                    log,
+                    timestamp: Instant::now(),
+                },
+            );
             // MessageReceived logged before user receives
             if proxy_tx.send(msg).is_ok() {
-                let _ = stats_tx.send(ChannelEvent::MessageReceived {
-                    id,
-                    timestamp: Instant::now(),
-                });
+                send_channel_event(
+                    &stats_tx,
+                    ChannelEvent::MessageReceived {
+                        id,
+                        timestamp: Instant::now(),
+                    },
+                );
             } else {
                 // proxy_rx dropped
                 break;
             }
         }
-        let _ = stats_tx.send(ChannelEvent::Closed { id });
+        send_channel_event(&stats_tx, ChannelEvent::Closed { id });
     });
 
     (inner_tx, proxy_rx)
