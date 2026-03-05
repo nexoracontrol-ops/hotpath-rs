@@ -86,6 +86,7 @@ pub(crate) fn init_threads_monitoring() {
         std::thread::Builder::new()
             .name("hp-threads".into())
             .spawn(move || {
+                let _suspend = crate::lib_on::SuspendAllocTracking::new();
                 collector_loop(state_clone, sample_interval);
             })
             .expect("Failed to spawn thread-metrics-collector thread");

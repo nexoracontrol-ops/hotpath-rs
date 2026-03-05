@@ -122,8 +122,10 @@ thread_local! {
 
 #[inline]
 pub(crate) fn track_alloc(size: usize) {
+    let mut tracking_enabled = true;
     ALLOCATIONS.with(|stack| {
-        if !stack.tracking_enabled.get() {
+        tracking_enabled = stack.tracking_enabled.get();
+        if !tracking_enabled {
             return;
         }
         let depth = stack.depth.get() as usize;
@@ -132,21 +134,34 @@ pub(crate) fn track_alloc(size: usize) {
         info.count_total.set(info.count_total.get() + 1);
     });
 
-    if THREAD_TRACKING_ENABLED.load(Ordering::Relaxed) != 0 {
-        let tid = current_tid();
-        if let Some(slot) = get_or_create_slot(tid) {
-            slot.alloc_bytes.fetch_add(size as u64, Ordering::Relaxed);
-        }
+    if !tracking_enabled {
+        return;
+    }
+
+    if THREAD_TRACKING_ENABLED.load(Ordering::Relaxed) == 0 {
+        return;
+    }
+
+    let tid = current_tid();
+    if let Some(slot) = get_or_create_slot(tid) {
+        slot.alloc_bytes.fetch_add(size as u64, Ordering::Relaxed);
     }
 }
 
 #[inline]
 pub(crate) fn track_dealloc(size: usize) {
-    if THREAD_TRACKING_ENABLED.load(Ordering::Relaxed) != 0 {
-        let tid = current_tid();
-        if let Some(slot) = get_or_create_slot(tid) {
-            slot.dealloc_bytes.fetch_add(size as u64, Ordering::Relaxed);
-        }
+    let tracking_enabled = ALLOCATIONS.with(|stack| stack.tracking_enabled.get());
+    if !tracking_enabled {
+        return;
+    }
+
+    if THREAD_TRACKING_ENABLED.load(Ordering::Relaxed) == 0 {
+        return;
+    }
+
+    let tid = current_tid();
+    if let Some(slot) = get_or_create_slot(tid) {
+        slot.dealloc_bytes.fetch_add(size as u64, Ordering::Relaxed);
     }
 }
 
@@ -167,10 +182,4 @@ pub(crate) fn suspend_alloc_tracking() -> bool {
 #[inline]
 pub(crate) fn resume_alloc_tracking(previous_enabled: bool) {
     let _ = set_alloc_tracking_enabled(previous_enabled);
-}
-
-#[cfg(test)]
-#[inline]
-pub(crate) fn alloc_tracking_enabled() -> bool {
-    ALLOCATIONS.with(|stack| stack.tracking_enabled.get())
 }

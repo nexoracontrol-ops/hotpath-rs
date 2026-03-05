@@ -280,8 +280,6 @@ impl HotpathGuard {
         threads_limit: usize,
     ) -> Self {
         let _suspend = crate::lib_on::SuspendAllocTracking::new();
-        #[cfg(feature = "hotpath-alloc")]
-        crate::functions::alloc::core::init_thread_alloc_tracking();
 
         let percentiles = percentiles.to_vec();
 
@@ -332,6 +330,7 @@ impl HotpathGuard {
         thread::Builder::new()
             .name("hp-functions".into())
             .spawn(move || {
+                let _suspend = crate::lib_on::SuspendAllocTracking::new();
                 #[cfg(feature = "hotpath-meta")]
                 {
                     let builder = hotpath_meta::HotpathGuardBuilder::new("hotpath-meta").with_functions_limit(10).with_threads_limit(5);
@@ -489,18 +488,19 @@ impl HotpathGuard {
             crate::futures::init_futures_state();
         }
 
-        #[cfg(feature = "threads")]
-        if sections.contains(&Section::Threads) {
-            crate::threads::init_threads_monitoring();
-            #[cfg(feature = "hotpath-alloc")]
-            crate::functions::alloc::core::init_thread_alloc_tracking();
-        }
-
         crate::cpu_baseline::init_cpu_baseline();
+
+        #[cfg(feature = "threads")]
+        {
+            crate::threads::init_threads_monitoring();
+        }
 
         let wrapper_guard = crate::functions::build_measurement_guard_sync(caller_name, true);
 
         drop(_suspend);
+
+        #[cfg(all(feature = "threads", feature = "hotpath-alloc"))]
+        crate::functions::alloc::core::init_thread_alloc_tracking();
 
         Self {
             state: Arc::clone(&state_arc),
@@ -551,6 +551,8 @@ fn build_timing_list(
 
 impl Drop for HotpathGuard {
     fn drop(&mut self) {
+        let _suspend = crate::lib_on::SuspendAllocTracking::new();
+
         if let Some(f) = self.before_shutdown.take() {
             f();
         }
