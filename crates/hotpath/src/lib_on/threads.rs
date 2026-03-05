@@ -2,7 +2,7 @@
 //! CPU usage statistics for all threads in the current process.
 
 use std::collections::HashMap;
-use std::sync::{Arc, OnceLock, RwLock};
+use std::sync::{Arc, LazyLock, OnceLock, RwLock};
 use std::time::Duration;
 
 use crate::instant::Instant;
@@ -55,17 +55,19 @@ type ThreadsStateRef = Arc<RwLock<ThreadsState>>;
 
 static THREADS_STATE: OnceLock<ThreadsStateRef> = OnceLock::new();
 
-const DEFAULT_SAMPLE_INTERVAL_MS: u64 = 1000;
+static THREADS_INTERVAL_MS: LazyLock<u64> = LazyLock::new(|| {
+    std::env::var("HOTPATH_THREADS_INTERVAL_MS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(250)
+});
 
 // Initialize thread monitoring worker
 // Call it unless you use channel!, stream!, or #[hotpath::main] macro elsewhere in the code
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
 pub(crate) fn init_threads_monitoring() {
     THREADS_STATE.get_or_init(|| {
-        let sample_interval_ms = std::env::var("HOTPATH_THREADS_INTERVAL_MS")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(DEFAULT_SAMPLE_INTERVAL_MS);
+        let sample_interval_ms = *THREADS_INTERVAL_MS;
 
         let sample_interval = Duration::from_millis(sample_interval_ms);
         let start_time = Instant::now();
@@ -247,7 +249,7 @@ pub(crate) fn get_threads_json() -> JsonThreadsList {
 
     JsonThreadsList {
         current_elapsed_ns: 0,
-        sample_interval_ms: DEFAULT_SAMPLE_INTERVAL_MS,
+        sample_interval_ms: *THREADS_INTERVAL_MS,
         data: Vec::new(),
         thread_count: 0,
         rss_bytes: rss_bytes.map(format_bytes),

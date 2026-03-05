@@ -260,7 +260,7 @@ impl App {
             inspected_data_flow_log: None,
             threads: JsonThreadsList {
                 current_elapsed_ns: 0,
-                sample_interval_ms: 1000,
+                sample_interval_ms: 250,
                 data: vec![],
                 thread_count: 0,
                 rss_bytes: None,
