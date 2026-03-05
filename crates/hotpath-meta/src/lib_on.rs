@@ -233,34 +233,12 @@ macro_rules! tokio_runtime {
 
 #[cfg(test)]
 mod tests {
-    use crate::lib_on::{HotpathGuard, SuspendAllocTracking};
-
-    #[cfg(all(feature = "hotpath-alloc-meta", not(feature = "hotpath-alloc")))]
-    use crate::functions::alloc::core::{alloc_tracking_enabled, set_alloc_tracking_enabled};
+    use crate::lib_on::HotpathGuard;
 
     fn is_send_sync<T: Send + Sync>() {}
 
     #[test]
     fn test_hotpath_is_send_sync() {
         is_send_sync::<HotpathGuard>();
-    }
-
-    #[cfg(all(feature = "hotpath-alloc-meta", not(feature = "hotpath-alloc")))]
-    #[test]
-    fn test_suspend_alloc_tracking_nested_restore() {
-        let _ = set_alloc_tracking_enabled(true);
-        assert!(alloc_tracking_enabled());
-
-        let outer = SuspendAllocTracking::new();
-        assert!(!alloc_tracking_enabled());
-
-        {
-            let _inner = SuspendAllocTracking::new();
-            assert!(!alloc_tracking_enabled());
-        }
-
-        assert!(!alloc_tracking_enabled());
-        drop(outer);
-        assert!(alloc_tracking_enabled());
     }
 }

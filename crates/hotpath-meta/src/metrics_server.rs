@@ -61,6 +61,7 @@ fn start_metrics_server(port: u16) {
     thread::Builder::new()
             .name("hp-meta-server".into())
             .spawn(move || {
+                let _suspend = crate::lib_on::SuspendAllocTracking::new();
                 let addr = format!("127.0.0.1:{}", port);
                 let server = match Server::http(&addr) {
                     Ok(s) => s,

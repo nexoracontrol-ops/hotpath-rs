@@ -2,7 +2,7 @@
 //! CPU usage statistics for all threads in the current process.
 
 use std::collections::HashMap;
-use std::sync::{Arc, OnceLock, RwLock};
+use std::sync::{Arc, LazyLock, OnceLock, RwLock};
 use std::time::Duration;
 
 use crate::instant::Instant;
@@ -54,16 +54,18 @@ type ThreadsStateRef = Arc<RwLock<ThreadsState>>;
 
 static THREADS_STATE: OnceLock<ThreadsStateRef> = OnceLock::new();
 
-const DEFAULT_SAMPLE_INTERVAL_MS: u64 = 1000;
+static THREADS_INTERVAL_MS: LazyLock<u64> = LazyLock::new(|| {
+    std::env::var("HOTPATH_META_THREADS_INTERVAL_MS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(250)
+});
 
 // Initialize thread monitoring worker
 // Call it unless you use channel!, stream!, or #[hotpath_meta::main] macro elsewhere in the code
 pub(crate) fn init_threads_monitoring() {
     THREADS_STATE.get_or_init(|| {
-        let sample_interval_ms = std::env::var("HOTPATH_META_THREADS_INTERVAL_MS")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(DEFAULT_SAMPLE_INTERVAL_MS);
+        let sample_interval_ms = *THREADS_INTERVAL_MS;
 
         let sample_interval = Duration::from_millis(sample_interval_ms);
         let start_time = Instant::now();
@@ -82,6 +84,7 @@ pub(crate) fn init_threads_monitoring() {
         std::thread::Builder::new()
             .name("hp-meta-threads".into())
             .spawn(move || {
+                let _suspend = crate::lib_on::SuspendAllocTracking::new();
                 collector_loop(state_clone, sample_interval);
             })
             .expect("Failed to spawn thread-metrics-collector thread");
@@ -100,6 +103,7 @@ fn collector_loop(state: ThreadsStateRef, interval: Duration) {
                     Err(_) => continue,
                 };
                 let elapsed_secs = state_guard.last_sample_time.elapsed().as_secs_f64();
+                let profiler_elapsed = state_guard.start_time.elapsed().as_secs_f64();
 
                 // Calculate CPU percentages by comparing with previous sample
                 let mut new_metrics = Vec::with_capacity(raw_metrics.len());
@@ -117,6 +121,11 @@ fn collector_loop(state: ThreadsStateRef, interval: Duration) {
                         m_with_percent.alloc_bytes = Some(alloc);
                         m_with_percent.dealloc_bytes = Some(dealloc);
                         m_with_percent.mem_diff = Some(alloc as i64 - dealloc as i64);
+                    }
+
+                    if profiler_elapsed > 0.0 {
+                        m_with_percent.cpu_percent_avg =
+                            Some((m_with_percent.cpu_total / profiler_elapsed) * 100.0);
                     }
 
                     if let Some(pct) = m_with_percent.cpu_percent {
@@ -237,7 +246,7 @@ pub(crate) fn get_threads_json() -> JsonThreadsList {
 
     JsonThreadsList {
         current_elapsed_ns: 0,
-        sample_interval_ms: DEFAULT_SAMPLE_INTERVAL_MS,
+        sample_interval_ms: *THREADS_INTERVAL_MS,
         data: Vec::new(),
         thread_count: 0,
         rss_bytes: rss_bytes.map(format_bytes),

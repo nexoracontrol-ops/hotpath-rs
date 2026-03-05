@@ -187,7 +187,7 @@ Returns JSON array with:
 - name: thread name (e.g. "tokio-runtime-worker")
 - cpu_percent: CPU utilization (0-100 per core)
 
-Sampled at configurable interval (HOTPATH_META_THREADS_INTERVAL_MS env var, default 1000ms). Useful for identifying CPU-bound threads."#)]
+Sampled at configurable interval (HOTPATH_META_THREADS_INTERVAL_MS env var, default 250ms). Useful for identifying CPU-bound threads."#)]
     async fn threads(&self) -> Result<CallToolResult, McpError> {
         log_debug("Tool called: threads");
 
