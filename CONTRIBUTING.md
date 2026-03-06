@@ -40,33 +40,35 @@ It benchmarks two versions of the library (branch names or commit SHAs are suppo
 - `HOTPATH_TUI_TAB` - set values from 1 to 6, to open a different TUI tab and execute different codepaths in the benchmark (default `1`)
 - `HOTPATH_BENCH_RELEASE` - set to `true` to run benchmarks with `--release` profile (default `false`)
 - `HOTPATH_TUI_REFRESH_INTERVAL_MS` - configure data refresh interval, lower values will produce more data (default `10`)
+- `HOTPATH_TUI_AUTO_EXPAND_LOGS` - Auto-open the logs panel once initial data arrives and pin selection to the given table index. Set to an integer (e.g. `0` for the first row, `2` for the third) (default: unset). 
 - `HOTPATH_META_FOCUS` - filter which methods appear in the benchmark report by name. Plain text does substring matching; wrap in `/pattern/` for regex (e.g. `HOTPATH_META_FOCUS="/^(compute|process)/"`).
 
 ### Hyperfine benchmarks
 
 Benchmark `hotpath` overhead of profiling 100k method calls with [hyperfine](https://github.com/sharkdp/hyperfine):
 
-Timing:
-```bash
-# With instrumentation
-cargo build --example benchmark_noop --features hotpath --release
-hyperfine --warmup 3 './target/release/examples/benchmark_noop'
+#### Timing
 
-# Without instrumentation
-cargo build --example benchmark_noop --release
-hyperfine --warmup 3 './target/release/examples/benchmark_noop'
+With instrumentation:
+```bash
+cargo build --example benchmark_noop --features hotpath --release && hyperfine --warmup 3 './target/release/examples/benchmark_noop'
 ```
 
-Allocations:
-
+Without instrumentation:
 ```bash
-# With instrumentation
-cargo build --example benchmark_alloc --features='hotpath,hotpath-alloc' --release
-hyperfine --warmup 3 './target/release/examples/benchmark_alloc'
+cargo build --example benchmark_noop --release && hyperfine --warmup 3 './target/release/examples/benchmark_noop'
+```
 
-# Without instrumentation
-cargo build --example benchmark_alloc --release
-hyperfine --warmup 3 './target/release/examples/benchmark_alloc'
+#### Allocations
+
+With instrumentation:
+```bash
+cargo build --example benchmark_alloc --features='hotpath,hotpath-alloc' --release && hyperfine --warmup 3 './target/release/examples/benchmark_alloc'
+```
+
+Without instrumentation
+```bash
+cargo build --example benchmark_alloc --release && hyperfine --warmup 3 './target/release/examples/benchmark_alloc'
 ```
 
 ## Running documentation server
