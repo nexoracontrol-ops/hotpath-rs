@@ -60,6 +60,7 @@ pub(crate) fn init_cpu_baseline() {
         std::thread::Builder::new()
             .name("hp-meta-cpu-baseline".into())
             .spawn(move || {
+                let _suspend = crate::lib_on::SuspendAllocTracking::new();
                 let mut total_ns: u128 = 0;
                 let mut count: u128 = 0;
                 let sample_interval = std::time::Duration::from_millis(50);

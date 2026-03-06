@@ -59,25 +59,26 @@ fn start_metrics_server(port: u16) {
     crate::threads::init_threads_monitoring();
 
     thread::Builder::new()
-            .name("hp-meta-server".into())
-            .spawn(move || {
-                let _suspend = crate::lib_on::SuspendAllocTracking::new();
-                let addr = format!("127.0.0.1:{}", port);
-                let server = match Server::http(&addr) {
-                    Ok(s) => s,
-                    Err(e) => {
-                        panic!(
-                            "Failed to bind metrics server to {}: {}. Customize the port using the HOTPATH_META_METRICS_PORT environment variable.",
-                            addr, e
-                        );
-                    }
-                };
-
-                for request in server.incoming_requests() {
-                    handle_request(request);
+        .name("hp-meta-server".into())
+        .spawn(move || {
+            let _suspend = crate::lib_on::SuspendAllocTracking::new();
+            let addr = format!("127.0.0.1:{}", port);
+            let server = match Server::http(&addr) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!(
+                        "{} busy ({}), skipping metrics server start. Use HOTPATH_META_METRICS_PORT to change the port.",
+                        addr, e
+                    );
+                    return;
                 }
-            })
-            .expect("Failed to spawn HTTP metrics server thread");
+            };
+
+            for request in server.incoming_requests() {
+                handle_request(request);
+            }
+        })
+        .expect("Failed to spawn HTTP metrics server thread");
 }
 
 fn handle_request(request: Request) {
