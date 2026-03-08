@@ -147,7 +147,6 @@ If `hotpath` feature is disabled, the code inside block will still execute.
 
 In addition to time-based profiling, `hotpath` can track memory allocations. This feature uses a custom global allocator from [allocation-counter crate](https://github.com/fornwall/allocation-counter) to intercept all memory allocations and provides detailed statistics about memory usage per function.
 
-
 Run your program with the allocation tracking feature to print a similar report:
 
 ```
@@ -155,10 +154,6 @@ cargo run --features='hotpath,hotpath-alloc'
 ```
 
 <img loading="lazy" src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
-
-### Async functions
-
-Allocation profiling uses thread-local storage to track memory usage. Since async tasks can migrate between threads, allocation counts for async functions would be inaccurate and is currently not supported. 
 
 ## Memory profiling modes
 
