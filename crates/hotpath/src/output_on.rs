@@ -110,6 +110,10 @@ pub(crate) fn display_functions_table_to<W: Write>(writer: &mut W, list: &JsonFu
         let _ = writeln!(writer);
     }
 
+    if let Some(total_alloc) = &list.total_allocated {
+        let _ = writeln!(writer, "Total: {}", total_alloc);
+    }
+
     print_table(&table, writer);
 
     let _ = writeln!(writer);
