@@ -37,6 +37,9 @@ jobs:
       - name: Check hotpath feature (time mode)
         run: |
           cargo check --features hotpath
+      - name: Check hotpath tui
+        run: |
+          cargo check --bin hotpath --features tui
       - name: Check hotpath-alloc
         run: |
           cargo check --features "hotpath,hotpath-alloc"

@@ -188,19 +188,6 @@ pub(crate) struct App {
 
 #[hotpath::measure_all]
 impl App {
-    fn env_flag(name: &str) -> bool {
-        match std::env::var(name) {
-            Ok(value) => {
-                let trimmed = value.trim();
-                trimmed.eq_ignore_ascii_case("1")
-                    || trimmed.eq_ignore_ascii_case("true")
-                    || trimmed.eq_ignore_ascii_case("yes")
-                    || trimmed.eq_ignore_ascii_case("on")
-            }
-            Err(_) => false,
-        }
-    }
-
     pub(crate) fn new(metrics_host: &str, metrics_port: u16, refresh_interval_ms: u64) -> Self {
         let (request_tx, request_rx) = hotpath::channel!(
             crossbeam_channel::unbounded::<DataRequest>(),
