@@ -19,12 +19,30 @@ pub(crate) fn render_function_logs_panel(
     table_state: &mut TableState,
     is_focused: bool,
 ) {
+    let title_style = Style::default()
+        .fg(Color::Magenta)
+        .add_modifier(Modifier::BOLD);
+
     let title = if let Some(function_logs) = current_function_logs {
-        format!(" {} ", function_logs.function_name)
+        let has_missing_log = function_logs.logs.iter().any(|e| e.result.is_none());
+        if has_missing_log {
+            Line::from(vec![
+                Span::styled(format!(" {} ", function_logs.function_name), title_style),
+                Span::styled(
+                    "(missing \"log = true\") ",
+                    Style::default().fg(Color::DarkGray),
+                ),
+            ])
+        } else {
+            Line::from(Span::styled(
+                format!(" {} ", function_logs.function_name),
+                title_style,
+            ))
+        }
     } else if selected_function_name.is_some() {
-        " Loading... ".to_string()
+        Line::from(Span::styled(" Loading... ", title_style))
     } else {
-        " Recent Logs ".to_string()
+        Line::from(Span::styled(" Recent Logs ", title_style))
     };
 
     let border_set = if is_focused {
@@ -40,12 +58,7 @@ pub(crate) fn render_function_logs_panel(
         } else {
             common_styles::UNFOCUSED_BORDER_STYLE
         })
-        .title(Span::styled(
-            title,
-            Style::default()
-                .fg(Color::Magenta)
-                .add_modifier(Modifier::BOLD),
-        ));
+        .title(title);
 
     // Fixed columns: Index(7) + Mem(12) + Objects(12) + Ago(10) + TID(6) + spacing(10) + borders(2) + highlight(3) = 62
     let inner_width = area.width.saturating_sub(2);

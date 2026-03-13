@@ -228,15 +228,11 @@ fn render_data_flow_view(frame: &mut Frame, app: &mut App, area: Rect) {
                 DataFlowLogs::Stream(l) => l.logs.iter().any(|e| e.message.is_none()),
                 DataFlowLogs::Future(_) => false,
             };
-            let display_label = if has_missing_log {
-                format!("{} (missing \"log = true\")", label)
-            } else {
-                label
-            };
             data_flow_logs::render_logs_panel(
                 logs,
                 data_flow_type,
-                &display_label,
+                &label,
+                has_missing_log,
                 logs_area,
                 frame,
                 &mut app.data_flow_logs_table_state,

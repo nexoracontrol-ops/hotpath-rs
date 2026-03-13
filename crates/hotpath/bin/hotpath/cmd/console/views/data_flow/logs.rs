@@ -4,9 +4,9 @@ use crate::cmd::console::widgets::formatters::truncate_message;
 use hotpath::{format_bytes, format_duration, json::DataFlowType};
 use ratatui::{
     layout::{Constraint, Layout, Rect},
-    style::{Color, Style},
+    style::{Color, Modifier, Style},
     symbols::border,
-    text::Line,
+    text::{Line, Span},
     widgets::{Block, Cell, HighlightSpacing, Paragraph, Row, Table, TableState},
     Frame,
 };
@@ -41,15 +41,33 @@ fn state_style(state: &str) -> Style {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn render_logs_panel(
     logs: &DataFlowLogs,
     data_flow_type: DataFlowType,
     label: &str,
+    has_missing_log: bool,
     area: Rect,
     frame: &mut Frame,
     table_state: &mut TableState,
     is_focused: bool,
 ) {
+    let title_style = Style::default()
+        .fg(Color::Magenta)
+        .add_modifier(Modifier::BOLD);
+
+    let title = if has_missing_log {
+        Line::from(vec![
+            Span::styled(format!(" {} ", label), title_style),
+            Span::styled(
+                "(missing \"log = true\") ",
+                Style::default().fg(Color::DarkGray),
+            ),
+        ])
+    } else {
+        Line::from(Span::styled(format!(" {} ", label), title_style))
+    };
+
     let border_set = if is_focused {
         border::THICK
     } else {
@@ -57,7 +75,7 @@ pub(crate) fn render_logs_panel(
     };
 
     let block = Block::bordered()
-        .title(format!(" {} ", label))
+        .title(title)
         .border_set(border_set)
         .border_style(if is_focused {
             Style::default()
