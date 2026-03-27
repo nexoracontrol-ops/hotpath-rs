@@ -22,7 +22,7 @@ mod lib_off;
 /// * `format` - Output format: `"table"` (default), `"json"`, `"json-pretty"`, or `"none"`
 /// * `limit` - Maximum number of functions in the report (0 = unlimited). Default: `15`
 /// * `output_path` - File path for the report. Defaults to stdout. Overridden by `HOTPATH_META_OUTPUT_PATH` env var.
-/// * `report` - Comma-separated sections to include: `"functions-timing"`, `"functions-alloc"`, `"channels"`, `"streams"`, `"futures"`, `"threads"`, or `"all"`. Overridden by `HOTPATH_META_REPORT` env var.
+/// * `report` - Comma-separated sections to include: `"functions-timing"`, `"functions-alloc"`, `"channels"`, `"streams"`, `"futures"`, `"threads"`, `"debug"`, or `"all"`. Overridden by `HOTPATH_META_REPORT` env var.
 ///
 /// # Examples
 ///

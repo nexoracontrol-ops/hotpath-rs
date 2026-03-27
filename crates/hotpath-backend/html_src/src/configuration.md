@@ -8,7 +8,7 @@
 |----------|-------------|
 | `HOTPATH_OUTPUT_FORMAT` | Output format: `table`, `json`, `json-pretty`, or `none`. Using `none` silences output while keeping the metrics server and MCP server active. (default: `table`) |
 | `HOTPATH_OUTPUT_PATH` | File path for profiling reports. Takes precedence over programmatic `output_path` config. (default: `stdout`) |
-| `HOTPATH_REPORT` | Comma-separated sections to include in report: `functions-timing`, `functions-alloc`, `channels`, `streams`, `futures`, `threads`, `tokio_runtime`, or `all`. (default: `functions-timing,functions-alloc,threads`) |
+| `HOTPATH_REPORT` | Comma-separated sections to include in report: `functions-timing`, `functions-alloc`, `channels`, `streams`, `futures`, `threads`, `tokio_runtime`, `debug`, or `all`. (default: `functions-timing,functions-alloc,threads`) |
 
 ## Functions
 
