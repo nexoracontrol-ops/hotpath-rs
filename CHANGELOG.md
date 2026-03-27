@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.1] - 2026-03-27
+
+### 🚀 Features
+
+- Print total alloc metric
+
+- Add missing MCP tools
+
+- Compare avg thread CPU diff
+
+- TUI UI fixes
+
+- Add last value of debug/metrics to static report (#295)
+
+
+### 🐛 Bug Fixes
+
+- Fix total_allocated value for hotpath-alloc mode
+
+- Report metrics port busy error [#286]
+
+- Remove unused function
+
+
+### ⚡ Performance
+
+- Use futures channel ref
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Release 0.14.1
+
+
 ## [0.14.0] - 2026-03-08
 
 ### 🚀 Features
