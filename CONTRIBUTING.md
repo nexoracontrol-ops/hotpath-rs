@@ -4,6 +4,7 @@
 2. Make your changes
 3. Ensure all the [CI checks](#ci-checks) pass
 4. Open a pull request against `main`
+5. Always check `Allow edits and access to secrets by maintainers` so we can push fixes or rebases directly to your branch ([docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/allowing-changes-to-a-pull-request-branch-created-from-a-fork))
 
 ## `meta` crates explained
 
