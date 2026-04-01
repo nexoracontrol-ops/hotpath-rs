@@ -146,6 +146,7 @@ See the full docs and advanced config tutorials at [hotpath.rs](https://hotpath.
 - [Sampling Comparison](https://hotpath.rs/sampling_comparison) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](https://hotpath.rs/profiling_modes) - static reports vs live TUI dashboard
 - [Functions](https://hotpath.rs/functions) - measure execution time and memory allocations
+- [A/B Benchmarks](https://hotpath.rs/benchmarks) - compare performance between app versions
 - [Async Data Flow](https://hotpath.rs/data_flow) - monitor channels, streams, and futures
 - [Debug & Metrics](https://hotpath.rs/debug) - track custom values with `dbg!`, `val!`, and `gauge!` macros
 - [Threads](https://hotpath.rs/threads) - monitor threads usage

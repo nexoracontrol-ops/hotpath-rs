@@ -205,6 +205,7 @@ Explore the docs for customization options and advanced profiling features.
 - [Sampling Comparison](./sampling_comparison.html) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](./profiling_modes.html) - static reports vs live TUI dashboard
 - [Functions](./functions.html) - measure execution time and memory allocations
+- [A/B Benchmarks](./benchmarks.html) - compare performance between app versions
 - [Async Data Flow](./data_flow.html) - monitor channels, streams, and futures
 - [Debug & Metrics](./debug.html) - track custom values with dbg!, val!, and gauge! macros
 - [Threads](./threads.html) - monitor threads usage
