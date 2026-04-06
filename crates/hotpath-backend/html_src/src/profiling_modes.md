@@ -89,7 +89,7 @@ fn main() {
 | Variable | Description |
 |----------|-------------|
 | `HOTPATH_OUTPUT_FORMAT` | Output format: `table` (default), `json`, `json-pretty`, or `none`. Using `none` silences output while keeping the metrics server and MCP server active. |
-| `HOTPATH_OUTPUT_PATH` | File path for profiling reports. Takes precedence over programmatic `output_path` config. Defaults to `stdout`. |
+| `HOTPATH_OUTPUT_PATH` | Filesystem path for profiling reports. If unset, reports are written to `stdout`. When set, this env var takes precedence over programmatic `output_path` config. On Unix, use `/dev/stdout` or `/dev/stderr` to redirect to the standard streams. |
 | `HOTPATH_REPORT` | Comma-separated sections to include: `functions-timing`, `functions-alloc`, `channels`, `streams`, `futures`, `threads`, `tokio_runtime`, `debug`, or `all`. Defaults to `functions-timing,functions-alloc,threads`. |
 | `HOTPATH_FOCUS` | Filter profiled functions by name. Plain text does substring matching; wrap in `/pattern/` for regex (e.g. `HOTPATH_FOCUS="/^(compute\|process)/"`). |
 | `HOTPATH_METRICS_SERVER_OFF` | Set to `true` or `1` to disable the HTTP metrics server. Useful when you only need a static report and don't want to use a TUI. |
