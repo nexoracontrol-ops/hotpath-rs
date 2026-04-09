@@ -83,3 +83,9 @@ clean-cache:
         -H "X-Auth-Key: ${CLOUDFLARE_API_KEY}" \
         -H "Content-Type: application/json" \
         --data '{"purge_everything":true}'
+
+cargo-publish:
+    cargo publish -p hotpath-macros-meta
+    cargo publish -p hotpath-meta
+    cargo publish -p hotpath-macros
+    cargo publish -p hotpath
