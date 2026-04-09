@@ -104,7 +104,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-hotpath = "0.14"
+hotpath = "0.15"
 
 [features]
 hotpath = ["hotpath/hotpath"]
