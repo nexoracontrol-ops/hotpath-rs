@@ -248,10 +248,9 @@ pub(crate) fn report_futures_table(
         let total_polls = future_stats.total_polls();
         let total_poll_dur = future_stats.total_poll_duration_ns();
         let total_alloc_bytes_across_polls = future_stats.total_poll_alloc_bytes();
-        let avg_poll = if total_polls > 0 {
-            format_duration(total_poll_dur / total_polls)
-        } else {
-            "-".to_string()
+        let avg_poll = match total_poll_dur.checked_div(total_polls) {
+            Some(avg) => format_duration(avg),
+            None => "-".to_string(),
         };
         let avg_alloc_per_call = match total_alloc_bytes_across_polls {
             Some(total_alloc_bytes) if total_calls > 0 => {

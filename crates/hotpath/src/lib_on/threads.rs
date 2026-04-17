@@ -222,8 +222,7 @@ pub(crate) fn get_threads_json() -> JsonThreadsList {
                 state_guard.current_metrics.iter().collect();
 
             #[cfg(feature = "hotpath-alloc")]
-            sorted_metrics
-                .sort_by(|a, b| b.alloc_bytes.unwrap_or(0).cmp(&a.alloc_bytes.unwrap_or(0)));
+            sorted_metrics.sort_by_key(|m| std::cmp::Reverse(m.alloc_bytes.unwrap_or(0)));
 
             #[cfg(not(feature = "hotpath-alloc"))]
             sorted_metrics.sort_by(|a, b| {

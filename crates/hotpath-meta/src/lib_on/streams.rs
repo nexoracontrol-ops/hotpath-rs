@@ -383,7 +383,7 @@ pub(crate) fn get_stream_logs(stream_id: &str) -> Option<StreamLogs> {
     let guard = state.inner.read().unwrap();
     let entry_logs = guard.logs.get(&id)?;
     let mut yielded_logs: Vec<DataFlowLogEntry> = entry_logs.logs.iter().cloned().collect();
-    yielded_logs.sort_by(|a, b| b.index.cmp(&a.index));
+    yielded_logs.sort_by_key(|entry| std::cmp::Reverse(entry.index));
     Some(StreamLogs {
         id: stream_id.to_string(),
         logs: yielded_logs,

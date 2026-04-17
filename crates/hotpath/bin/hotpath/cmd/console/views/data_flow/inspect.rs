@@ -69,10 +69,9 @@ pub(crate) fn render_inspect_popup(
         let inner_area = block.inner(popup_area);
         frame.render_widget(block, popup_area);
 
-        let avg_poll = if call.poll_count > 0 {
-            format_duration(call.total_poll_duration_ns / call.poll_count)
-        } else {
-            "-".to_string()
+        let avg_poll = match call.total_poll_duration_ns.checked_div(call.poll_count) {
+            Some(avg) => format_duration(avg),
+            None => "-".to_string(),
         };
         let total_poll = if call.poll_count > 0 {
             format_duration(call.total_poll_duration_ns)

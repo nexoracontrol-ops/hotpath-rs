@@ -184,11 +184,7 @@ impl FunctionStats {
     }
 
     pub fn avg_duration_ns(&self) -> u64 {
-        if self.count == 0 {
-            0
-        } else {
-            self.total_duration_ns / self.count
-        }
+        self.total_duration_ns.checked_div(self.count).unwrap_or(0)
     }
 
     #[inline]

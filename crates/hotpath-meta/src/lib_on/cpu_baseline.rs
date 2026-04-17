@@ -84,9 +84,10 @@ pub(crate) fn init_cpu_baseline() {
                     }
                 }
 
-                if count > 0 {
-                    let avg_ns = (total_ns / count) as u64;
-                    let _ = completion_tx.send(CpuBaselineResult { avg_ns });
+                if let Some(avg_ns) = total_ns.checked_div(count) {
+                    let _ = completion_tx.send(CpuBaselineResult {
+                        avg_ns: avg_ns as u64,
+                    });
                 }
             })
             .expect("Failed to spawn hp-cpu-baseline thread");
