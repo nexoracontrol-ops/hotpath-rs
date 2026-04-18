@@ -14,6 +14,14 @@ pub static MAX_LOG_LEN: LazyLock<usize> = LazyLock::new(|| {
         .unwrap_or(DEFAULT_MAX_LOG_LEN)
 });
 
+const DEFAULT_FUNCTIONS_NAME_DEPTH: usize = 2;
+pub static FUNCTIONS_NAME_DEPTH: LazyLock<usize> = LazyLock::new(|| {
+    std::env::var("HOTPATH_META_FUNCTIONS_NAME_DEPTH")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(DEFAULT_FUNCTIONS_NAME_DEPTH)
+});
+
 /// Destination for profiling report output.
 #[derive(Default)]
 pub enum OutputDestination {
@@ -328,9 +336,13 @@ pub fn format_debug_truncated(value: &impl std::fmt::Debug) -> String {
 }
 
 pub fn shorten_function_name(function_name: &str) -> String {
+    let depth = *FUNCTIONS_NAME_DEPTH;
+    if depth == 0 {
+        return function_name.to_string();
+    }
     let parts: Vec<&str> = function_name.split("::").collect();
-    if parts.len() > 2 {
-        parts[parts.len() - 2..].join("::")
+    if parts.len() > depth {
+        parts[parts.len() - depth..].join("::")
     } else {
         function_name.to_string()
     }
