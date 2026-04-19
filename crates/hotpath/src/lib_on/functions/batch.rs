@@ -6,13 +6,13 @@ pub(crate) const FLUSH_INTERVAL_NS: u64 = FLUSH_INTERVAL_MS * 1_000_000;
 
 pub(crate) trait BatchedMeasurement: Sized {
     fn elapsed_since_start_ns(&self) -> u64;
-    fn fetch_sender() -> Option<Sender<Self>>;
+    fn fetch_sender() -> Option<Sender<Vec<Self>>>;
 }
 
 pub(crate) struct MeasurementBatch<M: BatchedMeasurement> {
     measurements: Vec<M>,
     last_flush_elapsed_ns: u64,
-    sender: Option<Sender<M>>,
+    sender: Option<Sender<Vec<M>>>,
 }
 
 impl<M: BatchedMeasurement> MeasurementBatch<M> {
@@ -54,9 +54,8 @@ impl<M: BatchedMeasurement> MeasurementBatch<M> {
         if let Some(last) = self.measurements.last() {
             self.last_flush_elapsed_ns = last.elapsed_since_start_ns();
         }
-        for measurement in self.measurements.drain(..) {
-            let _ = sender.send(measurement);
-        }
+        let batch = std::mem::replace(&mut self.measurements, Vec::with_capacity(BATCH_SIZE));
+        let _ = sender.send(batch);
     }
 }
 

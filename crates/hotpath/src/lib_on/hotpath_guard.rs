@@ -301,7 +301,7 @@ impl HotpathGuard {
             panic!("More than one _hotpath guard cannot be alive at the same time.");
         }
 
-        let (tx, rx) = unbounded::<Measurement>();
+        let (tx, rx) = unbounded::<Vec<Measurement>>();
         #[cfg(feature = "hotpath-meta")]
         let (tx, rx) = hotpath_meta::channel!((tx, rx), label = "hp-fn-measurements", log = true);
         let (shutdown_tx, shutdown_rx) = bounded::<()>(1);
@@ -359,7 +359,11 @@ impl HotpathGuard {
                         recv(shutdown_rx) -> _ => {
                             for _ in 0..WORKER_SHUTDOWN_DRAIN_LIMIT {
                                 match rx.try_recv() {
-                                    Ok(measurement) => process_measurement(&mut local_stats, &mut name_to_id, measurement),
+                                    Ok(batch) => {
+                                        for measurement in batch {
+                                            process_measurement(&mut local_stats, &mut name_to_id, measurement);
+                                        }
+                                    }
                                     Err(_) => break,
                                 }
                             }
@@ -474,8 +478,10 @@ impl HotpathGuard {
                         }
                         recv(rx) -> result => {
                             match result {
-                                Ok(measurement) => {
-                                    process_measurement(&mut local_stats, &mut name_to_id, measurement);
+                                Ok(batch) => {
+                                    for measurement in batch {
+                                        process_measurement(&mut local_stats, &mut name_to_id, measurement);
+                                    }
                                 }
                                 Err(_) => break,
                             }

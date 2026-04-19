@@ -34,7 +34,7 @@ impl BatchedMeasurement for Measurement {
         self.elapsed_since_start_ns
     }
 
-    fn fetch_sender() -> Option<Sender<Self>> {
+    fn fetch_sender() -> Option<Sender<Vec<Self>>> {
         let arc_swap = super::super::FUNCTIONS_STATE.get()?;
         let state = arc_swap.load_full()?;
         let state_guard = state.read().ok()?;
@@ -131,7 +131,7 @@ impl FunctionStats {
 }
 
 pub(crate) struct FunctionsState {
-    pub sender: Option<Sender<Measurement>>,
+    pub sender: Option<Sender<Vec<Measurement>>>,
     pub shutdown_tx: Option<Sender<()>>,
     pub completion_rx: Option<Mutex<Receiver<HashMap<u32, FunctionStats>>>>,
 
