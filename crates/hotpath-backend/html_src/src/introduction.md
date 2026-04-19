@@ -1,5 +1,11 @@
 # Rust Performance & Memory Profiler
 
+<div class="hero-badges">
+  <a href="https://github.com/pawurb/hotpath-rs" target="_blank"><img src="{{#asset-hash images/stars-pawurb-hotpath-rs.svg}}" alt="GitHub Stars"></a>
+  <a href="https://crates.io/crates/hotpath" target="_blank"><img src="https://img.shields.io/crates/d/hotpath?cacheSeconds=86400" alt="crates.io downloads"></a>
+  <a href="https://crates.io/crates/hotpath" target="_blank"><img src="https://img.shields.io/crates/v/hotpath.svg?cacheSeconds=86400" alt="crates.io version"></a>
+</div>
+
 <div class="hero-row">
   <img src="{{#asset-hash images/hotpath-ferris.webp}}" alt="hotpath-rs Rust profiler mascot Ferris the crab" class="ferris-img-hero">
   <div class="ssh-demo-container">
