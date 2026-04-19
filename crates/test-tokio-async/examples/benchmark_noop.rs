@@ -12,7 +12,11 @@ fn spin_wait() {
 
 #[hotpath::main]
 fn main() {
-    for _ in 0..100_000 {
+    let runs = std::env::var("HOTPATH_BENCHMARK_NOOP_RUNS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(100_000);
+    for _ in 0..runs {
         spin_wait();
     }
 }

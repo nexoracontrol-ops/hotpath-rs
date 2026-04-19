@@ -83,7 +83,7 @@ cargo install --locked samply
 #### Timing
 
 ```bash
-cargo build --example benchmark_noop --features hotpath --profile profiling && samply record './target/profiling/examples/benchmark_noop'
+cargo build --example benchmark_noop --features hotpath --profile profiling && HOTPATH_BENCHMARK_NOOP_RUNS=5000000 samply record './target/profiling/examples/benchmark_noop'
 ```
 
 #### Allocations
