@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.15.1] - 2026-04-27
+
+### 🚀 Features
+
+- Support label for functions
+
+- Add HOTPATH_FUNCTIONS_NAME_DEPTH config
+
+
+### 🚜 Refactor
+
+- Unify batch measurements logic
+
+- Remove unneeded aliases
+
+- Minor cleanup
+
+
+### ⚡ Performance
+
+- Unify alloc and timing duration logic
+
+- Send measurements in batches
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Add cargo-publish task
+
+- Update CI to rust 1.95
+
+- Add samply docs
+
+- Release 0.15.1
+
+
 ## [0.15.0] - 2026-04-09
 
 ### 🚀 Features
