@@ -1,7 +1,9 @@
 //! Futures instrumentation module - tracks async Future lifecycle and poll statistics.
 
 use crate::channels::{resolve_label, LOGS_LIMIT, START_TIME};
-use crate::data_flow::{WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS, WORKER_SHUTDOWN_DRAIN_LIMIT};
+use crate::lib_on::hotpath_guard::{
+    WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS, WORKER_SHUTDOWN_DRAIN_LIMIT,
+};
 use crate::metrics_server::METRICS_SERVER_PORT;
 use crossbeam_channel::{bounded, select, unbounded, Receiver as CbReceiver, Sender as CbSender};
 use std::collections::{HashMap, VecDeque};
@@ -44,7 +46,7 @@ pub(crate) fn get_or_create_future_id(source: &'static str) -> (u32, bool) {
         return (future_id, false);
     }
 
-    let future_id = crate::data_flow::next_data_flow_id();
+    let future_id = crate::lib_on::hotpath_guard::next_data_flow_id();
     write_guard.insert(source, future_id);
     (future_id, true)
 }
@@ -178,9 +180,7 @@ pub(crate) struct FuturesState {
     pub(crate) completion_rx: Mutex<Option<CbReceiver<()>>>,
 }
 
-pub(crate) type FuturesStatsState = FuturesState;
-
-pub(crate) static FUTURES_STATE: OnceLock<FuturesStatsState> = OnceLock::new();
+pub(crate) static FUTURES_STATE: OnceLock<FuturesState> = OnceLock::new();
 
 /// Initialize the futures event collection system (called on first instrumented future).
 #[doc(hidden)]
@@ -188,7 +188,7 @@ pub fn init_futures_state() {
     let _ = get_futures_state();
 }
 
-fn get_futures_state() -> &'static FuturesStatsState {
+fn get_futures_state() -> &'static FuturesState {
     FUTURES_STATE.get_or_init(|| {
         START_TIME.get_or_init(Instant::now);
 
@@ -444,6 +444,18 @@ pub(crate) fn get_sorted_future_stats() -> Vec<FutureEntry> {
     let mut stats: Vec<FutureEntry> = guard.stats.values().cloned().collect();
     stats.sort_by(compare_future_stats);
     stats
+}
+
+pub(crate) fn get_futures_json() -> crate::json::JsonFuturesList {
+    let data = get_sorted_future_stats()
+        .iter()
+        .map(JsonFutureEntry::from)
+        .collect();
+
+    crate::json::JsonFuturesList {
+        current_elapsed_ns: crate::lib_on::current_elapsed_ns(),
+        data,
+    }
 }
 
 pub(crate) fn get_future_logs_list(future_id: u32) -> Option<FutureLogsList> {

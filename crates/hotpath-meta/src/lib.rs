@@ -17,8 +17,6 @@ mod lib_on;
 #[cfg(feature = "hotpath-meta")]
 pub use lib_on::channels;
 #[cfg(feature = "hotpath-meta")]
-pub use lib_on::data_flow;
-#[cfg(feature = "hotpath-meta")]
 pub use lib_on::futures;
 #[cfg(feature = "hotpath-meta")]
 pub use lib_on::streams;

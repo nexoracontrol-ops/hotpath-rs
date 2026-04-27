@@ -1,12 +1,22 @@
 use crate::instant::Instant;
-use arc_swap::ArcSwapOption;
 use crossbeam_channel::{bounded, select_biased, unbounded};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::atomic::AtomicU32;
+use std::sync::atomic::Ordering;
 use std::sync::{Arc, LazyLock, Mutex, RwLock};
 use std::thread;
 
 pub(crate) const WORKER_SHUTDOWN_DRAIN_LIMIT: usize = 1_000;
+pub(crate) const WORKER_BATCH_SIZE: usize = 100;
+pub(crate) const WORKER_FLUSH_INTERVAL_MS: u64 = 50;
+
+pub(crate) static DATA_FLOW_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
+
+pub(crate) fn next_data_flow_id() -> u32 {
+    DATA_FLOW_ID_COUNTER.fetch_add(1, Ordering::Relaxed)
+}
+
 const DEFAULT_LOGS_LIMIT: usize = 50;
 pub(crate) static LOGS_LIMIT: LazyLock<usize> = LazyLock::new(|| {
     std::env::var("HOTPATH_META_LOGS_LIMIT")
@@ -234,9 +244,7 @@ impl HotpathGuard {
 
         let percentiles = percentiles.to_vec();
 
-        let arc_swap = FUNCTIONS_STATE.get_or_init(|| ArcSwapOption::from(None));
-
-        if arc_swap.load().is_some() {
+        if FUNCTIONS_STATE.get().is_some() {
             panic!("More than one _hotpath guard cannot be alive at the same time.");
         }
 
@@ -407,7 +415,7 @@ impl HotpathGuard {
             })
             .expect("Failed to spawn hotpath-meta-worker thread");
 
-        arc_swap.store(Some(Arc::clone(&state_arc)));
+        let _ = FUNCTIONS_STATE.set(Arc::clone(&state_arc));
 
         crate::lib_on::START_TIME.get_or_init(Instant::now);
 
@@ -814,10 +822,6 @@ impl Drop for HotpathGuard {
                     }
                 }
             }
-        }
-
-        if let Some(arc_swap) = FUNCTIONS_STATE.get() {
-            arc_swap.store(None);
         }
     }
 }

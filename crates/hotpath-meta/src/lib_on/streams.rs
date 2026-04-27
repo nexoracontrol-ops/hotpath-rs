@@ -9,9 +9,11 @@ use crate::instant::Instant;
 pub(crate) mod wrapper;
 
 use crate::channels::{resolve_label, LOGS_LIMIT};
-use crate::data_flow::{WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS, WORKER_SHUTDOWN_DRAIN_LIMIT};
 use crate::json::JsonStreamEntry;
 pub(crate) use crate::json::{ChannelState, DataFlowLogEntry, StreamLogs};
+use crate::lib_on::hotpath_guard::{
+    WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS, WORKER_SHUTDOWN_DRAIN_LIMIT,
+};
 use crate::metrics_server::METRICS_SERVER_PORT;
 pub use crate::Format;
 
@@ -113,9 +115,7 @@ pub(crate) struct StreamsState {
     pub(crate) completion_rx: Mutex<Option<CbReceiver<()>>>,
 }
 
-pub(crate) type StreamStatsState = StreamsState;
-
-pub(crate) static STREAMS_STATE: OnceLock<StreamStatsState> = OnceLock::new();
+pub(crate) static STREAMS_STATE: OnceLock<StreamsState> = OnceLock::new();
 
 fn process_stream_event(state: &mut StreamsInternalState, event: StreamEvent) {
     match event {
@@ -161,7 +161,7 @@ fn process_stream_event(state: &mut StreamsInternalState, event: StreamEvent) {
 
 /// Initialize the stream statistics collection system (called on first instrumented stream).
 /// Returns a reference to the global state.
-pub(crate) fn init_streams_state() -> &'static StreamStatsState {
+pub(crate) fn init_streams_state() -> &'static StreamsState {
     STREAMS_STATE.get_or_init(|| {
         crate::lib_on::START_TIME.get_or_init(Instant::now);
 
@@ -375,6 +375,18 @@ pub(crate) fn get_sorted_stream_stats() -> Vec<StreamStats> {
     let mut stats: Vec<StreamStats> = guard.stats.values().cloned().collect();
     stats.sort_by(compare_stream_stats);
     stats
+}
+
+pub(crate) fn get_streams_json() -> crate::json::JsonStreamsList {
+    let data = get_sorted_stream_stats()
+        .iter()
+        .map(JsonStreamEntry::from)
+        .collect();
+
+    crate::json::JsonStreamsList {
+        current_elapsed_ns: crate::lib_on::current_elapsed_ns(),
+        data,
+    }
 }
 
 pub(crate) fn get_stream_logs(id: u32) -> Option<StreamLogs> {

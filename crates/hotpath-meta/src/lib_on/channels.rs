@@ -10,11 +10,11 @@ mod wrapper;
 
 use std::mem;
 
-use crate::data_flow::{
-    next_data_flow_id, WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS, WORKER_SHUTDOWN_DRAIN_LIMIT,
-};
 use crate::json::JsonChannelEntry;
 pub(crate) use crate::json::{ChannelLogs, ChannelState, DataFlowLogEntry};
+use crate::lib_on::hotpath_guard::{
+    next_data_flow_id, WORKER_BATCH_SIZE, WORKER_FLUSH_INTERVAL_MS, WORKER_SHUTDOWN_DRAIN_LIMIT,
+};
 use crate::metrics_server::METRICS_SERVER_PORT;
 
 pub use crate::Format;
@@ -201,9 +201,7 @@ pub(crate) struct ChannelsState {
     pub(crate) completion_rx: Mutex<Option<CbReceiver<()>>>,
 }
 
-type ChannelStatsState = ChannelsState;
-
-pub(crate) static CHANNELS_STATE: OnceLock<ChannelStatsState> = OnceLock::new();
+pub(crate) static CHANNELS_STATE: OnceLock<ChannelsState> = OnceLock::new();
 
 pub(crate) use crate::lib_on::START_TIME;
 
@@ -286,7 +284,7 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
 }
 
 /// Initialize the channel statistics collection system (called on first instrumented channel).
-pub(crate) fn init_channels_state() -> &'static ChannelStatsState {
+pub(crate) fn init_channels_state() -> &'static ChannelsState {
     CHANNELS_STATE.get_or_init(|| {
         START_TIME.get_or_init(Instant::now);
 
@@ -631,6 +629,18 @@ pub(crate) fn get_sorted_channel_entries() -> Vec<ChannelEntry> {
     let mut stats: Vec<ChannelEntry> = guard.stats.values().cloned().collect();
     stats.sort_by(compare_channel_entries);
     stats
+}
+
+pub(crate) fn get_channels_json() -> crate::json::JsonChannelsList {
+    let data = get_sorted_channel_entries()
+        .iter()
+        .map(JsonChannelEntry::from)
+        .collect();
+
+    crate::json::JsonChannelsList {
+        current_elapsed_ns: crate::lib_on::current_elapsed_ns(),
+        data,
+    }
 }
 
 pub(crate) fn get_channel_logs(id: u32) -> Option<ChannelLogs> {
