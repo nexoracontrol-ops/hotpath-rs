@@ -1,5 +1,4 @@
 use crate::instant::Instant;
-use arc_swap::ArcSwapOption;
 use crossbeam_channel::{bounded, select_biased, unbounded};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -295,9 +294,7 @@ impl HotpathGuard {
 
         let percentiles = percentiles.to_vec();
 
-        let arc_swap = FUNCTIONS_STATE.get_or_init(|| ArcSwapOption::from(None));
-
-        if arc_swap.load().is_some() {
+        if FUNCTIONS_STATE.get().is_some() {
             panic!("More than one _hotpath guard cannot be alive at the same time.");
         }
 
@@ -493,7 +490,7 @@ impl HotpathGuard {
             })
             .expect("Failed to spawn hotpath-worker thread");
 
-        arc_swap.store(Some(Arc::clone(&state_arc)));
+        let _ = FUNCTIONS_STATE.set(Arc::clone(&state_arc));
 
         crate::lib_on::START_TIME.get_or_init(Instant::now);
 
@@ -900,10 +897,6 @@ impl Drop for HotpathGuard {
                     }
                 }
             }
-        }
-
-        if let Some(arc_swap) = FUNCTIONS_STATE.get() {
-            arc_swap.store(None);
         }
     }
 }

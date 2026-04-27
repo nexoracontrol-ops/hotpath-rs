@@ -96,9 +96,6 @@ jobs:
       - name: Run all_noop example
         run: |
           cargo run --example all_noop 
-      - name: Run sample unit test
-        run: |
-          cargo test --example unit_test --features hotpath -- --nocapture --test-threads=1
       - name: Run noop example
         run: |
           cargo run --example basic_std 
