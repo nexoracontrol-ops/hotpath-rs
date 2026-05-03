@@ -1,4 +1,4 @@
-name: Build and store samply binary
+name: Build and store samply binary (macOS)
 
 on:
   workflow_dispatch:
@@ -7,8 +7,8 @@ permissions:
   contents: write
 
 jobs:
-  build-samply:
-    runs-on: ubuntu-latest
+  build-samply-macos:
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -25,14 +25,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG=samply-release
+          TAG=samply-macos-release
+          BIN=~/.cargo/bin/samply
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Uploading to existing release..."
-            gh release upload "$TAG" ~/.cargo/bin/samply --clobber
+            gh release upload "$TAG" "$BIN" --clobber
           else
             echo "Creating new release..."
-            gh release create "$TAG" ~/.cargo/bin/samply \
-              --title "Samply Binary" \
-              --notes "Prebuilt samply binary, used in CI for hotpath-cpu tests"
+            gh release create "$TAG" "$BIN" \
+              --title "Samply Binary (macOS)" \
+              --notes "Prebuilt samply binary for macOS, used in CI for hotpath-cpu tests"
           fi
