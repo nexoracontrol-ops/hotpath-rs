@@ -117,6 +117,14 @@ fn run_snapshot() {
         }
     };
 
+    if report.attributed_samples == 0 {
+        set_snapshot_error(&format!(
+            "no samples attributed to instrumented functions (total_samples={})",
+            report.total_samples
+        ));
+        return;
+    }
+
     let elapsed_ns = crate::lib_on::START_TIME
         .get()
         .map(|s| s.elapsed().as_nanos() as u64)
