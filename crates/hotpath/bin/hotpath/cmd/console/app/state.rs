@@ -108,7 +108,8 @@ impl App {
         let Some(path) = self
             .cpu_envelope
             .as_ref()
-            .and_then(|e| e.last_profile_path.clone())
+            .and_then(|e| e.report.as_ref())
+            .map(|r| r.profile_path.clone())
         else {
             info!("samply load skipped: no captured profile yet");
             return;

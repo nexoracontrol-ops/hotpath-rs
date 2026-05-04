@@ -175,6 +175,7 @@ pub(crate) fn build_cpu_report_from_path(
         attributed_samples,
         caller_name,
         stats,
+        profile_path: path.display().to_string(),
     })
 }
 

@@ -33,6 +33,7 @@ pub(crate) struct CpuReport {
     pub(crate) attributed_samples: u64,
     pub(crate) caller_name: &'static str,
     pub(crate) stats: Vec<CpuFunctionStats>,
+    pub(crate) profile_path: String,
 }
 
 #[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure(log = true))]
@@ -49,7 +50,6 @@ struct SnapshotState {
     captured_at_ms: Option<u64>,
     capture_duration_ms: Option<u64>,
     error: Option<String>,
-    last_profile_path: Option<String>,
 }
 
 impl SnapshotState {
@@ -60,7 +60,6 @@ impl SnapshotState {
             captured_at_ms: None,
             capture_duration_ms: None,
             error: None,
-            last_profile_path: None,
         }
     }
 }
@@ -117,14 +116,6 @@ fn run_snapshot() {
         }
     };
 
-    if report.attributed_samples == 0 {
-        set_snapshot_error(&format!(
-            "no samples attributed to instrumented functions (total_samples={})",
-            report.total_samples
-        ));
-        return;
-    }
-
     let elapsed_ns = crate::lib_on::START_TIME
         .get()
         .map(|s| s.elapsed().as_nanos() as u64)
@@ -138,7 +129,6 @@ fn run_snapshot() {
         state.captured_at_ms = current_unix_ms();
         state.capture_duration_ms = Some(started.elapsed().as_millis() as u64);
         state.error = None;
-        state.last_profile_path = Some(path.to_string_lossy().into_owned());
     }
 }
 
@@ -168,18 +158,16 @@ pub(crate) fn get_cpu_envelope() -> JsonFunctionsCpuEnvelope {
     };
 
     let snapshot = SNAPSHOT_STATE.read();
-    let (status, report, captured_at_ms, capture_duration_ms, error, last_profile_path) =
-        match snapshot {
-            Ok(state) => (
-                state.status,
-                state.report.clone(),
-                state.captured_at_ms,
-                state.capture_duration_ms,
-                state.error.clone(),
-                state.last_profile_path.clone(),
-            ),
-            Err(_) => (CpuSnapshotStatus::Idle, None, None, None, None, None),
-        };
+    let (status, report, captured_at_ms, capture_duration_ms, error) = match snapshot {
+        Ok(state) => (
+            state.status,
+            state.report.clone(),
+            state.captured_at_ms,
+            state.capture_duration_ms,
+            state.error.clone(),
+        ),
+        Err(_) => (CpuSnapshotStatus::Idle, None, None, None, None),
+    };
 
     JsonFunctionsCpuEnvelope {
         status,
@@ -189,7 +177,6 @@ pub(crate) fn get_cpu_envelope() -> JsonFunctionsCpuEnvelope {
         report,
         current_session_id,
         current_session_path,
-        last_profile_path,
     }
 }
 
@@ -253,6 +240,7 @@ pub(crate) fn build_cpu_json(
         description,
         caller_name: report.caller_name.to_string(),
         data: entries,
+        profile_path: report.profile_path.clone(),
         displayed_count,
         total_count,
     }
@@ -277,32 +265,38 @@ fn print_table<W: Write>(table: &Table, writer: &mut W) {
 }
 
 pub(crate) fn report_functions_cpu_table<W: Write>(writer: &mut W, list: &JsonFunctionsCpuList) {
-    if list.data.is_empty() {
-        return;
-    }
-
-    let mut table = Table::new();
-    table.add_row(Row::new(vec![
-        styled_header("Function"),
-        styled_header("Samples"),
-        styled_header("% Total"),
-    ]));
-
-    for entry in &list.data {
-        let short_name = shorten_function_name(&entry.name);
-        table.add_row(Row::new(vec![
-            Cell::new(&short_name),
-            Cell::new(&entry.samples.to_string()),
-            Cell::new(&entry.percent),
-        ]));
-    }
-
     let mut info = format!("{} total samples", list.total_samples);
     if list.displayed_count < list.total_count {
         info.push_str(&format!(", {}/{}", list.displayed_count, list.total_count));
     }
     let _ = writeln!(writer, "cpu - {} ({})", list.description, info);
-    print_table(&table, writer);
+
+    if list.data.is_empty() {
+        let _ = writeln!(writer, "no samples attributed to instrumented functions");
+    } else {
+        let mut table = Table::new();
+        table.add_row(Row::new(vec![
+            styled_header("Function"),
+            styled_header("Samples"),
+            styled_header("% Total"),
+        ]));
+
+        for entry in &list.data {
+            let short_name = shorten_function_name(&entry.name);
+            table.add_row(Row::new(vec![
+                Cell::new(&short_name),
+                Cell::new(&entry.samples.to_string()),
+                Cell::new(&entry.percent),
+            ]));
+        }
+        print_table(&table, writer);
+    }
+
+    let _ = writeln!(
+        writer,
+        "{}",
+        crate::output::cyan(&format!("samply load {}", list.profile_path))
+    );
     let _ = writeln!(writer);
 }
 

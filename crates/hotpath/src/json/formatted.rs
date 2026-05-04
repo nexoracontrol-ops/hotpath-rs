@@ -123,6 +123,7 @@ pub struct JsonFunctionsCpuList {
     pub description: String,
     pub caller_name: String,
     pub data: Vec<JsonFunctionCpuEntry>,
+    pub profile_path: String,
     #[serde(skip)]
     pub displayed_count: usize,
     #[serde(skip)]
@@ -160,8 +161,6 @@ pub struct JsonFunctionsCpuEnvelope {
     pub current_session_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub current_session_path: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub last_profile_path: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -794,7 +793,8 @@ mod parse_tests {
         let result = r#"{
             "time_elapsed":"1s","total_elapsed_ns":1,
             "total_samples":10,"attributed_samples":5,
-            "description":"d","caller_name":"main","data":[]
+            "description":"d","caller_name":"main","data":[],
+            "profile_path":"/tmp/hp.json.gz"
         }"#;
         match serde_json::from_str::<JsonFunctionsCpu>(result).unwrap() {
             JsonFunctionsCpu::Ok(list) => assert_eq!(list.caller_name, "main"),

@@ -75,7 +75,7 @@ fn render_status_panel(frame: &mut Frame, app: &App, area: Rect) {
             detail_spans.push(Span::raw("  |  "));
             detail_spans.push(Span::styled(err.clone(), Style::default().fg(Color::Red)));
         }
-        if env.last_profile_path.is_some() && env.status == CpuSnapshotStatus::Ready {
+        if env.report.is_some() && env.status == CpuSnapshotStatus::Ready {
             detail_spans.push(Span::raw("  |  "));
             detail_spans.push(Span::styled(
                 "press 'f' to open in samply",

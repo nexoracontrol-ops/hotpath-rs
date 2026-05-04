@@ -642,15 +642,7 @@ impl Drop for HotpathGuard {
                                     r.attributed_samples,
                                     r.stats.len()
                                 );
-                            if r.attributed_samples == 0 {
-                                let msg = format!(
-                                    "no samples attributed to instrumented functions (total_samples={})",
-                                    r.total_samples
-                                );
-                                Some(Err(msg))
-                            } else {
-                                Some(Ok(r))
-                            }
+                            Some(Ok(r))
                         }
                         None => {
                             let msg = format!(
