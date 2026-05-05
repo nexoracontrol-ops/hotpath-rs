@@ -14,10 +14,10 @@ pub(crate) fn build_functions_list_alloc(
     config: &FunctionStatsConfig,
     current_elapsed_ns: u64,
 ) -> JsonFunctionsList {
-    use crate::lib_on::functions::alloc::shared::{alloc_metric, AllocMetric};
+    use crate::lib_on::functions::alloc::guard::{AllocMetric, ALLOC_METRIC};
 
     let exclude_wrapper = *crate::functions::EXCLUDE_WRAPPER;
-    let use_count = alloc_metric() == AllocMetric::Count;
+    let use_count = *ALLOC_METRIC == AllocMetric::Count;
 
     let bytes_cache: HashMap<u32, u64> = stats
         .iter()
@@ -43,7 +43,7 @@ pub(crate) fn build_functions_list_alloc(
             .filter(|s| !s.wrapper && s.has_data)
             .map(|s| primary_cache.get(&s.id).copied().unwrap_or(0))
             .sum()
-    } else if crate::lib_on::functions::alloc::shared::is_alloc_cumulative_enabled() {
+    } else if *crate::lib_on::functions::alloc::guard::ALLOC_CUMULATIVE {
         let wrapper_total = stats
             .values()
             .find(|s| s.wrapper && s.has_data)
@@ -94,7 +94,7 @@ pub(crate) fn build_functions_list_alloc(
         }
     };
 
-    let profiling_mode = match alloc_metric() {
+    let profiling_mode = match *ALLOC_METRIC {
         AllocMetric::Bytes => ProfilingMode::AllocBytes,
         AllocMetric::Count => ProfilingMode::AllocCount,
     };
@@ -149,11 +149,11 @@ pub(crate) fn build_functions_list_alloc(
         .collect();
 
     let description = {
-        let metric = match alloc_metric() {
+        let metric = match *ALLOC_METRIC {
             AllocMetric::Bytes => "bytes",
             AllocMetric::Count => "count",
         };
-        if crate::lib_on::functions::alloc::shared::is_alloc_cumulative_enabled() {
+        if *crate::lib_on::functions::alloc::guard::ALLOC_CUMULATIVE {
             format!(
                 "Cumulative allocation {} during each function call (including nested calls).",
                 metric

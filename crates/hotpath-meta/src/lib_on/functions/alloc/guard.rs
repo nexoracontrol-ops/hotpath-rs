@@ -1,5 +1,6 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::LazyLock;
 
 use crate::instant::Instant;
 
@@ -25,6 +26,31 @@ impl AsyncAllocBridge {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum AllocMetric {
+    Bytes,
+    Count,
+}
+
+pub(crate) static ALLOC_METRIC: LazyLock<AllocMetric> =
+    LazyLock::new(|| match std::env::var("HOTPATH_META_ALLOC_METRIC") {
+        Ok(v) => match v.to_lowercase().as_str() {
+            "bytes" => AllocMetric::Bytes,
+            "count" => AllocMetric::Count,
+            other => panic!(
+                "Invalid HOTPATH_META_ALLOC_METRIC value: '{}'. Expected 'bytes' or 'count'.",
+                other
+            ),
+        },
+        Err(_) => AllocMetric::Bytes,
+    });
+
+pub(crate) static ALLOC_CUMULATIVE: LazyLock<bool> = LazyLock::new(|| {
+    std::env::var("HOTPATH_META_ALLOC_CUMULATIVE")
+        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
+        .unwrap_or(false)
+});
+
 #[inline]
 pub(crate) fn push_alloc_stack() {
     crate::functions::alloc::core::ALLOCATIONS.with(|stack| {
@@ -47,7 +73,7 @@ pub(crate) fn pop_alloc_stack() -> (u64, u64) {
 
         stack.depth.set(stack.depth.get() - 1);
 
-        if super::shared::is_alloc_cumulative_enabled() {
+        if *ALLOC_CUMULATIVE {
             let parent = stack.depth.get() as usize;
             stack.elements[parent]
                 .bytes_total

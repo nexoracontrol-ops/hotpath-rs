@@ -7,8 +7,6 @@ use std::collections::{HashMap, VecDeque};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, OnceLock, RwLock};
 
-pub(crate) type SharedStr = Arc<str>;
-
 pub static DEBUG_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
 
 static VAL_ID_REGISTRY: OnceLock<RwLock<HashMap<String, u32>>> = OnceLock::new();
@@ -80,7 +78,7 @@ impl DbgEntry {
 #[derive(Debug, Clone)]
 pub(crate) struct ValEntry {
     pub id: u32,
-    pub key: SharedStr,
+    pub key: Arc<str>,
     pub log_count: u64,
     pub logs: VecDeque<ValLog>,
 }
@@ -95,7 +93,7 @@ pub(crate) struct ValLog {
 }
 
 impl ValEntry {
-    fn new(id: u32, key: SharedStr) -> Self {
+    fn new(id: u32, key: Arc<str>) -> Self {
         Self {
             id,
             key,
@@ -117,7 +115,7 @@ pub(crate) enum DebugEvent {
     },
     Val {
         id: u32,
-        key: SharedStr,
+        key: Arc<str>,
         source: &'static str,
         value: String,
         timestamp: Instant,
@@ -125,7 +123,7 @@ pub(crate) enum DebugEvent {
     },
     Gauge {
         id: u32,
-        key: SharedStr,
+        key: Arc<str>,
         source: &'static str,
         value: f64,
         timestamp: Instant,
@@ -133,7 +131,7 @@ pub(crate) enum DebugEvent {
     },
     GaugeInc {
         id: u32,
-        key: SharedStr,
+        key: Arc<str>,
         source: &'static str,
         delta: f64,
         timestamp: Instant,
@@ -141,7 +139,7 @@ pub(crate) enum DebugEvent {
     },
     GaugeDec {
         id: u32,
-        key: SharedStr,
+        key: Arc<str>,
         source: &'static str,
         delta: f64,
         timestamp: Instant,

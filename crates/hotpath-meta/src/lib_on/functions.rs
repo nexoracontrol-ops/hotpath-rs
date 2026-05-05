@@ -218,7 +218,7 @@ where
     cfg_if::cfg_if! {
         if #[cfg(feature = "hotpath-alloc-meta")] {
             let (guard, alloc_bridge) = build_measurement_guard_async_with_log_bridge(measurement_loc, false);
-            let result = crate::futures::wrapper::InstrumentedFutureLog::new(
+            let result = crate::futures::wrapper::InstrumentedFuture::new(
                 fut,
                 measurement_loc,
                 None,

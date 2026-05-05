@@ -7,8 +7,6 @@ use std::collections::{HashMap, VecDeque};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, OnceLock, RwLock};
 
-pub(crate) type SharedStr = Arc<str>;
-
 pub static DEBUG_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
 
 static VAL_ID_REGISTRY: OnceLock<RwLock<HashMap<String, u32>>> = OnceLock::new();
