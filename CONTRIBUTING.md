@@ -12,6 +12,8 @@ Project maintains a complete copy of `hotpath` (`hotpath-meta`) and `hotpath-mac
 
 A full copy is needed because a crate cannot depend on itself. Extracting shared core is also impractical, because `hotpath` uses a custom instrumentation logic (like `#[cfg_attr(feature = "hotpath-meta", hotpath_meta::measure_all)]` calls). If you have ideas for a cleaner way to implement self-profiling without full crate duplication, I'm open to suggestions.
 
+To mirror changes from the source crates into the meta crates, you can use the [`syncmeta`](skills/syncmeta/SKILL.md) LLM skill. It applies diffs from `hotpath`/`hotpath-macros` to their meta counterparts while preserving meta-specific naming (feature flags, env vars, crate imports).
+
 ## Benchmarking `hotpath` 
 
 ### Self benchmarks
