@@ -78,6 +78,79 @@ pub mod tests {
         }
     }
 
+    // cargo run -p test-tokio-async --example cpu_inline --features hotpath,hotpath-cpu
+    #[test]
+    fn test_cpu_inline_default_strips_user_inline() {
+        let output = Command::new("cargo")
+            .args([
+                "run",
+                "-p",
+                "test-tokio-async",
+                "--example",
+                "cpu_inline",
+                "--features",
+                "hotpath,hotpath-cpu",
+                "--release",
+            ])
+            .env("HOTPATH_REPORT", "functions-cpu")
+            .env("CARGO_TARGET_DIR", "target/test-cpu-inline-default")
+            .output()
+            .expect("Failed to execute command");
+
+        assert!(
+            output.status.success(),
+            "Process did not exit successfully.\n\nstderr:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+
+        for expected in ["cpu_inline::never_inlined", "cpu_inline::always_inlined"] {
+            assert!(
+                stdout.contains(expected),
+                "Expected:\n{expected}\n\nGot:\n{stdout}",
+            );
+        }
+    }
+
+    // HOTPATH_KEEP_INLINE=1 cargo run -p test-tokio-async --example cpu_inline --features hotpath,hotpath-cpu
+    #[test]
+    fn test_cpu_inline_keep_inline_preserves_user_inline() {
+        let output = Command::new("cargo")
+            .args([
+                "run",
+                "-p",
+                "test-tokio-async",
+                "--example",
+                "cpu_inline",
+                "--features",
+                "hotpath,hotpath-cpu",
+                "--release",
+            ])
+            .env("HOTPATH_REPORT", "functions-cpu")
+            .env("HOTPATH_KEEP_INLINE", "1")
+            .env("CARGO_TARGET_DIR", "target/test-cpu-inline-keep")
+            .output()
+            .expect("Failed to execute command");
+
+        assert!(
+            output.status.success(),
+            "Process did not exit successfully.\n\nstderr:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+
+        assert!(
+            stdout.contains("cpu_inline::never_inlined"),
+            "Expected:\ncpu_inline::never_inlined\n\nGot:\n{stdout}",
+        );
+        assert!(
+            !stdout.contains("cpu_inline::always_inlined"),
+            "Expected always_inlined to be missing under HOTPATH_KEEP_INLINE=1.\n\nGot:\n{stdout}",
+        );
+    }
+
     // cargo run -p test-tokio-async --example cpu_labels --features hotpath,hotpath-cpu
     #[test]
     fn test_cpu_labels_output() {

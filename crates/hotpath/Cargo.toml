@@ -56,7 +56,7 @@ async-channel = ["dep:tokio", "tokio/sync", "tokio/macros", "tokio/time", "tokio
 crossbeam = []
 threads = []
 dev = ["dep:time"]
-hotpath-cpu = ["dep:object", "dep:rustc-demangle", "dep:flate2", "dep:serde", "dep:serde_json"]
+hotpath-cpu = ["hotpath-macros/hotpath-cpu", "dep:object", "dep:rustc-demangle", "dep:flate2", "dep:serde", "dep:serde_json"]
 hotpath-mcp = ["hotpath", "dep:rmcp", "dep:tokio", "tokio/rt", "tokio/net", "dep:axum", "dep:tokio-util", "dep:schemars"]
 
 [dependencies]

@@ -1,7 +1,16 @@
 use proc_macro::TokenStream;
 use quote::quote;
+use std::sync::LazyLock;
 use syn::parse::Parser;
 use syn::{parse_macro_input, ImplItem, Item, ItemFn, Lit, LitInt, LitStr};
+
+fn env_flag(name: &str) -> bool {
+    std::env::var(name)
+        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
+        .unwrap_or(false)
+}
+
+static KEEP_INLINE: LazyLock<bool> = LazyLock::new(|| env_flag("HOTPATH_KEEP_INLINE"));
 
 #[derive(Clone, Copy)]
 pub(crate) enum Format {
@@ -447,10 +456,21 @@ pub fn main_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn measure_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemFn);
 
-    let attrs = &input.attrs;
+    let touch_inline = cfg!(feature = "hotpath-cpu") && !*KEEP_INLINE;
+    let attrs: Vec<&syn::Attribute> = input
+        .attrs
+        .iter()
+        .filter(|a| !(touch_inline && a.path().is_ident("inline")))
+        .collect();
     let vis = &input.vis;
     let sig = &input.sig;
     let block = &input.block;
+
+    let inline_attr = if touch_inline {
+        quote! { #[inline(never)] }
+    } else {
+        quote! {}
+    };
 
     let fn_ident = &sig.ident;
     let is_async_fn = sig.asyncness.is_some();
@@ -574,6 +594,7 @@ pub fn measure_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let output = quote! {
+        #inline_attr
         #(#attrs)*
         #vis #sig {
             #cpu_alias_register
@@ -623,10 +644,21 @@ pub fn measure_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn future_fn_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemFn);
 
-    let attrs = &input.attrs;
+    let touch_inline = cfg!(feature = "hotpath-cpu") && !*KEEP_INLINE;
+    let attrs: Vec<&syn::Attribute> = input
+        .attrs
+        .iter()
+        .filter(|a| !(touch_inline && a.path().is_ident("inline")))
+        .collect();
     let vis = &input.vis;
     let sig = &input.sig;
     let block = &input.block;
+
+    let inline_attr = if touch_inline {
+        quote! { #[inline(never)] }
+    } else {
+        quote! {}
+    };
 
     // Ensure the function is async
     if sig.asyncness.is_none() {
@@ -688,6 +720,7 @@ pub fn future_fn_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let output = quote! {
+        #inline_attr
         #(#attrs)*
         #vis #sig {
             #wrapped_body
