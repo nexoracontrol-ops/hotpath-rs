@@ -74,7 +74,7 @@ pub use lib_off::streams;
 pub use lib_off::threads;
 
 mod shared;
-pub use shared::{Format, IntoF64, Section};
+pub use shared::{env_flag, Format, IntoF64, Section};
 
 #[doc(hidden)]
 pub mod dev_logging;

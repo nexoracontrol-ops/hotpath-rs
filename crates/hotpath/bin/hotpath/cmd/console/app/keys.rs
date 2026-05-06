@@ -3,6 +3,7 @@
 use crate::cmd::console::app::{
     App, DataFlowFocus, DebugFocus, FunctionsFocus, FunctionsSubTab, SelectedTab,
 };
+use crate::cmd::console::constants::SAMPLY_LOAD_DISABLED;
 use crate::cmd::console::events::DataRequest;
 use crossterm::event::KeyCode;
 use std::time::{Duration, Instant};
@@ -71,7 +72,8 @@ impl App {
                 let _ = self.request_tx.send(DataRequest::TriggerCpuSnapshot);
                 return;
             }
-            if matches!(key_code, KeyCode::Char('f') | KeyCode::Char('F')) {
+            if matches!(key_code, KeyCode::Char('f') | KeyCode::Char('F')) && !*SAMPLY_LOAD_DISABLED
+            {
                 self.open_cpu_profile_in_samply();
                 return;
             }

@@ -56,6 +56,7 @@
 | `HOTPATH_TUI_AUTO_EXPAND_LOGS` | Auto-open the logs panel once initial data arrives and pin selection to the given table index. Set to an integer (e.g. `0` for the first row, `2` for the third). (default: unset) |
 | `HOTPATH_METRICS_HOST` | Host URL that the TUI console connects to for metrics data. (default: `http://localhost`) |
 | `HOTPATH_METRICS_PORT` | Port that the TUI console connects to for metrics data. (default: `6770`) |
+| `HOTPATH_DISABLE_SAMPLY_LOAD` | Set to `true` or `1` to disable the `samply load` shortcut on the CPU subtab; the `'f'` keybinding and its hint are hidden. (default: `false`) |
 
 ## Other
 
