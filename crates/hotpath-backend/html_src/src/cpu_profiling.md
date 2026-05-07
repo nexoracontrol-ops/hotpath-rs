@@ -20,6 +20,14 @@ samply --version
 
 `hotpath` is tested to work with version `0.13.x`.
 
+Then install the `hotpath-samply` wrapper binary that ships with `hotpath`:
+
+```bash
+cargo install hotpath --bin hotpath-samply --version '^{{HOTPATH_VERSION}}'
+```
+
+Both `samply` and `hotpath-samply` must be available in your `PATH` at runtime. The host process spawns `hotpath-samply` as a child, which in turn invokes `samply` to record the profile.
+
 ### MacOS samply permissions
 
 Run:
