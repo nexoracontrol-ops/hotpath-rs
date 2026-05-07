@@ -284,6 +284,7 @@ pub mod tests {
     }
 
     // HOTPATH_METRICS_PORT=6773 TEST_SLEEP_SECONDS=10 cargo run -p test-channels-tokio --example basic_tokio --features hotpath
+    #[cfg(feature = "hotpath")]
     #[test]
     fn test_data_endpoints() {
         use hotpath::json::JsonChannelsList;

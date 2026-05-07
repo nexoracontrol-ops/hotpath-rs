@@ -194,6 +194,7 @@ pub mod tests {
     }
 
     // HOTPATH_METRICS_PORT=6772 TEST_SLEEP_SECONDS=10 cargo run -p test-channels-asc --example basic_asc --features hotpath
+    #[cfg(feature = "hotpath")]
     #[test]
     fn test_data_endpoints() {
         use hotpath::json::JsonChannelsList;
