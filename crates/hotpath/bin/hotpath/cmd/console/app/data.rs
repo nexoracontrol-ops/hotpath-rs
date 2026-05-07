@@ -504,29 +504,25 @@ impl App {
             DataResponse::FunctionsAlloc(data) => {
                 trace!("Received alloc data: {} functions", data.data.len());
                 self.loading_functions = false;
-                self.memory_available = true;
+                self.memory_unavailable_reason = None;
                 self.update_memory_metrics(data);
                 self.request_function_logs_if_open();
             }
-            DataResponse::FunctionsAllocUnavailable => {
-                trace!("Memory profiling unavailable");
+            DataResponse::FunctionsAllocUnavailable(reason) => {
+                trace!("Memory profiling unavailable: {}", reason);
                 self.loading_functions = false;
-                self.memory_available = false;
-                self.set_error(
-                    "Memory profiling not available - enable hotpath-alloc feature".to_string(),
-                );
+                self.memory_unavailable_reason = Some(reason);
             }
             DataResponse::FunctionsCpu(envelope) => {
                 trace!("Received CPU envelope: status={:?}", envelope.status);
                 self.loading_functions = false;
+                self.cpu_unavailable_reason = None;
                 self.update_cpu_envelope(envelope);
             }
-            DataResponse::FunctionsCpuUnavailable => {
-                trace!("CPU profiling unavailable");
+            DataResponse::FunctionsCpuUnavailable(reason) => {
+                trace!("CPU profiling unavailable: {}", reason);
                 self.loading_functions = false;
-                self.set_error(
-                    "CPU profiling not available - enable hotpath-cpu feature".to_string(),
-                );
+                self.cpu_unavailable_reason = Some(reason);
             }
             DataResponse::CpuSnapshotTriggered => {
                 trace!("CPU snapshot triggered");

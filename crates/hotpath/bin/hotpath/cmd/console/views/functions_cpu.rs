@@ -3,7 +3,7 @@ use crate::cmd::console::constants::SAMPLY_LOAD_DISABLED;
 use crate::cmd::console::views::common_styles;
 use hotpath::json::CpuSnapshotStatus;
 use ratatui::{
-    layout::{Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     symbols::border,
     text::{Line, Span},
@@ -13,6 +13,11 @@ use ratatui::{
 
 #[hotpath::measure]
 pub(crate) fn render_functions_table(frame: &mut Frame, app: &mut App, area: Rect) {
+    if let Some(reason) = app.cpu_unavailable_reason.as_deref() {
+        render_unavailable(frame, area, reason);
+        return;
+    }
+
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Length(3), Constraint::Min(0)])
@@ -20,6 +25,31 @@ pub(crate) fn render_functions_table(frame: &mut Frame, app: &mut App, area: Rec
 
     render_status_panel(frame, app, chunks[0]);
     render_cpu_table(frame, app, chunks[1]);
+}
+
+fn render_unavailable(frame: &mut Frame, area: Rect, reason: &str) {
+    let block = Block::bordered()
+        .border_set(border::THICK)
+        .title(Span::styled(
+            " CPU samples ",
+            common_styles::TITLE_STYLE_YELLOW,
+        ));
+
+    let lines = vec![
+        Line::from(""),
+        Line::from(Span::styled(
+            reason,
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        )),
+    ];
+
+    let paragraph = Paragraph::new(lines)
+        .block(block)
+        .alignment(Alignment::Center);
+
+    frame.render_widget(paragraph, area);
 }
 
 fn render_status_panel(frame: &mut Frame, app: &App, area: Rect) {

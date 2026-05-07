@@ -67,9 +67,9 @@ impl DataRequest {
 pub(crate) enum DataResponse {
     FunctionsTiming(JsonFunctionsList),
     FunctionsAlloc(JsonFunctionsList),
-    FunctionsAllocUnavailable,
+    FunctionsAllocUnavailable(String),
     FunctionsCpu(JsonFunctionsCpuEnvelope),
-    FunctionsCpuUnavailable,
+    FunctionsCpuUnavailable(String),
     CpuSnapshotTriggered,
     CpuSnapshotBusy,
     FunctionLogsTiming {

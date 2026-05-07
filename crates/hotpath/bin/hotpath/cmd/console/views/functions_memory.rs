@@ -19,39 +19,22 @@ pub(crate) fn render_functions_table(frame: &mut Frame, app: &mut App, area: Rec
         app.memory_functions.caller_name, app.memory_functions.description
     );
 
-    // Check if memory profiling is available
-    if !app.memory_available {
-        let message = vec![
-            Span::from(""),
-            Span::from("Memory profiling is not available.").style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::from(""),
-            Span::from("To enable memory profiling, run your application with:"),
-            Span::from(""),
-            Span::from("  cargo run --features hotpath,hotpath-alloc").style(
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::from(""),
-        ];
-
+    if let Some(reason) = app.memory_unavailable_reason.as_deref() {
         let block = Block::bordered()
             .border_set(border::THICK)
             .title(Span::styled(title, common_styles::TITLE_STYLE_YELLOW));
-
-        let paragraph = Paragraph::new(
-            message
-                .into_iter()
-                .map(ratatui::text::Line::from)
-                .collect::<Vec<_>>(),
-        )
-        .block(block)
-        .alignment(Alignment::Center);
-
+        let lines = vec![
+            ratatui::text::Line::from(""),
+            ratatui::text::Line::from(Span::styled(
+                reason,
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            )),
+        ];
+        let paragraph = Paragraph::new(lines)
+            .block(block)
+            .alignment(Alignment::Center);
         frame.render_widget(paragraph, area);
         return;
     }

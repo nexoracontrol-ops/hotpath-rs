@@ -68,6 +68,9 @@ impl App {
 
     fn handle_functions_key(&mut self, key_code: KeyCode) {
         if self.functions_sub_tab == FunctionsSubTab::Cpu {
+            if self.cpu_unavailable_reason.is_some() {
+                return;
+            }
             if matches!(key_code, KeyCode::Char('c') | KeyCode::Char('C')) {
                 let _ = self.request_tx.send(DataRequest::TriggerCpuSnapshot);
                 return;

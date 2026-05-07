@@ -174,8 +174,9 @@ pub(crate) enum InspectedDataFlowLog {
 pub(crate) struct App {
     pub(crate) timing_functions: JsonFunctionsList,
     pub(crate) memory_functions: JsonFunctionsList,
-    pub(crate) memory_available: bool,
+    pub(crate) memory_unavailable_reason: Option<String>,
     pub(crate) cpu_envelope: Option<hotpath::json::JsonFunctionsCpuEnvelope>,
+    pub(crate) cpu_unavailable_reason: Option<String>,
     pub(crate) cpu_table_state: TableState,
 
     pub(crate) timing_table_state: TableState,
@@ -294,8 +295,9 @@ impl App {
         Self {
             timing_functions: empty_functions.clone(),
             memory_functions: empty_functions,
-            memory_available: true,
+            memory_unavailable_reason: None,
             cpu_envelope: None,
+            cpu_unavailable_reason: None,
             cpu_table_state: TableState::default().with_selected(0),
             timing_table_state: TableState::default().with_selected(0),
             memory_table_state: TableState::default().with_selected(0),

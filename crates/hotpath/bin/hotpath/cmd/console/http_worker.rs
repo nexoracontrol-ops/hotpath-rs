@@ -117,7 +117,7 @@ pub(crate) fn spawn_http_worker(
 
 trait RouteExt {
     async fn fetch(&self, client: &reqwest::Client, base_url: &str) -> DataResponse;
-    fn not_found_response(&self) -> Option<DataResponse>;
+    fn not_found_response(&self, error_msg: &str) -> Option<DataResponse>;
     fn parse_bytes(&self, bytes: &[u8]) -> DataResponse;
 }
 
@@ -144,7 +144,8 @@ impl RouteExt for Route {
                 return DataResponse::CpuSnapshotBusy;
             }
             if status == StatusCode::NOT_FOUND {
-                return DataResponse::FunctionsCpuUnavailable;
+                let msg = parse_error_body(resp.text().await.unwrap_or_default());
+                return DataResponse::FunctionsCpuUnavailable(msg);
             }
             return DataResponse::Error(format!("CPU snapshot HTTP {}", status));
         }
@@ -161,15 +162,11 @@ impl RouteExt for Route {
         trace!("Response status {} for {}", status, url);
 
         if status == StatusCode::NOT_FOUND {
-            if let Some(not_found) = self.not_found_response() {
+            let msg = parse_error_body(resp.text().await.unwrap_or_default());
+            if let Some(not_found) = self.not_found_response(&msg) {
                 trace!("Resource not found: {}", url);
                 return not_found;
             }
-            let body = resp.text().await.unwrap_or_default();
-            let msg = serde_json::from_str::<serde_json::Value>(&body)
-                .ok()
-                .and_then(|v| v.get("error")?.as_str().map(String::from))
-                .unwrap_or_else(|| body.to_string());
             return DataResponse::Error(msg);
         }
 
@@ -194,11 +191,13 @@ impl RouteExt for Route {
         self.parse_bytes(&bytes)
     }
 
-    fn not_found_response(&self) -> Option<DataResponse> {
+    fn not_found_response(&self, error_msg: &str) -> Option<DataResponse> {
         match self {
-            Route::FunctionsAlloc => Some(DataResponse::FunctionsAllocUnavailable),
+            Route::FunctionsAlloc => Some(DataResponse::FunctionsAllocUnavailable(
+                error_msg.to_string(),
+            )),
             Route::FunctionsCpu | Route::FunctionsCpuSnapshot => {
-                Some(DataResponse::FunctionsCpuUnavailable)
+                Some(DataResponse::FunctionsCpuUnavailable(error_msg.to_string()))
             }
             Route::FunctionTimingLogs { function_id } => {
                 Some(DataResponse::FunctionLogsTimingNotFound(*function_id))
@@ -308,4 +307,11 @@ impl RouteExt for Route {
 
 fn parse_json<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, serde_json::Error> {
     serde_json::from_slice(bytes)
+}
+
+fn parse_error_body(body: String) -> String {
+    serde_json::from_str::<serde_json::Value>(&body)
+        .ok()
+        .and_then(|v| v.get("error")?.as_str().map(String::from))
+        .unwrap_or(body)
 }
