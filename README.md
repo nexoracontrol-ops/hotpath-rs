@@ -1,9 +1,9 @@
-# <img src="media/hotpath-logo2.png" alt="hotpath-rs logo" width="80px" align="left"> hotpath - real-time Rust performance, CPU, memory and data flow profiler
+# <img src="media/hotpath-logo2.png" alt="hotpath-rs logo" width="80px" align="left"> hotpath - Rust Performance, CPU & Memory Profiler
 [![Latest Version](https://img.shields.io/crates/v/hotpath.svg)](https://crates.io/crates/hotpath) [![Downloads](https://img.shields.io/crates/d/hotpath?cacheSeconds=86400)](https://crates.io/crates/hotpath) [![GH Actions](https://github.com/pawurb/hotpath/actions/workflows/ci.yml/badge.svg)](https://github.com/pawurb/hotpath/actions)
 
-hotpath-rs is an easy-to-configure Rust performance profiler that shows exactly where your code spends time, burns CPU, and allocates. 
+hotpath-rs is an easy-to-configure Rust performance profiler that shows exactly where your code spends time, burns CPU, and allocates memory. 
 
-It helps you distinguish between functions that are slow because they **wait** and those that are slow because they **use CPU**. Instrument functions, channels, futures, and streams to find bottlenecks and focus optimizations where they matter most. Quickly diagnose whether a bottleneck is I/O-bound or CPU-bound. Get actionable insights into time, memory, and async data flow with minimal setup.
+It helps you distinguish between functions that are slow because they wait on I/O and those that are CPU-intensive. Instrument functions, channels, futures, and streams to find bottlenecks and focus optimizations where they matter most. Get actionable insights into time, memory, and async data flow with minimal setup.
 
 Try the TUI demo via SSH - no installation required:
 
@@ -13,7 +13,7 @@ ssh demo.hotpath.rs
 
 Explore the full documentation at [hotpath.rs](https://hotpath.rs). See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
-You can use it to produce one-off performance (timing or memory) reports:
+You can use it to produce one-off performance (timing, memory or CPU) reports:
 
 ![hotpath alloc report](media/hotpath-alloc-report.png)
 
@@ -39,14 +39,6 @@ https://github.com/user-attachments/assets/2e890417-2b43-4b1b-8657-a5ef3b458153
 - **Tokio runtime monitoring** - track worker thread utilization, task scheduling, and queue depths.
 - **MCP server for AI agents** - built-in [Model Context Protocol](https://modelcontextprotocol.io/) server that lets LLMs query profiling data in real-time.
 - **GitHub Actions integration** - configure CI to automatically benchmark your program against a base branch for each PR.
-
-## Roadmap 
-
-- [ ] global CPU sampling
-- [ ] per-function CPU sampling
-- [ ] interactive, live CPU traces TUI
-- [ ] channels perf stats
-- [ ] flamegraphs generation
 
 ## Getting Started
 
@@ -158,6 +150,7 @@ See the full docs and advanced config tutorials at [hotpath.rs](https://hotpath.
 - [Sampling Comparison](https://hotpath.rs/sampling_comparison) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](https://hotpath.rs/profiling_modes) - static reports vs live TUI dashboard
 - [Functions](https://hotpath.rs/functions) - measure execution time and memory allocations
+- [CPU profiling](https://hotpath.rs/cpu_profiling) - attribute CPU samples to instrumented functions
 - [A/B Benchmarks](https://hotpath.rs/benchmarks) - compare performance between app versions
 - [Async Data Flow](https://hotpath.rs/data_flow) - monitor channels, streams, and futures
 - [Debug & Metrics](https://hotpath.rs/debug) - track custom values with `dbg!`, `val!`, and `gauge!` macros

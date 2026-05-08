@@ -102,9 +102,17 @@ You can optionally run the displayed `samply load` command to open an interactiv
 
 <img loading="lazy" src="{{#asset-hash images/samply-report.png}}" alt="Interactive samply performance report">
 
+## Inlining and CPU attribution
+
+Standard CPU profilers sometimes miss top bottleneck functions because the compiler implicitly inlines small or hot functions. Once a function is inlined, its symbol disappears from the binary and its samples get attributed to the caller, hiding it from the report.
+
+Under the `hotpath-cpu` feature, `#[hotpath::measure]` strip any user-provided `#[inline(...)]` attribute and inject `#[inline(never)]` instead. This forces the function to retain its own symbol so CPU samples attribute correctly.
+
+To disable this rewrite, set `HOTPATH_KEEP_INLINE=1`. The variable is read at proc-macro expansion time, so touch the source file or run `cargo clean` after toggling it.
+
 ## Improving symbols attribution
 
-Currently `hotpath` correctly attributes CPU usage to module functions instrumented with `measure` macro. `impl` functions instrumented with `measure` require an additional config:
+Currently `hotpath` correctly attributes CPU usage to module functions instrumented with `measure` macro. `impl` functions instrumented with `measure` require an additional config. 
 
 ```rust
 impl Worker {
@@ -115,7 +123,7 @@ impl Worker {
 }
 ```
 
-This config won't correctly attribute CPU samples to the `run` function, because it's defined in an `impl` block. You have to explicitly declare `impl_type` to fix it:
+The above example wouldn't correctly attribute CPU samples to the `run` function, because it's defined in an `impl` block. You have to explicitly declare `impl_type` to fix it:
 
 ```rust
 impl Worker {
@@ -136,6 +144,7 @@ impl Worker {
     }
 }
 ```
+
 
 ## Current status
 

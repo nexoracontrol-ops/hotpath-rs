@@ -17,9 +17,9 @@
   </div>
 </div>
 
-[hotpath-rs](https://github.com/pawurb/hotpath-rs) is an easy-to-configure Rust performance profiler that shows exactly where your code spends time, burns CPU, and allocates. 
+[hotpath-rs](https://github.com/pawurb/hotpath-rs) is an easy-to-configure Rust performance profiler that shows exactly where your code spends time, burns CPU, and allocates memory. 
 
-It helps you distinguish between functions that are slow because they wait and those that are slow because they use CPU. Instrument functions, channels, futures, and streams to find bottlenecks and focus optimizations where they matter most. Quickly diagnose whether a bottleneck is I/O-bound or CPU-bound. Get actionable insights into time, memory, and async data flow with minimal setup.
+It helps you distinguish between functions that are slow because they wait on I/O and those that are CPU-intensive. Instrument functions, channels, futures, and streams to find bottlenecks and focus optimizations where they matter most. Get actionable insights into time, memory, and async data flow with minimal setup.
 
 <div style="clear: both;"></div>
 
@@ -53,7 +53,7 @@ It helps you distinguish between functions that are slow because they wait and t
   </div>
 </div>
 
-You can use it to produce one-off performance (timing or memory) reports:
+You can use it to produce one-off performance (timing, memory or CPU) reports:
 
 <img loading="lazy" src="{{#asset-hash images/hotpath-alloc-report.png}}" alt="hotpath-rs memory allocation profiling report showing per-function byte counts">
 
@@ -89,7 +89,7 @@ Other than the SSH demo an easy way to quickly try the TUI is to run it in **aut
 First, install `hotpath` CLI with auto-instrumentation enabled:
 
 ```bash
-cargo install hotpath --features='tui,hotpath,hotpath-alloc'
+cargo install hotpath --features='tui,hotpath,hotpath-alloc' --version '^{{HOTPATH_VERSION}}'
 ```
 
 Then launch the TUI:
@@ -103,7 +103,7 @@ and you'll see timing, memory and other metrics.
 Make sure to reinstall it without the auto-profiling features so that you can also observe metrics of other programs!
 
 ```bash
-cargo install hotpath --features='tui'
+cargo install hotpath --features='tui' --version '^{{HOTPATH_VERSION}}'
 ```
 
 ## Getting Started
@@ -156,7 +156,7 @@ async fn main() {
 }
 ```
 
-Now, run your program with `hotpath` (and optionally `hotpath-alloc` features):
+Now, run your program with `hotpath` (and optionally `hotpath-alloc`) feature:
 
 ```bash
 cargo run --features='hotpath,hotpath-alloc'
