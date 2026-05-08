@@ -28,6 +28,11 @@ cargo install hotpath --bin hotpath-samply --version '^{{HOTPATH_VERSION}}'
 
 Both `samply` and `hotpath-samply` must be available in your `PATH` at runtime. The host process spawns `hotpath-samply` as a child, which in turn invokes `samply` to record the profile.
 
+If either binary lives outside `PATH`, point `hotpath` at it explicitly:
+
+- `HOTPATH_SAMPLY_WRAPPER_BIN` - path to the `hotpath-samply` wrapper binary the host process spawns (default: `hotpath-samply`, resolved via `PATH`).
+- `HOTPATH_SAMPLY_BIN` - path to the external `samply` binary the wrapper invokes (default: `samply`, resolved via `PATH`).
+
 ### MacOS samply permissions
 
 Run:
