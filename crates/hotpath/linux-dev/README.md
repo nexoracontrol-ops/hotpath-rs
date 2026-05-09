@@ -1,7 +1,24 @@
 # Debugging `hotpath-cpu` on Linux
 
-Persistent Ubuntu container with `samply` + Rust toolchain for iterating on
-`hotpath-cpu` from macOS (or any non-Linux host).
+Persistent Ubuntu container with `samply` + `perf` + Rust toolchain for
+iterating on `hotpath-cpu` from macOS (or any non-Linux host).
+
+## One-liner setup
+
+Build image, relax host sysctls, recreate container, pre-build wrapper, and
+exec into bash. Run from repo root:
+
+```bash
+./crates/hotpath/linux-dev/setup.sh
+```
+
+`perf_event_paranoid=-1` enables hardware events for non-root; `kptr_restrict=0`
+resolves kernel symbols. Both reset on Docker Desktop VM restart — re-run the
+script.
+
+`HOTPATH_SAMPLY_WRAPPER_BIN` baked into container env so every `cargo run` of
+an example finds the wrapper. Pre-built once during setup; rebuilds automatically
+when its source changes.
 
 ## Build image
 

@@ -13,7 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         git \
-    && rm -rf /var/lib/apt/lists/*
+        jq \
+        linux-tools-generic \
+        vim \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -s /usr/lib/linux-tools/*/perf /usr/local/bin/perf
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
       | sh -s -- -y --default-toolchain stable --profile minimal
