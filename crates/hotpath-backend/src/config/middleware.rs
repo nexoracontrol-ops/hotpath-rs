@@ -200,7 +200,7 @@ const STATIC_EXTENSIONS: &[&str] = &[
     ".eot", ".mp4", ".webm",
 ];
 
-const TEMPLATE_VARS: &[(&str, &str)] = &[("{{HOTPATH_VERSION}}", "0.16")];
+const TEMPLATE_VARS: &[(&str, &str)] = &[("{{HOTPATH_VERSION}}", "0.16.1")];
 
 const BASE_URL: &str = "https://hotpath.rs";
 const OG_IMAGE: &str = "https://hotpath.rs/images/hotpath-ferris.png";
