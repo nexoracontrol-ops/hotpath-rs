@@ -31,6 +31,7 @@ path = "bin/hotpath-samply/main.rs"
 default = ["threads"]
 hotpath = [
   "hotpath-macros/hotpath",
+  "dep:arc-swap",
   "dep:cfg-if",
   "dep:crossbeam-channel",
   "dep:hdrhistogram",
@@ -61,6 +62,7 @@ hotpath-cpu = ["hotpath-macros/hotpath-cpu", "dep:object", "dep:rustc-demangle",
 hotpath-mcp = ["hotpath", "dep:rmcp", "dep:tokio", "tokio/rt", "tokio/net", "dep:axum", "dep:tokio-util", "dep:schemars"]
 
 [dependencies]
+arc-swap = { version = "1.7", optional = true }
 cfg-if = { version = "1.0", optional = true }
 clap = { version = "4", features = ["derive"], optional = true }
 crossbeam-channel = { version = "0.5", optional = true }
