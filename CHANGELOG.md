@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.16.1] - 2026-05-17
+
+### 🚀 Features
+
+- Windows thread monitoring support
+
+- Support flume channels
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Release 0.16.1
+
+
 ## [0.16.0] - 2026-05-07
 
 ### 🚀 Features
