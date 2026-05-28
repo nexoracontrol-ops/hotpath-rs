@@ -42,11 +42,10 @@ https://github.com/user-attachments/assets/2e890417-2b43-4b1b-8657-a5ef3b458153
 
 ## Current roadmap
 
-- [ ] `hotpath::channel!/stream!/future!` events batching
-- [ ] `hotpath::channel!` timing histogram
-- [ ] `hotpath::channel!(..., deep_tracking = true)` 
-- [ ] `hotpath::mutex!(...)`
-- [ ] `hotpath::rw_lock!(...)`
+- [ ] [`hotpath::channel!/stream!/future!` events batching](https://github.com/pawurb/hotpath-rs/issues/345)
+- [ ] [`hotpath::channel!` timing histogram](https://github.com/pawurb/hotpath-rs/issues/299)
+- [ ] [`hotpath::mutex!/rw_lock!`](https://github.com/pawurb/hotpath-rs/issues/340)
+- [ ] `hotpath::channel!(..., precise = true)` 
 - [ ] `ENV['HOTPATH_DISABLE_TIMING']`
 
 ## Getting Started
