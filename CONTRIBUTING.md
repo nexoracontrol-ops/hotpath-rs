@@ -48,11 +48,9 @@ It benchmarks two versions of the library (branch names or commit SHAs are suppo
 
 ### Overhead benchmarks
 
-Each `benchmark_*` example hammers an instrumented codepath in a tight loop. Run with `--features hotpath` to measure with instrumentation, and omit it to measure the uninstrumented baseline.
+Each `benchmark_*` example hammers a single instrumented codepath in a tight, uncontended loop and prints total time plus per-operation overhead on exit. Run with `--features hotpath` to measure instrumentation cost; omit it for the uninstrumented baseline. The iteration count defaults to 1,000,000 and is configurable via `HOTPATH_BENCH_RUNS`.
 
 #### Timing
-
-Prints total time and per-operation overhead on exit. The call count defaults to 100,000 and is configurable via `HOTPATH_BENCHMARK_NOOP_RUNS`.
 
 ```bash
 cargo run --example benchmark_noop --features hotpath --release
@@ -66,111 +64,33 @@ cargo run --example benchmark_alloc --features='hotpath,hotpath-alloc' --release
 
 #### Mutexes and RwLocks
 
-Each lock backend has a dedicated crate with a `benchmark_*` example that hammers a single instrumented lock in a tight, uncontended loop, so the measured time reflects per-acquisition instrumentation overhead. RwLock examples run a write loop followed by a read loop. The iteration count defaults to 1,000,000 and is configurable via `HOTPATH_LOCK_BENCH_RUNS`.
-
-For each backend, run with `--features hotpath` to measure with instrumentation, and omit it to measure the uninstrumented baseline.
-
-##### std Mutex
+RwLock examples run a write loop followed by a read loop.
 
 ```bash
 cargo run -p test-mutex-std --example benchmark_mutex_std --features hotpath --release
-```
-
-##### tokio Mutex
-
-```bash
 cargo run -p test-mutex-tokio --example benchmark_mutex_tokio --features hotpath --release
-```
-
-##### async-lock Mutex
-
-```bash
 cargo run -p test-mutex-async-lock --example benchmark_mutex_async_lock --features hotpath --release
-```
-
-##### std RwLock
-
-```bash
 cargo run -p test-rw-lock-std --example benchmark_rw_lock_std --features hotpath --release
-```
-
-##### tokio RwLock
-
-```bash
 cargo run -p test-rw-lock-tokio --example benchmark_rw_lock_tokio --features hotpath --release
-```
-
-##### parking_lot RwLock
-
-```bash
 cargo run -p test-rw-lock-parking-lot --example benchmark_rw_lock_parking_lot --features hotpath --release
-```
-
-##### async-lock RwLock
-
-```bash
 cargo run -p test-rw-lock-async-lock --example benchmark_rw_lock_async_lock --features hotpath --release
 ```
 
 #### Channels
 
-Each channel backend has a dedicated crate with a `benchmark_channel_*` example that hammers a single instrumented channel with send/recv cycles in a tight, uncontended loop, so the measured time reflects per-operation instrumentation overhead. The iteration count defaults to 1,000,000 and is configurable via `HOTPATH_CHANNEL_BENCH_RUNS`.
-
-For each backend, run with `--features hotpath` to measure with instrumentation, and omit it to measure the uninstrumented baseline.
-
-##### std channel
-
 ```bash
 cargo run -p test-channels-std --example benchmark_channel_std --features hotpath --release
-```
-
-##### crossbeam channel
-
-```bash
 cargo run -p test-channels-crossbeam --example benchmark_channel_crossbeam --features hotpath --release
-```
-
-##### tokio channel
-
-```bash
 cargo run -p test-channels-tokio --example benchmark_channel_tokio --features hotpath --release
-```
-
-##### futures-channel
-
-```bash
 cargo run -p test-channels-ftc --example benchmark_channel_ftc --features hotpath --release
-```
-
-##### async-channel
-
-```bash
 cargo run -p test-channels-asc --example benchmark_channel_asc --features hotpath --release
-```
-
-##### flume channel
-
-```bash
 cargo run -p test-channels-flume --example benchmark_channel_flume --features hotpath --release
 ```
 
-#### Futures
-
-The `benchmark_future` example wraps a trivial ready future with the `future!` macro in a tight loop, so the measured time reflects per-future instrumentation overhead. The iteration count defaults to 1,000,000 and is configurable via `HOTPATH_FUTURE_BENCH_RUNS`.
-
-Run with `--features hotpath` to measure with instrumentation, and omit it to measure the uninstrumented baseline.
+#### Futures and Streams
 
 ```bash
 cargo run -p test-futures --example benchmark_future --features hotpath --release
-```
-
-#### Streams
-
-The `benchmark_stream` example wraps a long iterator stream with the `stream!` macro and drains it in a tight loop, so the measured time reflects per-item instrumentation overhead. The iteration count defaults to 1,000,000 and is configurable via `HOTPATH_STREAM_BENCH_RUNS`.
-
-Run with `--features hotpath` to measure with instrumentation, and omit it to measure the uninstrumented baseline.
-
-```bash
 cargo run -p test-streams --example benchmark_stream --features hotpath --release
 ```
 
@@ -185,7 +105,7 @@ cargo install --locked samply
 #### Timing
 
 ```bash
-cargo build --example benchmark_noop --features hotpath --profile profiling && HOTPATH_BENCHMARK_NOOP_RUNS=5000000 samply record './target/profiling/examples/benchmark_noop'
+cargo build --example benchmark_noop --features hotpath --profile profiling && HOTPATH_BENCH_RUNS=5000000 samply record './target/profiling/examples/benchmark_noop'
 ```
 
 #### Allocations

@@ -27,7 +27,7 @@ fn main() {
 }
 
 fn bench_runs() -> u64 {
-    std::env::var("HOTPATH_CHANNEL_BENCH_RUNS")
+    std::env::var("HOTPATH_BENCH_RUNS")
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(1_000_000)
