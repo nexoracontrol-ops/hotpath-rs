@@ -83,7 +83,7 @@ impl<T> Mutex<T> {
         wait_nanos: u64,
     ) -> MutexGuard<'a, T> {
         MutexGuard {
-            inner,
+            inner: Some(inner),
             start: Instant::now(),
             wait_nanos,
             id: self.id,
@@ -95,7 +95,7 @@ impl<T> Mutex<T> {
 /// Guard returned by [`Mutex::lock`]. Emits wait and acquire durations on drop.
 #[must_use = "if unused the Mutex will immediately unlock"]
 pub struct MutexGuard<'a, T> {
-    inner: std::sync::MutexGuard<'a, T>,
+    inner: Option<std::sync::MutexGuard<'a, T>>,
     start: Instant,
     wait_nanos: u64,
     id: u32,
@@ -105,18 +105,21 @@ pub struct MutexGuard<'a, T> {
 impl<T> std::ops::Deref for MutexGuard<'_, T> {
     type Target = T;
     fn deref(&self) -> &T {
-        &self.inner
+        self.inner.as_ref().expect("guard held until drop")
     }
 }
 
 impl<T> std::ops::DerefMut for MutexGuard<'_, T> {
     fn deref_mut(&mut self) -> &mut T {
-        &mut self.inner
+        self.inner.as_mut().expect("guard held until drop")
     }
 }
 
 impl<T> Drop for MutexGuard<'_, T> {
     fn drop(&mut self) {
+        // Release the real lock before stamping/sending so the held duration
+        // excludes the event-send cost and the lock frees as early as possible.
+        drop(self.inner.take());
         send_mutex_event(
             self.stats_tx,
             MutexEvent::Released {

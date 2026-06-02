@@ -87,7 +87,7 @@ impl<T> RwLock<T> {
         wait_nanos: u64,
     ) -> RwLockReadGuard<'a, T> {
         RwLockReadGuard {
-            inner,
+            inner: Some(inner),
             start: Instant::now(),
             wait_nanos,
             id: self.id,
@@ -101,7 +101,7 @@ impl<T> RwLock<T> {
         wait_nanos: u64,
     ) -> RwLockWriteGuard<'a, T> {
         RwLockWriteGuard {
-            inner,
+            inner: Some(inner),
             start: Instant::now(),
             wait_nanos,
             id: self.id,
@@ -113,7 +113,7 @@ impl<T> RwLock<T> {
 /// Guard returned by [`RwLock::read`]. Emits wait and acquire durations on drop.
 #[must_use = "if unused the RwLock will immediately unlock"]
 pub struct RwLockReadGuard<'a, T> {
-    inner: parking_lot::RwLockReadGuard<'a, T>,
+    inner: Option<parking_lot::RwLockReadGuard<'a, T>>,
     start: Instant,
     wait_nanos: u64,
     id: u32,
@@ -123,12 +123,15 @@ pub struct RwLockReadGuard<'a, T> {
 impl<T> std::ops::Deref for RwLockReadGuard<'_, T> {
     type Target = T;
     fn deref(&self) -> &T {
-        &self.inner
+        self.inner.as_ref().expect("guard held until drop")
     }
 }
 
 impl<T> Drop for RwLockReadGuard<'_, T> {
     fn drop(&mut self) {
+        // Release the real lock before stamping/sending so the held duration
+        // excludes the event-send cost and the lock frees as early as possible.
+        drop(self.inner.take());
         send_rw_lock_event(
             self.stats_tx,
             RwLockEvent::Released {
@@ -144,7 +147,7 @@ impl<T> Drop for RwLockReadGuard<'_, T> {
 /// Guard returned by [`RwLock::write`]. Emits wait and acquire durations on drop.
 #[must_use = "if unused the RwLock will immediately unlock"]
 pub struct RwLockWriteGuard<'a, T> {
-    inner: parking_lot::RwLockWriteGuard<'a, T>,
+    inner: Option<parking_lot::RwLockWriteGuard<'a, T>>,
     start: Instant,
     wait_nanos: u64,
     id: u32,
@@ -154,18 +157,21 @@ pub struct RwLockWriteGuard<'a, T> {
 impl<T> std::ops::Deref for RwLockWriteGuard<'_, T> {
     type Target = T;
     fn deref(&self) -> &T {
-        &self.inner
+        self.inner.as_ref().expect("guard held until drop")
     }
 }
 
 impl<T> std::ops::DerefMut for RwLockWriteGuard<'_, T> {
     fn deref_mut(&mut self) -> &mut T {
-        &mut self.inner
+        self.inner.as_mut().expect("guard held until drop")
     }
 }
 
 impl<T> Drop for RwLockWriteGuard<'_, T> {
     fn drop(&mut self) {
+        // Release the real lock before stamping/sending so the held duration
+        // excludes the event-send cost and the lock frees as early as possible.
+        drop(self.inner.take());
         send_rw_lock_event(
             self.stats_tx,
             RwLockEvent::Released {
