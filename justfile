@@ -48,6 +48,21 @@ test_all:
 server: docs
     cd crates/hotpath-backend && cargo run --bin server
 
+# Watch backend sources and auto-restart the server on changes
+watch-server: docs
+    stop_server() { [ -f /tmp/hotpath-server.pid ] && kill "$(cat /tmp/hotpath-server.pid)" 2>/dev/null; pkill -f 'target/debug/server' 2>/dev/null; true; }; \
+    start_server() { (cd crates/hotpath-backend && cargo run --bin server) & echo $! > /tmp/hotpath-server.pid; }; \
+    rebuild_docs() { (cd crates/hotpath-backend/html_src && mdbook build) && cargo run -p hotpath-backend --bin clean-html-links crates/hotpath-backend/html; }; \
+    trap 'stop_server; exit 0' INT TERM; \
+    start_server; \
+    fswatch -o --latency 1 -e ".*" -i "\.rs$" -i "\.md$" -i "\.css$" -i "\.js$" crates/hotpath-backend/src crates/hotpath-backend/html_src/src | while read -r _; do \
+        while read -r -t 1 _; do :; done; \
+        echo "Change detected, rebuilding docs and restarting server..."; \
+        rebuild_docs; \
+        stop_server; \
+        start_server; \
+    done
+
 # Build mdbook docs and clean .html links
 docs:
     cd crates/hotpath-backend/html_src && mdbook build
