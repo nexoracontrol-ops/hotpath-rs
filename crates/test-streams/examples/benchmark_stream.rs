@@ -12,10 +12,17 @@ fn main() {
             .build();
 
         let runs = bench_runs();
-        let mut s = hotpath::stream!(stream::iter(0..runs), label = "counter");
+        let mut s = hotpath::stream!(
+            stream::iter(0..runs).map(|v| {
+                spin_1us();
+                v
+            }),
+            label = "counter"
+        );
 
         let start = Instant::now();
         while let Some(v) = s.next().await {
+            spin_1us();
             std::hint::black_box(v);
         }
         let elapsed = start.elapsed();
@@ -27,9 +34,17 @@ fn main() {
     })
 }
 
+#[inline(never)]
+fn spin_1us() {
+    let start = Instant::now();
+    while start.elapsed().as_nanos() < 1000 {
+        std::hint::spin_loop();
+    }
+}
+
 fn bench_runs() -> u64 {
     std::env::var("HOTPATH_BENCH_RUNS")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(1_000_000)
+        .unwrap_or(100_000)
 }

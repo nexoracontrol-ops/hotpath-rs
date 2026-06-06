@@ -15,6 +15,7 @@ fn main() {
         let start = Instant::now();
         for i in 0..runs {
             tx.send_async(i).await.unwrap();
+            spin_1us();
             rx.recv_async().await.unwrap();
         }
         let elapsed = start.elapsed();
@@ -26,9 +27,17 @@ fn main() {
     })
 }
 
+#[inline(never)]
+fn spin_1us() {
+    let start = Instant::now();
+    while start.elapsed().as_nanos() < 1000 {
+        std::hint::spin_loop();
+    }
+}
+
 fn bench_runs() -> u64 {
     std::env::var("HOTPATH_BENCH_RUNS")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(1_000_000)
+        .unwrap_or(100_000)
 }

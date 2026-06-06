@@ -15,6 +15,7 @@ fn main() {
     for _ in 0..runs {
         let mut w = lock.write();
         *w += 1;
+        spin_1us();
     }
     let write_elapsed = start.elapsed();
 
@@ -23,6 +24,7 @@ fn main() {
     for _ in 0..runs {
         let r = lock.read();
         acc = acc.wrapping_add(*r);
+        spin_1us();
     }
     let read_elapsed = start.elapsed();
 
@@ -37,9 +39,17 @@ fn main() {
     println!("Final value: {}, read acc: {acc}", *lock.read());
 }
 
+#[inline(never)]
+fn spin_1us() {
+    let start = Instant::now();
+    while start.elapsed().as_nanos() < 1000 {
+        std::hint::spin_loop();
+    }
+}
+
 fn bench_runs() -> u64 {
     std::env::var("HOTPATH_BENCH_RUNS")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(1_000_000)
+        .unwrap_or(100_000)
 }

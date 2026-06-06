@@ -15,6 +15,7 @@ fn main() {
     for _ in 0..runs {
         let mut v = lock.lock().unwrap();
         *v += 1;
+        spin_1us();
     }
     let elapsed = start.elapsed();
 
@@ -25,9 +26,17 @@ fn main() {
     println!("Final value: {}", *lock.lock().unwrap());
 }
 
+#[inline(never)]
+fn spin_1us() {
+    let start = Instant::now();
+    while start.elapsed().as_nanos() < 1000 {
+        std::hint::spin_loop();
+    }
+}
+
 fn bench_runs() -> u64 {
     std::env::var("HOTPATH_BENCH_RUNS")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(1_000_000)
+        .unwrap_or(100_000)
 }

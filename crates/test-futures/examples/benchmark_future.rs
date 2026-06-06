@@ -14,7 +14,15 @@ async fn main() {
 
     let start = Instant::now();
     for i in 0..runs {
-        let v = future!(async move { i }, label = "counter").await;
+        let v = future!(
+            async move {
+                spin_1us();
+                i
+            },
+            label = "counter"
+        )
+        .await;
+        spin_1us();
         std::hint::black_box(v);
     }
     let elapsed = start.elapsed();
@@ -25,9 +33,17 @@ async fn main() {
     );
 }
 
+#[inline(never)]
+fn spin_1us() {
+    let start = Instant::now();
+    while start.elapsed().as_nanos() < 1000 {
+        std::hint::spin_loop();
+    }
+}
+
 fn bench_runs() -> u64 {
     std::env::var("HOTPATH_BENCH_RUNS")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(1_000_000)
+        .unwrap_or(100_000)
 }
