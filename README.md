@@ -11,13 +11,15 @@ Try the TUI demo via SSH - no installation required:
 ssh demo.hotpath.rs
 ```
 
-**Coming soon: Hotpath Team**
+## Coming soon: Hotpath Team
 
 **Every Rust pull request gets a performance review.** See exactly what changed between commits and where to look next.
 
-[![Join waitlist with GitHub](https://img.shields.io/badge/Join%20waitlist-with%20GitHub-6f42c1?logo=github&logoColor=white)](https://hotpath.rs/auth/github/login)
+[<img src="media/join-waitlist-github.png" alt="Join waitlist with GitHub" width="240px">](https://hotpath.rs/auth/github/login)
 
 We'll only email you when early access becomes available. Or follow [@_pawurb](https://x.com/_pawurb) on X for development updates.
+
+---
 
 Explore the full documentation at [hotpath.rs](https://hotpath.rs). See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
