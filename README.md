@@ -57,6 +57,7 @@ https://github.com/user-attachments/assets/2e890417-2b43-4b1b-8657-a5ef3b458153
 - [ ] [Instrument AsyncRead/AsyncWrite and Read/Write wrappers](https://github.com/pawurb/hotpath-rs/issues/379)
 - [ ] [`hotpath::channel!` timing histogram](https://github.com/pawurb/hotpath-rs/issues/299)
 - [ ] `hotpath::channel!(..., precise = true)` 
+- [ ] `hotpath::sql!(...)` 
 - [ ] `ENV['HOTPATH_DISABLE_TIMING']`
 
 ## Getting Started
