@@ -2,12 +2,9 @@
 
 use std::sync::RwLock as StdRwLock;
 
-use crossbeam_channel::Sender as CbSender;
-
 use crate::instant::Instant;
 use crate::rw_locks::{
-    elapsed_nanos, register_rw_lock, send_rw_lock_event, InstrumentRwLock, RegisteredRwLock,
-    RwLockEvent, RwLockKind,
+    elapsed_nanos, register_rw_lock, send_rw_lock_event, InstrumentRwLock, RwLockEvent, RwLockKind,
 };
 
 /// Instrumented drop-in replacement for [`std::sync::RwLock`].
@@ -16,7 +13,6 @@ use crate::rw_locks::{
 pub struct RwLock<T> {
     inner: StdRwLock<T>,
     id: u32,
-    stats_tx: CbSender<RwLockEvent>,
 }
 
 impl<T> RwLock<T> {
@@ -37,12 +33,8 @@ impl<T> RwLock<T> {
         source: &'static str,
         label: Option<String>,
     ) -> Self {
-        let RegisteredRwLock { id, stats_tx } = register_rw_lock::<T>(source, label);
-        Self {
-            inner,
-            id,
-            stats_tx,
-        }
+        let id = register_rw_lock::<T>(source, label);
+        Self { inner, id }
     }
 
     pub fn read(&self) -> std::sync::LockResult<RwLockReadGuard<'_, T>> {
@@ -101,30 +93,28 @@ impl<T> RwLock<T> {
     }
 
     fn read_guard<'a>(
-        &self,
+        &'a self,
         inner: std::sync::RwLockReadGuard<'a, T>,
         wait_nanos: u64,
     ) -> RwLockReadGuard<'a, T> {
         RwLockReadGuard {
-            inner,
+            inner: Some(inner),
             start: Instant::now(),
             wait_nanos,
             id: self.id,
-            stats_tx: self.stats_tx.clone(),
         }
     }
 
     fn write_guard<'a>(
-        &self,
+        &'a self,
         inner: std::sync::RwLockWriteGuard<'a, T>,
         wait_nanos: u64,
     ) -> RwLockWriteGuard<'a, T> {
         RwLockWriteGuard {
-            inner,
+            inner: Some(inner),
             start: Instant::now(),
             wait_nanos,
             id: self.id,
-            stats_tx: self.stats_tx.clone(),
         }
     }
 }
@@ -132,68 +122,70 @@ impl<T> RwLock<T> {
 /// Guard returned by [`RwLock::read`]. Emits wait and acquire durations on drop.
 #[must_use = "if unused the RwLock will immediately unlock"]
 pub struct RwLockReadGuard<'a, T> {
-    inner: std::sync::RwLockReadGuard<'a, T>,
+    inner: Option<std::sync::RwLockReadGuard<'a, T>>,
     start: Instant,
     wait_nanos: u64,
     id: u32,
-    stats_tx: CbSender<RwLockEvent>,
 }
 
 impl<T> std::ops::Deref for RwLockReadGuard<'_, T> {
     type Target = T;
     fn deref(&self) -> &T {
-        &self.inner
+        self.inner.as_ref().expect("guard held until drop")
     }
 }
 
 impl<T> Drop for RwLockReadGuard<'_, T> {
     fn drop(&mut self) {
-        send_rw_lock_event(
-            &self.stats_tx,
-            RwLockEvent::Released {
-                id: self.id,
-                kind: RwLockKind::Read,
-                wait_nanos: self.wait_nanos,
-                acquire_nanos: elapsed_nanos(self.start),
-            },
-        );
+        // Release the real lock before stamping/sending so the held duration
+        // excludes the event-send cost and the lock frees as early as possible.
+        drop(self.inner.take());
+        let now = Instant::now();
+        send_rw_lock_event(RwLockEvent::Released {
+            id: self.id,
+            kind: RwLockKind::Read,
+            wait_nanos: self.wait_nanos,
+            acquire_nanos: now.duration_since(self.start).as_nanos() as u64,
+            elapsed_ns: crate::lib_on::elapsed_since_start_ns(now),
+        });
     }
 }
 
 /// Guard returned by [`RwLock::write`]. Emits wait and acquire durations on drop.
 #[must_use = "if unused the RwLock will immediately unlock"]
 pub struct RwLockWriteGuard<'a, T> {
-    inner: std::sync::RwLockWriteGuard<'a, T>,
+    inner: Option<std::sync::RwLockWriteGuard<'a, T>>,
     start: Instant,
     wait_nanos: u64,
     id: u32,
-    stats_tx: CbSender<RwLockEvent>,
 }
 
 impl<T> std::ops::Deref for RwLockWriteGuard<'_, T> {
     type Target = T;
     fn deref(&self) -> &T {
-        &self.inner
+        self.inner.as_ref().expect("guard held until drop")
     }
 }
 
 impl<T> std::ops::DerefMut for RwLockWriteGuard<'_, T> {
     fn deref_mut(&mut self) -> &mut T {
-        &mut self.inner
+        self.inner.as_mut().expect("guard held until drop")
     }
 }
 
 impl<T> Drop for RwLockWriteGuard<'_, T> {
     fn drop(&mut self) {
-        send_rw_lock_event(
-            &self.stats_tx,
-            RwLockEvent::Released {
-                id: self.id,
-                kind: RwLockKind::Write,
-                wait_nanos: self.wait_nanos,
-                acquire_nanos: elapsed_nanos(self.start),
-            },
-        );
+        // Release the real lock before stamping/sending so the held duration
+        // excludes the event-send cost and the lock frees as early as possible.
+        drop(self.inner.take());
+        let now = Instant::now();
+        send_rw_lock_event(RwLockEvent::Released {
+            id: self.id,
+            kind: RwLockKind::Write,
+            wait_nanos: self.wait_nanos,
+            acquire_nanos: now.duration_since(self.start).as_nanos() as u64,
+            elapsed_ns: crate::lib_on::elapsed_since_start_ns(now),
+        });
     }
 }
 
