@@ -52,9 +52,10 @@ https://github.com/user-attachments/assets/2e890417-2b43-4b1b-8657-a5ef3b458153
 
 ## Current roadmap
 
-- [ ] [`hotpath::channel!/stream!/future!` events batching](https://github.com/pawurb/hotpath-rs/issues/345)
+- [x] [`hotpath::channel!/stream!/future!` events batching](https://github.com/pawurb/hotpath-rs/issues/345)
+- [x] [`hotpath::mutex!/rw_lock!`](https://github.com/pawurb/hotpath-rs/issues/340)
+- [ ] [Instrument AsyncRead/AsyncWrite and Read/Write wrappers](https://github.com/pawurb/hotpath-rs/issues/379)
 - [ ] [`hotpath::channel!` timing histogram](https://github.com/pawurb/hotpath-rs/issues/299)
-- [ ] [`hotpath::mutex!/rw_lock!`](https://github.com/pawurb/hotpath-rs/issues/340)
 - [ ] `hotpath::channel!(..., precise = true)` 
 - [ ] `ENV['HOTPATH_DISABLE_TIMING']`
 
