@@ -7,9 +7,6 @@ hotpath_report.json
 *.json
 log/
 tmp/
-crates/hotpath-backend/ansible*
-crates/hotpath-backend/certs/
-crates/hotpath-backend/html/
+docs/book/
 *.json.gz
-*.json
 

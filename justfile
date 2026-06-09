@@ -44,45 +44,16 @@ test_all:
     cargo test --features hotpath --test futures -- --nocapture --test-threads=1
     cargo test --features hotpath --test debug -- --nocapture --test-threads=1
 
-# Start the dev server
-server: docs
-    cd crates/hotpath-backend && cargo run --bin server
-
-# Watch backend sources and auto-restart the server on changes
-watch-server: docs
-    stop_server() { [ -f /tmp/hotpath-server.pid ] && kill "$(cat /tmp/hotpath-server.pid)" 2>/dev/null; pkill -f 'target/debug/server' 2>/dev/null; true; }; \
-    start_server() { (cd crates/hotpath-backend && cargo run --bin server) & echo $! > /tmp/hotpath-server.pid; }; \
-    rebuild_docs() { (cd crates/hotpath-backend/html_src && mdbook build) && cargo run -p hotpath-backend --bin clean-html-links crates/hotpath-backend/html; }; \
-    trap 'stop_server; exit 0' INT TERM; \
-    start_server; \
-    fswatch -o --latency 1 -e ".*" -i "\.rs$" -i "\.md$" -i "\.css$" -i "\.js$" crates/hotpath-backend/src crates/hotpath-backend/html_src/src | while read -r _; do \
-        while read -r -t 1 _; do :; done; \
-        echo "Change detected, rebuilding docs and restarting server..."; \
-        rebuild_docs; \
-        stop_server; \
-        start_server; \
-    done
-
-# Build mdbook docs and clean .html links
+# Serve the mdbook docs locally with live reload (http://localhost:3000).
+# The production server + deploy live in the private hotpath-backend repo.
 docs:
-    cd crates/hotpath-backend/html_src && mdbook build
-    cargo run -p hotpath-backend --bin clean-html-links crates/hotpath-backend/html
-
-# Deploy to remote server
-deploy: docs
-    cd crates/hotpath-backend && ./deploy.sh
-
-# Deploy, restart server, and purge cache
-release: deploy
-    cd crates/hotpath-backend && ./remote/restart.sh
-    just clean-cache
-    echo "Release deployed and server restarted"
+    cd docs && mdbook serve --open
 
 # Fetch GitHub star badges locally for documentation
 fetch-badges:
     #!/usr/bin/env bash
     set -euo pipefail
-    DIR="crates/hotpath-backend/html_src/src/images"
+    DIR="docs/src/images"
     fetch() { sleep 2; echo "Fetching $2..."; curl -sL "https://img.shields.io/github/stars/${2}?style=social" -o "${DIR}/stars-${1}.svg"; }
     fetch apache-opendal apache/opendal
     fetch apache-horaedb apache/horaedb
@@ -93,20 +64,6 @@ fetch-badges:
     fetch pawurb-hotpath-rs pawurb/hotpath-rs
 
     echo "Badges saved to ${DIR}/"
-
-# Benchmark the documentation server
-bench_docs: docs
-    bash scripts/bench_docs.sh
-
-# Purge Cloudflare cache
-clean-cache:
-    #!/usr/bin/env bash
-    source crates/hotpath-backend/.envrc
-    curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
-        -H "X-Auth-Email: ${CLOUDFLARE_EMAIL}" \
-        -H "X-Auth-Key: ${CLOUDFLARE_API_KEY}" \
-        -H "Content-Type: application/json" \
-        --data '{"purge_everything":true}'
 
 cargo-publish:
     cargo publish -p hotpath-macros-meta

@@ -44,7 +44,6 @@ import re, pathlib
 drop = (
     "crates/hotpath-meta",
     "crates/hotpath-macros-meta",
-    "crates/hotpath-backend",
     "crates/test-tokio-async",
     "crates/test-smol-async",
     "crates/test-all-features",

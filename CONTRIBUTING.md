@@ -114,9 +114,9 @@ cargo build --example benchmark_noop --features hotpath --profile profiling && H
 cargo build --example benchmark_alloc --features='hotpath,hotpath-alloc' --profile profiling && samply record './target/profiling/examples/benchmark_alloc'
 ```
 
-## Running documentation server
+## Building the documentation
 
-Install the dependencies:
+The mdBook source lives in `docs/`. Install the dependencies:
 
 - https://github.com/rust-lang/mdBook
 - https://github.com/pawurb/mdbook-reading-time 
@@ -128,7 +128,11 @@ cargo install mdbook-reading-time
 cargo install mdbook-assets-hash
 ```
 
-`just server` - run the documentation server on `http://localhost:3001`
+`just docs` - start the mdBook dev server with live reload on `http://localhost:3000`
+(opens your browser automatically; rebuilds on file changes).
+
+The Axum web server that builds and serves the production `hotpath.rs` site lives in a
+separate private repository and is not part of this repo.
 
 ## CI checks
 
@@ -199,7 +203,6 @@ just test_all
 | `hotpath-meta` | Mirror of the `hotpath` library, used to profile the profiler itself. |
 | `hotpath-macros` | Procedural macros (`#[measure]`, `#[main]`, `#[future_fn]`, etc.) |
 | `hotpath-macros-meta` | Mirror of the `hotpath-macros` library, used to profile the profiler itself. |
-| `hotpath-backend` | Axum web server with mdbook for the `hotpath.rs` documentation site |
 | `test-tokio-async` | Integration tests and examples using the Tokio runtime |
 | `test-smol-async` | Integration tests and examples using the smol runtime |
 | `test-all-features` | Tests with all feature flags enabled |
