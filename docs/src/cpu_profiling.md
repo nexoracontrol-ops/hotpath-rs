@@ -1,6 +1,6 @@
 # CPU profiling
 
-In addition to execution time and allocations tracking, `hotpath` also supports CPU sampling. By comparing different profiling reports, you can determine whether a bottleneck is I/O-bound, CPU-bound, or memory-bound. See [Sampling comparison](/sampling_comparison) for a detailed explanation of how the profiling modes differ.
+In addition to execution time and allocations tracking, `hotpath` also supports CPU sampling. By comparing different profiling reports, you can determine whether a bottleneck is I/O-bound, CPU-bound, or memory-bound. See [Sampling comparison](/blog/sampling_comparison) for a detailed explanation of how the profiling modes differ.
 
 CPU profiling uses [samply](https://github.com/mstange/samply) and requires some additional system configuration.
 

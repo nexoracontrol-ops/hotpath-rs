@@ -39,18 +39,6 @@
     "hash": "e921d5ce",
     "hashed_path": "images/mevlog-enable-cache.e921d5ce.png"
   },
-  "images/samply-async-io.png": {
-    "hash": "55fe660f",
-    "hashed_path": "images/samply-async-io.55fe660f.png"
-  },
-  "images/samply-blocking-io.png": {
-    "hash": "47b452c0",
-    "hashed_path": "images/samply-blocking-io.47b452c0.png"
-  },
-  "images/samply-cpu.png": {
-    "hash": "9f7ebcb0",
-    "hashed_path": "images/samply-cpu.9f7ebcb0.png"
-  },
   "images/samply-report.png": {
     "hash": "90b6b5e8",
     "hashed_path": "images/samply-report.90b6b5e8.png"
@@ -90,10 +78,6 @@
   "images/threads-view.png": {
     "hash": "c5354828",
     "hashed_path": "images/threads-view.c5354828.png"
-  },
-  "images/tokio-threads.png": {
-    "hash": "0fb3c8ea",
-    "hashed_path": "images/tokio-threads.0fb3c8ea.png"
   },
   "videos/hotpath-live-dashboard.mp4": {
     "hash": "990d1b92",

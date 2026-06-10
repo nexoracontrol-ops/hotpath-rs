@@ -64,7 +64,10 @@
     text-shadow: 0 0 12px rgba(255, 180, 84, 0.45);
 }
 
-.hp-navlink {
+/* :visited variants needed throughout — mdbook's `a:visited { color: var(--links) }`
+   otherwise out-specifies the plain class and turns visited items blue */
+.hp-navlink,
+.hp-navlink:visited {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -95,7 +98,8 @@
     transition: opacity 0.15s ease;
 }
 
-.hp-navlink.active {
+.hp-navlink.active,
+.hp-navlink.active:visited {
     color: var(--hp-ember);
 }
 
@@ -108,6 +112,33 @@
 .hp-navlink:focus-visible {
     outline: 2px solid var(--hp-ember);
     outline-offset: -2px;
+}
+
+/* Site footer — markup lives in the shared index.hbs, so its styles belong
+   here (loaded by both the docs and blog books) */
+.site-footer {
+    margin-top: 3rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--quote-border);
+    text-align: center;
+    color: var(--inline-code-color);
+    font-size: 1.4rem;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+.site-footer a,
+.site-footer a:link,
+.site-footer a:visited {
+    color: var(--inline-code-color);
+    text-decoration: none;
+    -webkit-text-fill-color: var(--inline-code-color);
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
 }
 
 /* Push mdbook's fixed sidebar and sticky menu-bar below the visible part

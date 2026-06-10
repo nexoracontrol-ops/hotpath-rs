@@ -17,31 +17,6 @@
     }
 }
 
-.site-footer {
-    margin-top: 3rem;
-    padding: 1.5rem 0;
-    border-top: 1px solid var(--quote-border);
-    text-align: center;
-    color: var(--inline-code-color);
-    font-size: 1.4rem;
-}
-
-.site-footer p {
-    margin: 0;
-}
-
-.site-footer a,
-.site-footer a:link,
-.site-footer a:visited {
-    color: var(--inline-code-color);
-    text-decoration: none;
-    -webkit-text-fill-color: var(--inline-code-color);
-}
-
-.site-footer a:hover {
-    text-decoration: underline;
-}
-
 /* Hero Row */
 .hero-row {
     display: flex;

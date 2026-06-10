@@ -1,7 +1,6 @@
 # Summary
 
 - [Introduction](./introduction.md)
-- [Sampling Comparison](./sampling_comparison.md)
 - [Profiling modes](./profiling_modes.md)
 - [Functions](./functions.md)
 - [CPU profiling](./cpu_profiling.md)

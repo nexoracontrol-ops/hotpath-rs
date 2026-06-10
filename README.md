@@ -167,7 +167,7 @@ threads - Thread CPU and memory statistics. (RSS: 7.8 MB, Alloc: 2.1 MB, Dealloc
 
 See the full docs and advanced config tutorials at [hotpath.rs](https://hotpath.rs).
 
-- [Sampling Comparison](https://hotpath.rs/sampling_comparison) - when to use `hotpath` vs CPU sampling profilers
+- [Sampling Comparison](https://hotpath.rs/blog/sampling_comparison) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](https://hotpath.rs/profiling_modes) - static reports vs live TUI dashboard
 - [Functions](https://hotpath.rs/functions) - measure execution time and memory allocations
 - [CPU profiling](https://hotpath.rs/cpu_profiling) - attribute CPU samples to instrumented functions
