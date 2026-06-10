@@ -11,16 +11,6 @@ Try the TUI demo via SSH - no installation required:
 ssh demo.hotpath.rs
 ```
 
-## Coming soon: Hotpath Team
-
-**Every Rust pull request gets a performance review.** See exactly what changed between commits, based on reproducible signals - not CI noise.
-
-[<img src="media/join-waitlist-github.png" alt="Join waitlist with GitHub" width="240px">](https://hotpath.rs/auth/github/login)
-
-We'll only email you when early access becomes available. Or follow [@_pawurb](https://x.com/_pawurb) on X for development updates.
-
----
-
 Explore the full documentation at [hotpath.rs](https://hotpath.rs). See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
 You can use it to produce one-off performance (timing, memory or CPU) reports:
@@ -49,6 +39,14 @@ https://github.com/user-attachments/assets/2e890417-2b43-4b1b-8657-a5ef3b458153
 - **Tokio runtime monitoring** - track worker thread utilization, task scheduling, and queue depths.
 - **MCP server for AI agents** - built-in [Model Context Protocol](https://modelcontextprotocol.io/) server that lets LLMs query profiling data in real-time.
 - **GitHub Actions integration** - configure CI to automatically benchmark your program against a base branch for each PR.
+
+## Coming soon: Hotpath Team
+
+**Every Rust pull request gets a performance review.** See exactly what changed between commits, based on reproducible signals - not CI noise.
+
+[<img src="media/join-waitlist-github.png" alt="Join waitlist with GitHub" width="240px">](https://hotpath.rs/auth/github/login)
+
+We'll only email you when early access becomes available. Or follow [@_pawurb](https://x.com/_pawurb) on X for development updates.
 
 ## Current roadmap
 
