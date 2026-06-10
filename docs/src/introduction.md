@@ -2,9 +2,7 @@
 
 <div class="hero-badges">
   <a href="https://github.com/pawurb/hotpath-rs" target="_blank"><img src="{{#asset-hash images/stars-pawurb-hotpath-rs.svg}}" alt="GitHub Stars"></a>
-  <a href="https://crates.io/crates/hotpath" target="_blank"><img src="https://img.shields.io/crates/v/hotpath.svg?cacheSeconds=86400" alt="crates.io version"></a>
   <a href="https://crates.io/crates/hotpath" target="_blank"><img src="https://img.shields.io/crates/d/hotpath?cacheSeconds=86400" alt="crates.io downloads"></a>
-  <a href="/sponsorship"><img src="https://img.shields.io/badge/Sponsor-hotpath--rs-6f42c1" alt="Sponsor hotpath-rs"></a>
 </div>
 
 <div class="hero-row">
@@ -227,7 +225,6 @@ threads - Thread CPU and memory statistics. (RSS: 7.8 MB, Alloc: 2.1 MB, Dealloc
 
 Explore the docs for customization options and advanced profiling features.
 
-- [Sampling Comparison](/blog/sampling_comparison) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](./profiling_modes.html) - static reports vs live TUI dashboard
 - [Functions](./functions.html) - measure execution time and memory allocations
 - [CPU profiling](./cpu_profiling.html) - attribute CPU samples to instrumented functions
