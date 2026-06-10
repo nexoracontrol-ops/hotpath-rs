@@ -1,16 +1,25 @@
 # Summary
 
-- [Introduction](./introduction.md)
+[Introduction](./introduction.md)
+
+# Profiling
+
 - [Profiling modes](./profiling_modes.md)
 - [Functions](./functions.md)
 - [CPU profiling](./cpu_profiling.md)
-- [A/B benchmarks](./benchmarks.md)
-- [Async Data Flow](./data_flow.md)
-- [Debug & Metrics](./debug.md)
 - [Threads](./threads.md)
+- [Async Data Flow](./data_flow.md)
 - [Tokio Runtime](./tokio_runtime.md)
-- [MCP integration](./mcp.md)
+- [Debug & Metrics](./debug.md)
+
+# More
+
+- [A/B benchmarks](./benchmarks.md)
 - [GitHub CI integration](./github_ci.md)
+- [MCP integration](./mcp.md)
 - [Configuration](./configuration.md)
-- [Sponsorship](./sponsorship.md)
-- [Terms](./terms.md)
+
+---
+
+[Sponsorship](./sponsorship.md)
+[Terms](./terms.md)
