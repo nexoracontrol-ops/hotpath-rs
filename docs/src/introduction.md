@@ -222,6 +222,7 @@ cargo install hotpath --features='tui' --version '^{{HOTPATH_VERSION}}'
 
 Explore the docs for customization options and advanced profiling features.
 
+- [Sampling Comparison](/blog/sampling_comparison) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](./profiling_modes.html) - static reports vs live TUI dashboard
 - [Functions](./functions.html) - measure execution time and memory allocations
 - [CPU profiling](./cpu_profiling.html) - attribute CPU samples to instrumented functions
