@@ -2,6 +2,11 @@
     color: #ffb454 !important;
 }
 
+.content p,
+.content li {
+    line-height: 1.6;
+}
+
 .ferris-img {
     float: left;
     margin-right: 15px;
