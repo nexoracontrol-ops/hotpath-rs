@@ -5,7 +5,7 @@
 
     params.delete("waitlist");
     const qs = params.toString();
-    history.replaceState({}, "", window.location.pathname + (qs ? "?" + qs : ""));
+    history.replaceState({}, "", window.location.pathname + (qs ? "?" + qs : "") + window.location.hash);
 
     if (status === "joined") {
         const card = document.querySelector(".waitlist-card");

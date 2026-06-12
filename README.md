@@ -15,11 +15,11 @@ Explore the full documentation at [hotpath.rs](https://hotpath.rs). See [CONTRIB
 
 You can use it to produce one-off performance (timing, memory or CPU) reports:
 
-![hotpath alloc report](media/hotpath-alloc-report.png)
+![hotpath alloc report](media/hotpath-alloc-report2.png)
 
 compare performance between different app versions:
 
-![hotpath-rs showing performance diff between different git commits](media/compare-perf.png)
+![hotpath-rs showing performance diff between different git commits](media/compare-perf2.png)
 
 or use the live TUI dashboard to monitor real-time performance metrics with debug info:
 

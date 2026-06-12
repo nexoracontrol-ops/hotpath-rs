@@ -173,7 +173,3 @@ cargo run --features='hotpath,hotpath-alloc'
 By default, allocation tracking is **exclusive**, meaning each function only reports allocations made directly at its own level, excluding nested instrumented calls.
 
 To switch to **cumulative** mode (where a function's allocation count includes all allocations from nested instrumented calls), set `HOTPATH_ALLOC_CUMULATIVE=true`. Note that cumulative mode produces invalid results for recursive functions because the same allocations are counted multiple times as they propagate up through each recursive frame.
-
-## Nightly features
-
-When Rust stabilizes [`#![feature(proc_macro_hygiene)]`](https://doc.rust-lang.org/beta/unstable-book/language-features/proc-macro-hygiene.html?highlight=proc_macro_hygiene#proc_macro_hygiene) and [`#![feature(custom_inner_attributes)]`](https://doc.rust-lang.org/beta/unstable-book/language-features/custom-inner-attributes.html), it will be possible to use `#![measure_all]` as an inner attribute directly inside module files (e.g., at the top of `math_operations.rs`) to automatically instrument all functions in that module.
