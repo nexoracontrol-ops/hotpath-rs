@@ -40,16 +40,6 @@ https://github.com/user-attachments/assets/2e890417-2b43-4b1b-8657-a5ef3b458153
 - **MCP server for AI agents** - built-in [Model Context Protocol](https://modelcontextprotocol.io/) server that lets LLMs query profiling data in real-time.
 - **GitHub Actions integration** - configure CI to automatically benchmark your program against a base branch for each PR.
 
-## Coming soon: Hotpath Team
-
-**Every Rust pull request gets a performance review.**
-
-![Hotpath Team commit timeline comparing duration, memory, HTTP and SQL metrics across commits, flagging a PR that introduced 171 new SQL calls](media/hotpath-team-poc.webp)
-
-See exactly what changed between commits, based on reproducible signals - not CI noise.
-
-[<img src="media/join-waitlist-github.png" alt="Join waitlist with GitHub" width="240px">](https://hotpath.rs/auth/github/login)
-
 ## Current roadmap
 
 - [x] [`hotpath::channel!/stream!/future!` events batching](https://github.com/pawurb/hotpath-rs/issues/345)
