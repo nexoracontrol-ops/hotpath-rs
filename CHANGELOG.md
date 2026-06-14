@@ -2,6 +2,78 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.17.0] - 2026-06-14
+
+### 🚀 Features
+
+- Initial hotpath::rw_lock! implementation [#340]
+
+- Use histogram for RwLocks timing
+
+- Instrument parking_lot::RwLock
+
+- Add RwLocks to TUI
+
+- Add async-lock RwLock support [#340]
+
+- Track wait and acquire time for RwLocks
+
+- Add tokio RwLock support
+
+- Initial hotpath::mutex! implementation
+
+- Add hotpath::mutex! support for Tokio
+
+- Add hotpath::mutex! support for async-lock
+
+- Add locks docs
+
+
+### 🐛 Bug Fixes
+
+- Add missing feature
+
+- Add deprecated hotpath::wrap::new method
+
+- Test crates features config
+
+
+### ⚡ Performance
+
+- Dont clone mutex and rw_locks stats_tx
+
+- Profile after inner guard drop
+
+- Add event batching to all resources
+
+- Use custom Instant implementation on macos
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Mutex/RwLock meta instrumentation and benchmarks
+
+- Add channels instrumentation benchmarks
+
+- Add futures and streams instrumentation benchmark
+
+- Cleanup benchmark docs
+
+- Add hotpath-alloc-meta to add test crates
+
+- Benchmark_noop black_box
+
+- Track Cargo lock file
+
+- Cargo update CI check
+
+- Add benchmarks spin wait
+
+- Update ratatui
+
+- Release 0.17.0
+
+
 ## [0.16.1] - 2026-05-17
 
 ### 🚀 Features
