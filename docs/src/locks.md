@@ -7,43 +7,6 @@
 
 Both the `rw_lock!` and `mutex!` macros are noop unless the `hotpath` feature is activated.
 
-## Wrapping changes the type
-
-`rw_lock!` and `mutex!` do not return the lock you passed in - they return an *instrumented wrapper* around it. The macro expands to a different type than the original:
-
-```rust
-// before: a plain std RwLock
-let lock: std::sync::RwLock<u32> = std::sync::RwLock::new(0);
-
-// after: the macro returns a hotpath wrapper, not std::sync::RwLock
-let lock = hotpath::rw_lock!(std::sync::RwLock::new(0u32));
-```
-
-At a `let` binding this is invisible - type inference picks up whatever the macro returns. It only matters when you need to *name* the type, for example a struct field or a function signature. There you cannot write `std::sync::RwLock<T>`, because the value is a wrapper, not an `std::sync::RwLock`.
-
-Use the `hotpath::wrap::` path instead. It mirrors the standard module layout, so you prefix the original path with `hotpath::wrap::`:
-
-```rust
-// before
-struct App {
-    counter: std::sync::RwLock<u32>,
-    name: std::sync::Mutex<String>,
-}
-
-// after - prefix the type with hotpath::wrap::
-struct App {
-    counter: hotpath::wrap::std::sync::RwLock<u32>,
-    name: hotpath::wrap::std::sync::Mutex<String>,
-}
-
-let app = App {
-    counter: hotpath::rw_lock!(std::sync::RwLock::new(0u32)),
-    name: hotpath::mutex!(std::sync::Mutex::new(String::new())),
-};
-```
-
-This is purely to keep the compiler police happy: `hotpath::wrap::std::sync::RwLock` is still noop unless the `hotpath` feature is enabled. With the feature off it is a plain re-export of `std::sync::RwLock` (zero overhead, **identical behavior**); with the feature on it resolves to the instrumented wrapper. Either way the field type lines up with what the macro returns, so the same code compiles in both configurations.
-
 ## RwLocks
 
 ### rw_lock! macro
@@ -153,3 +116,40 @@ The number of locks shown per section is unlimited by default (`0`). Cap it with
 
 - Builder: `.rw_locks_limit(n)` / `.mutexes_limit(n)`
 - Env vars: `HOTPATH_RW_LOCKS_LIMIT` / `HOTPATH_MUTEXES_LIMIT`
+
+## Wrapped types
+
+`rw_lock!` and `mutex!` do not return the lock you passed in - they return an *instrumented wrapper* around it. The macro expands to a different type than the original:
+
+```rust
+// before: a plain std RwLock
+let lock: std::sync::RwLock<u32> = std::sync::RwLock::new(0);
+
+// after: the macro returns a hotpath wrapper, not std::sync::RwLock
+let lock = hotpath::rw_lock!(std::sync::RwLock::new(0u32));
+```
+
+At a `let` binding this is invisible - type inference picks up whatever the macro returns. It only matters when you need to *name* the type, for example a struct field or a function signature. There you cannot write `std::sync::RwLock<T>`, because the value is a wrapper, not an `std::sync::RwLock`.
+
+Use the `hotpath::wrap::` path instead. It mirrors the standard module layout, so you prefix the original path with `hotpath::wrap::`:
+
+```rust
+// before
+struct App {
+    counter: std::sync::RwLock<u32>,
+    name: std::sync::Mutex<String>,
+}
+
+// after - prefix the type with hotpath::wrap::
+struct App {
+    counter: hotpath::wrap::std::sync::RwLock<u32>,
+    name: hotpath::wrap::std::sync::Mutex<String>,
+}
+
+let app = App {
+    counter: hotpath::rw_lock!(std::sync::RwLock::new(0u32)),
+    name: hotpath::mutex!(std::sync::Mutex::new(String::new())),
+};
+```
+
+This is purely to keep the compiler police happy: `hotpath::wrap::std::sync::RwLock` is still noop unless the `hotpath` feature is enabled. With the feature off it is a plain re-export of `std::sync::RwLock` (zero overhead, **identical behavior**); with the feature on it resolves to the instrumented wrapper. Either way the field type lines up with what the macro returns, so the same code compiles in both configurations.
