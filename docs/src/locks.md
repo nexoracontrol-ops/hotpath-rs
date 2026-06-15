@@ -1,5 +1,7 @@
 # Lock contention monitoring: RwLocks and Mutexes
 
+<img loading="lazy" src="{{#asset-hash images/locks-contention.png}}" alt="hotpath-rs rw_locks report showing read/write wait and acquire time statistics">
+
 `hotpath` instruments synchronization primitives to surface lock contention - one of the common and hard-to-spot causes of latency in concurrent Rust. For every acquisition it tracks two durations:
 
 - **Wait time** - how long a caller was blocked *before* the lock was granted. High wait time means contention: threads are queuing for the lock.
@@ -28,7 +30,7 @@ let lock = hotpath::rw_lock!(std::sync::RwLock::new(0u32), label = "config");
 
 ### Supported RwLock libraries
 
-`std::sync::RwLock` is instrumented by default. Enable the matching feature flag for each third-party library.
+`std::sync::RwLock` can be instrumented by default. Enable the matching feature flag for each third-party library.
 
 #### [std](https://github.com/rust-lang/rust)
 
@@ -70,7 +72,7 @@ The `label` parameter is optional; without it the lock is identified by `file:li
 
 ### Supported Mutex libraries
 
-`std::sync::Mutex` is instrumented by default. Enable the matching feature flag for each third-party library.
+`std::sync::Mutex` can be instrumented by default. Enable the matching feature flag for each third-party library.
 
 #### [std](https://github.com/rust-lang/rust)
 
@@ -89,16 +91,6 @@ Enable the `tokio` feature.
 Enable the `async-lock` feature.
 
 - [`async_lock::Mutex`](https://docs.rs/async-lock/latest/async_lock/struct.Mutex.html)
-
-## Metrics and reporting
-
-For every instrumented lock, each row shows the acquisition count plus the average and configured-percentile durations for both **wait time** and **acquire time**.
-
-**RwLocks** render as two stacked sub-tables sharing one selection cursor - reads on top, writes below (the write sub-table is skipped when there were no writes) - with four histograms per lock: read-wait, read-acquire, write-wait, write-acquire.
-
-**Mutexes** render as a single table with two histograms per lock: wait and acquire.
-
-Locks are table-only: there are no per-event logs. In the live TUI they appear under the **Data Flow** tab.
 
 ### Including locks in the report
 

@@ -35,6 +35,10 @@
     "hash": "2c7a34c6",
     "hashed_path": "images/hotpath-timing-report.2c7a34c6.png"
   },
+  "images/locks-contention.png": {
+    "hash": "540b26d4",
+    "hashed_path": "images/locks-contention.540b26d4.png"
+  },
   "images/mcp-analysis.png": {
     "hash": "d0119bf3",
     "hashed_path": "images/mcp-analysis.d0119bf3.png"
