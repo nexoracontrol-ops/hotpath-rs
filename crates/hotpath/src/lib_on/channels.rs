@@ -312,7 +312,9 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
         }
         ChannelEvent::Notified { id } => {
             if let Some(channel_stats) = state.stats.get_mut(&id) {
-                channel_stats.state = ChannelState::Notified;
+                if channel_stats.state != ChannelState::Closed {
+                    channel_stats.state = ChannelState::Notified;
+                }
             }
         }
     }
@@ -708,4 +710,25 @@ pub(crate) fn get_channel_logs(id: u32) -> Option<ChannelLogs> {
         sent_logs: entry_logs.sent_logs.iter().rev().cloned().collect(),
         received_logs: entry_logs.received_logs.iter().rev().cloned().collect(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn closed_channel_state_is_terminal() {
+        let mut entry = crate::channels::ChannelEntry::new(
+            1,
+            "test",
+            None,
+            crate::channels::ChannelType::Bounded(1),
+            "u8",
+            1,
+            0,
+        );
+        entry.state = crate::channels::ChannelState::Closed;
+
+        entry.update_state();
+
+        assert_eq!(entry.state, crate::channels::ChannelState::Closed);
+    }
 }
