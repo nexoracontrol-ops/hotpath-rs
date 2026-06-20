@@ -68,7 +68,7 @@ or use the live TUI dashboard to monitor real-time performance and data flow met
 
 ## Features
 
-- **Time, CPU & memory profiling** - identify expensive functions and allocations.
+- **Time, CPU & memory profiling** - identify expensive functions, allocation hotspots, and investigate memory leaks.
 - **Async observability** - futures, channels and streams.
 - **Concurrency metrics** - Mutex/RwLock wait time and contention.
 - **Tokio runtime monitoring** - workers, scheduling and queues.
