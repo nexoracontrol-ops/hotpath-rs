@@ -744,7 +744,7 @@ cfg_if::cfg_if! {
 macro_rules! channel {
     // Wrap mode (`wrap = true`) returns instrumented endpoint wrappers
     // (`hotpath::wrap::<backend>::{Sender, Receiver}`) for exact queue tracking.
-    // `wrap = true` must be the first option after the channel expression.
+    // `wrap`, `label`, and `log` may appear in any order.
     ($expr:expr, wrap = true) => {{
         const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
         $crate::InstrumentChannelWrap::instrument_wrap($expr, CHANNEL_ID, None, None)
@@ -776,6 +776,61 @@ macro_rules! channel {
     }};
 
     ($expr:expr, wrap = true, log = true, label = $label:expr) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            None,
+        )
+    }};
+
+    ($expr:expr, label = $label:expr, wrap = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        $crate::InstrumentChannelWrap::instrument_wrap(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            None,
+        )
+    }};
+
+    ($expr:expr, log = true, wrap = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log($expr, CHANNEL_ID, None, None)
+    }};
+
+    ($expr:expr, label = $label:expr, wrap = true, log = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            None,
+        )
+    }};
+
+    ($expr:expr, log = true, wrap = true, label = $label:expr) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            None,
+        )
+    }};
+
+    ($expr:expr, label = $label:expr, log = true, wrap = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            None,
+        )
+    }};
+
+    ($expr:expr, log = true, label = $label:expr, wrap = true) => {{
         const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
         $crate::InstrumentChannelWrapLog::instrument_wrap_log(
             $expr,
