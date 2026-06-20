@@ -98,6 +98,13 @@ pub mod wrap {
             };
         }
     }
+
+    /// Instrumented crossbeam channel endpoints for `channel!(..., wrap = true)`.
+    #[cfg(feature = "crossbeam")]
+    pub mod crossbeam {
+        #[cfg(feature = "hotpath-meta")]
+        pub use crate::lib_on::channels::wrapper::crossbeam_wrap::{Receiver, Sender};
+    }
 }
 
 mod shared;

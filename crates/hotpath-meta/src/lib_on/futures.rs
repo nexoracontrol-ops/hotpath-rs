@@ -334,6 +334,12 @@ pub(crate) fn ensure_futures_state() {
     let _ = get_futures_state();
 }
 
+fn update_future_state(call: &mut FutureLog, state: FutureState) {
+    if !matches!(call.state, FutureState::Ready | FutureState::Cancelled) {
+        call.state = state;
+    }
+}
+
 /// Process a future event and update stats.
 fn process_future_event(state: &mut FuturesInternalState, event: FutureEvent) {
     fn add_optional(total: &mut Option<u64>, delta: Option<u64>) {
@@ -404,10 +410,10 @@ fn process_future_event(state: &mut FuturesInternalState, event: FutureEvent) {
                     }
                     match result {
                         PollResult::Pending => {
-                            call.state = FutureState::Suspended;
+                            update_future_state(call, FutureState::Suspended);
                         }
                         PollResult::Ready => {
-                            call.state = FutureState::Ready;
+                            update_future_state(call, FutureState::Ready);
                         }
                     };
                 }
@@ -420,7 +426,7 @@ fn process_future_event(state: &mut FuturesInternalState, event: FutureEvent) {
         } => {
             if let Some(entry_logs) = state.logs.get_mut(&future_id) {
                 if let Some(call) = entry_logs.find_call_mut(call_id) {
-                    call.state = FutureState::Ready;
+                    update_future_state(call, FutureState::Ready);
                     call.result = log_message;
                 }
             }
@@ -428,9 +434,7 @@ fn process_future_event(state: &mut FuturesInternalState, event: FutureEvent) {
         FutureEvent::Cancelled { future_id, call_id } => {
             if let Some(entry_logs) = state.logs.get_mut(&future_id) {
                 if let Some(call) = entry_logs.find_call_mut(call_id) {
-                    if call.state != FutureState::Ready {
-                        call.state = FutureState::Cancelled;
-                    }
+                    update_future_state(call, FutureState::Cancelled);
                 }
             }
         }
@@ -581,4 +585,29 @@ macro_rules! future {
             Some($label.to_string()),
         )
     }};
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn ready_future_state_is_terminal() {
+        let mut call = crate::json::FutureLog::new(1, 1);
+        crate::futures::update_future_state(&mut call, crate::futures::FutureState::Ready);
+
+        crate::futures::update_future_state(&mut call, crate::futures::FutureState::Suspended);
+        crate::futures::update_future_state(&mut call, crate::futures::FutureState::Cancelled);
+
+        assert_eq!(call.state, crate::futures::FutureState::Ready);
+    }
+
+    #[test]
+    fn cancelled_future_state_is_terminal() {
+        let mut call = crate::json::FutureLog::new(1, 1);
+        crate::futures::update_future_state(&mut call, crate::futures::FutureState::Cancelled);
+
+        crate::futures::update_future_state(&mut call, crate::futures::FutureState::Suspended);
+        crate::futures::update_future_state(&mut call, crate::futures::FutureState::Ready);
+
+        assert_eq!(call.state, crate::futures::FutureState::Cancelled);
+    }
 }

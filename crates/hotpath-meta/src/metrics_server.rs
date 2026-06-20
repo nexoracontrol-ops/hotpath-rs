@@ -278,7 +278,8 @@ fn respond_json<T: Serialize>(request: Request, value: &T) {
 }
 
 fn respond_error(request: Request, code: u16, msg: &str) {
-    let body = format!(r#"{{"error":"{}"}}"#, msg);
+    let escaped = serde_json::to_string(msg).unwrap_or_else(|_| "\"\"".to_string());
+    let body = format!(r#"{{"error":{}}}"#, escaped);
     let mut response = Response::from_string(body).with_status_code(code);
     response.add_header(
         Header::from_bytes(b"Content-Type".as_slice(), b"application/json".as_slice()).unwrap(),
