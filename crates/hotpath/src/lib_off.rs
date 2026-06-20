@@ -78,6 +78,24 @@ macro_rules! channel {
     ($expr:expr, wrap = true, log = true, label = $label:expr) => {
         $expr
     };
+    ($expr:expr, label = $label:expr, wrap = true) => {
+        $expr
+    };
+    ($expr:expr, log = true, wrap = true) => {
+        $expr
+    };
+    ($expr:expr, label = $label:expr, wrap = true, log = true) => {
+        $expr
+    };
+    ($expr:expr, log = true, wrap = true, label = $label:expr) => {
+        $expr
+    };
+    ($expr:expr, label = $label:expr, log = true, wrap = true) => {
+        $expr
+    };
+    ($expr:expr, log = true, label = $label:expr, wrap = true) => {
+        $expr
+    };
     ($expr:expr) => {
         $expr
     };
