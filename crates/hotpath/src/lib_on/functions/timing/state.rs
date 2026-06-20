@@ -30,7 +30,7 @@ pub(crate) struct Measurement {
 }
 
 impl BatchedMeasurement for Measurement {
-    type Tx = crate::lib_on::functions::WorkerTx;
+    type Tx = crate::lib_on::functions::MeasurementsTx;
 
     fn elapsed_since_start_ns(&self) -> u64 {
         self.elapsed_since_start_ns
@@ -40,11 +40,11 @@ impl BatchedMeasurement for Measurement {
         let arc_swap = crate::lib_on::functions::FUNCTIONS_STATE.get()?;
         let state = arc_swap.load_full()?;
         let state_guard = state.read().ok()?;
-        state_guard.sender.clone()
+        state_guard.measurements_tx.clone()
     }
 
     fn send_batch(tx: &Self::Tx, batch: Vec<Self>) {
-        let _ = tx.send(crate::lib_on::functions::WorkerMsg::Measurements(batch));
+        let _ = tx.send(batch);
     }
 }
 
@@ -136,7 +136,8 @@ impl FunctionStats {
 }
 
 pub(crate) struct FunctionsState {
-    pub sender: Option<crate::lib_on::functions::WorkerTx>,
+    pub measurements_tx: Option<crate::lib_on::functions::MeasurementsTx>,
+    pub shutdown_tx: Option<crossbeam_channel::Sender<()>>,
     pub completion_rx: Option<Mutex<Receiver<HashMap<u32, FunctionStats>>>>,
 
     pub start_time: Instant,

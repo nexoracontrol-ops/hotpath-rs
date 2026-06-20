@@ -1,6 +1,6 @@
 use crate::instant::Instant;
 use arc_swap::ArcSwapOption;
-use crossbeam_channel::{bounded, unbounded};
+use crossbeam_channel::{bounded, unbounded, Select};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, LazyLock, Mutex, RwLock};
@@ -39,7 +39,7 @@ use crate::output_on::{
     display_functions_table_to, display_no_measurements_message_to, write_report_header,
 };
 
-use crate::functions::{FunctionsQuery, WorkerMsg, FUNCTIONS_QUERY_TX, FUNCTIONS_STATE};
+use crate::functions::{FunctionsQuery, Measurement, FUNCTIONS_QUERY_TX, FUNCTIONS_STATE};
 use crate::lib_on::report;
 use crate::shared::Section;
 
@@ -350,9 +350,18 @@ impl HotpathGuard {
             panic!("More than one _hotpath guard cannot be alive at the same time.");
         }
 
-        let (tx, rx) = unbounded::<WorkerMsg>();
+        // Measurements ride their own (`wrap = true`) channel; shutdown and queries
+        // ride dedicated control channels so the worker can drain them with priority
+        // via `Select::ready()` instead of behind a measurement backlog on one FIFO.
+        let (measurements_tx, measurements_rx) = unbounded::<Vec<Measurement>>();
         #[cfg(feature = "hotpath-meta")]
-        let (tx, rx) = hotpath_meta::channel!((tx, rx), wrap = true, label = "hp-fn");
+        let (measurements_tx, measurements_rx) = hotpath_meta::channel!(
+            (measurements_tx, measurements_rx),
+            wrap = true,
+            label = "hp-fn"
+        );
+        let (query_tx, query_rx) = unbounded::<FunctionsQuery>();
+        let (shutdown_tx, shutdown_rx) = bounded::<()>(1);
         let (completion_tx, completion_rx) = bounded::<HashMap<u32, FunctionStats>>(1);
         #[cfg(feature = "hotpath-meta")]
         let (completion_tx, completion_rx) = hotpath_meta::channel!(
@@ -360,11 +369,12 @@ impl HotpathGuard {
             label = "hp-fn-completion",
             log = true
         );
-        let _ = FUNCTIONS_QUERY_TX.set(tx.clone());
+        let _ = FUNCTIONS_QUERY_TX.set(query_tx);
         let start_time = Instant::now();
 
         let state_arc = Arc::new(RwLock::new(FunctionsState {
-            sender: Some(tx),
+            measurements_tx: Some(measurements_tx),
+            shutdown_tx: Some(shutdown_tx),
             completion_rx: Some(Mutex::new(completion_rx)),
             start_time,
             caller_name,
@@ -388,16 +398,44 @@ impl HotpathGuard {
                     name_to_id.insert(worker_caller_name, 0);
                 }
 
+                // Wait for readiness with `Select::ready()` (it dequeues nothing), then
+                // drain control channels (shutdown, then queries) BEFORE measurements so
+                // a saturated measurement backlog can never starve shutdown or a query.
+                // The actual receive goes through each channel's `try_recv()` - for the
+                // measurement channel that is the wrapper's `try_recv()` under
+                // `hotpath-meta`, keeping its send/recv instrumentation intact.
+                let mut select = Select::new();
+                let _shutdown_idx = select.recv(&shutdown_rx);
+                let _query_idx = select.recv(&query_rx);
+                #[cfg(feature = "hotpath-meta")]
+                let _meas_idx = select.recv(measurements_rx.select_handle());
+                #[cfg(not(feature = "hotpath-meta"))]
+                let _meas_idx = select.recv(&measurements_rx);
+
                 loop {
-                    match rx.recv() {
-                        Ok(WorkerMsg::Measurements(batch)) => {
-                            for measurement in batch {
-                                process_measurement(&mut local_stats, &mut name_to_id, measurement);
+                    let _ = select.ready();
+
+                    if shutdown_rx.try_recv().is_ok() {
+                        for _ in 0..WORKER_SHUTDOWN_DRAIN_LIMIT {
+                            match measurements_rx.try_recv() {
+                                Ok(batch) => {
+                                    for measurement in batch {
+                                        process_measurement(
+                                            &mut local_stats,
+                                            &mut name_to_id,
+                                            measurement,
+                                        );
+                                    }
+                                }
+                                Err(_) => break,
                             }
                         }
-                        Ok(WorkerMsg::Query(query_request)) => {
-                            {
-                                let config = FunctionStatsConfig {
+                        break;
+                    }
+
+                    while let Ok(query_request) = query_rx.try_recv() {
+                        {
+                            let config = FunctionStatsConfig {
                                     total_elapsed: worker_start_time.elapsed(),
                                     percentiles: worker_percentiles.clone(),
                                     caller_name: worker_caller_name,
@@ -511,21 +549,13 @@ impl HotpathGuard {
                                 }
                             }
                         }
-                        Ok(WorkerMsg::Shutdown) => {
-                            for _ in 0..WORKER_SHUTDOWN_DRAIN_LIMIT {
-                                match rx.try_recv() {
-                                    Ok(WorkerMsg::Measurements(batch)) => {
-                                        for measurement in batch {
-                                            process_measurement(&mut local_stats, &mut name_to_id, measurement);
-                                        }
-                                    }
-                                    Ok(_) => {}
-                                    Err(_) => break,
-                                }
-                            }
-                            break;
+                    // Process at most one batch per iteration so the next
+                    // `select.ready()` re-checks shutdown/query - a fast measurement
+                    // stream can't starve the control channels.
+                    if let Ok(batch) = measurements_rx.try_recv() {
+                        for measurement in batch {
+                            process_measurement(&mut local_stats, &mut name_to_id, measurement);
                         }
-                        Err(_) => break,
                     }
                 }
 
@@ -706,22 +736,24 @@ impl Drop for HotpathGuard {
             .map(|s| s.percentiles.clone())
             .unwrap_or_default();
 
-        let (worker_tx, completion_rx, end_time) = {
+        let (shutdown_tx, completion_rx, end_time) = {
             let Ok(mut state_guard) = state.write() else {
                 return;
             };
 
-            // Take (not clear) the sender: stops new producers and lets us deliver
-            // Shutdown on the same FIFO channel, after the flushed measurements.
-            let worker_tx = state_guard.sender.take();
+            // Drop the measurement sender to stop new producers, then signal shutdown
+            // on the dedicated control channel. `Select::ready()` wakes the worker
+            // immediately and it drains shutdown ahead of any queued measurements.
+            let _ = state_guard.measurements_tx.take();
+            let shutdown_tx = state_guard.shutdown_tx.take();
             let end_time = Instant::now();
 
             let completion_rx = state_guard.completion_rx.take();
-            (worker_tx, completion_rx, end_time)
+            (shutdown_tx, completion_rx, end_time)
         };
 
-        if let Some(tx) = worker_tx {
-            let _ = tx.send(WorkerMsg::Shutdown);
+        if let Some(tx) = shutdown_tx {
+            let _ = tx.send(());
         }
 
         let functions_stats =
