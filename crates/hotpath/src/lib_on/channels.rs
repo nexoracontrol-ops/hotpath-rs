@@ -296,16 +296,16 @@ impl ChannelEntry {
         }
     }
 
-    /// `max` tracks the peak `len()` snapshot (order-independent). Current depth is
-    /// derived from the counts: the converged value is order-independent (the sum
-    /// commutes), so a reordered batch can't leave the final report stale. A live read
-    /// can still lag - a recv may be folded in before its matching send - so
-    /// `saturating_sub` clamps the transient underflow until the send catches up.
+    /// Peak comes only from real `len()` snapshots; max of those is order-independent,
+    /// so it stays a true high-water mark. Current depth is counts-derived
+    /// (`sent - received`), exact once the channel is idle since the counters commute,
+    /// but it can transiently overshoot when a producer batch reaches the worker ahead
+    /// of the matching consumer batch - clamping to `max` keeps `current <= max`.
     fn record_queue(&mut self, queue_len: usize) {
-        if queue_len > self.max_queue_size.unwrap_or(0) {
-            self.max_queue_size = Some(queue_len);
-        }
-        self.queue_size = Some(self.sent_count.saturating_sub(self.received_count) as usize);
+        let max = self.max_queue_size.unwrap_or(0).max(queue_len);
+        self.max_queue_size = Some(max);
+        let depth = self.sent_count.saturating_sub(self.received_count) as usize;
+        self.queue_size = Some(depth.min(max));
     }
 
     fn update_state(&mut self) {
@@ -1048,13 +1048,12 @@ mod tests {
     use crate::instant::Instant;
     use std::collections::HashMap;
 
-    /// When a sender and receiver run on different threads, their per-thread event
-    /// batches can reach the worker out of order - including with equal `Instant`
-    /// timestamps when both ops fall in the same clock tick. Current depth is derived
-    /// from `sent_count - received_count`, which commutes, so reordered (or same-tick)
-    /// arrival must not leave the reported depth stale.
+    /// Current depth is counts-derived, so it converges exactly regardless of arrival
+    /// order even when per-thread batches reach the worker out of order with equal
+    /// `Instant` timestamps. Peak tracks the real `len()` snapshot and current is
+    /// clamped to it, so `current <= max`.
     #[test]
-    fn out_of_order_queue_snapshot_leaves_stale_depth() {
+    fn out_of_order_queue_snapshot_converges_within_peak() {
         let mut state = ChannelsInternalState {
             stats: HashMap::new(),
             logs: HashMap::new(),
@@ -1108,8 +1107,9 @@ mod tests {
             "current depth must equal sent_count - received_count regardless of order"
         );
 
-        // max_queue_size tracks the peak snapshot (1), also order-independent.
+        // Peak is the real `len()` snapshot (1); current is clamped to it.
         assert_eq!(entry.max_queue_size, Some(1));
+        assert!(entry.queue_size <= entry.max_queue_size);
     }
 
     #[test]
