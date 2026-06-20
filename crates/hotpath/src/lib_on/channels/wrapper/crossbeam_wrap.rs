@@ -1,27 +1,21 @@
 //! Endpoint-wrapping crossbeam channel instrumentation (`channel!(..., wrap = true)`).
 //!
-//! Unlike the forwarder-proxy wrapping in [`crate::channels::wrapper::crossbeam`],
-//! this wraps the `Sender`/`Receiver` endpoints directly. No extra thread or proxy
-//! channel is inserted, so send/recv happen on the real channel and the queue depth
-//! reported (`queue_len`) is a snapshot of the channel's length taken right after each
-//! operation. It is exact for single-threaded use; with concurrent senders/receivers it
-//! may skew by the number of operations other threads complete in that window.
+//! Wraps the `Sender`/`Receiver` endpoints directly (unlike the forwarder-proxy in
+//! [`crate::channels::wrapper::crossbeam`]): no extra thread or proxy channel, so
+//! send/recv hit the real channel. `queue_len` is a snapshot taken right after each
+//! op - exact single-threaded, may skew under concurrent endpoints.
 //!
-//! The inner channel carries `(msg_id, send_ts, T)` rather than `T`. The
-//! monotonic `msg_id` lets a send pair with its exact matching receive even under
-//! multiple producers/consumers. `send_ts` is stamped *before* the message is
-//! published, so it is always `<= recv_ts` (the message can't be received until
-//! after it's enqueued) — the reported delay is a valid non-negative interval, not
-//! a value that races the consumer and clamps to zero. For bounded/rendezvous
-//! channels the stamp precedes the blocking send, so the delay includes
-//! backpressure wait, not just queue residence. Both fields are internal — the
-//! public API still sends and receives `T`.
+//! The inner channel carries `(msg_id, send_ts, T)`. Monotonic `msg_id` pairs a send
+//! with its matching receive under multiple producers/consumers. `send_ts` is stamped
+//! before publishing, so `send_ts <= recv_ts` always holds and the reported delay is
+//! non-negative (no race with the consumer that clamps to zero); for bounded/rendezvous
+//! channels it precedes the blocking send, so the delay includes backpressure wait.
+//! Both fields are internal - the public API still uses `T`.
 //!
-//! Because the wrapper rebuilds the inner channel, the channel expression passed
-//! to `channel!(..., wrap = true)` must be constructed inline; raw endpoints must
-//! not be cloned/retained before wrapping (such a clone would be orphaned).
+//! The wrapper rebuilds the inner channel, so the `channel!` expression must be
+//! constructed inline; endpoints cloned before wrapping are orphaned.
 //!
-//! Returned types are [`Sender`]/[`Receiver`], re-exported as
+//! Returns [`Sender`]/[`Receiver`], re-exported as
 //! `hotpath::wrap::crossbeam_channel::{Sender, Receiver}`.
 
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
@@ -65,10 +59,9 @@ impl<T> Sender<T> {
     pub fn send(&self, msg: T) -> Result<(), SendError<T>> {
         let log = self.log_fn.map(|f| f(&msg));
         let msg_id = self.next_id.fetch_add(1, Ordering::Relaxed);
-        // Stamp before publishing and carry it in the envelope: a consumer can
-        // receive and timestamp the message the instant `inner.send` enqueues it,
-        // so sampling `now()` afterward races the receive and can read recv < send.
-        // Captured here, send_ts <= recv_ts by construction.
+        // Stamp before publishing: a consumer could receive and timestamp the message
+        // the instant `inner.send` enqueues it, so stamping after would race the
+        // receive and read recv < send. Here send_ts <= recv_ts by construction.
         let sent_at = Instant::now();
         self.inner
             .send((msg_id, sent_at, msg))
@@ -318,9 +311,8 @@ fn build<T>(
     let ch_type = channel_type(&orig_tx);
     let id = register_channel_wrap::<T>(source, label, ch_type);
 
-    // Rebuild the inner channel to carry `(msg_id, send_ts, T)` so each message's
-    // identity and send time travel with it. The caller's original channel is
-    // discarded — wrap mode is inline-construction only (see module docs); only its
+    // Rebuild the inner channel to carry `(msg_id, send_ts, T)`. The caller's original
+    // channel is discarded (wrap mode is inline-only, see module docs); only its
     // kind/capacity is copied.
     let (tx, rx) = match ch_type {
         ChannelType::Bounded(cap) => crossbeam_channel::bounded::<(u64, Instant, T)>(cap),

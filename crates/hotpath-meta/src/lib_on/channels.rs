@@ -697,11 +697,10 @@ cfg_if::cfg_if! {
 ///
 /// # `wrap = true`
 ///
-/// In wrap mode the channel expression **must be constructed inline**, e.g.
-/// `channel!(crossbeam_channel::unbounded::<T>(), wrap = true)`. The wrapper
-/// rebuilds the inner channel to carry a per-message id, discarding the channel
-/// you pass in. Any raw endpoint cloned or retained *before* wrapping is therefore
-/// orphaned (connected to the discarded channel) and its messages are silently
+/// The channel expression **must be constructed inline**, e.g.
+/// `channel!(crossbeam_channel::unbounded::<T>(), wrap = true)`. The wrapper rebuilds
+/// the inner channel (to carry a per-message id) and discards the one you pass in, so
+/// any endpoint cloned before wrapping is orphaned and its messages are silently
 /// dropped. Clone the returned wrapper endpoints instead.
 ///
 /// # Examples
