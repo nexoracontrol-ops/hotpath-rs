@@ -272,6 +272,7 @@ pub(crate) enum ChannelEvent {
     #[cfg_attr(not(feature = "crossbeam"), allow(dead_code))]
     WrapMessageSent {
         id: u32,
+        msg_id: u64,
         log: Option<String>,
         timestamp: Instant,
         queue_len: usize,
@@ -279,6 +280,7 @@ pub(crate) enum ChannelEvent {
     #[cfg_attr(not(feature = "crossbeam"), allow(dead_code))]
     WrapMessageReceived {
         id: u32,
+        msg_id: u64,
         timestamp: Instant,
         queue_len: usize,
     },
@@ -348,6 +350,7 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                     timestamp_nanos(timestamp),
                     log,
                     None,
+                    None,
                 ));
             }
         }
@@ -367,11 +370,13 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                     timestamp_nanos(timestamp),
                     None,
                     None,
+                    None,
                 ));
             }
         }
         ChannelEvent::WrapMessageSent {
             id,
+            msg_id,
             log,
             timestamp,
             queue_len,
@@ -392,11 +397,13 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                     timestamp_nanos(timestamp),
                     log,
                     None,
+                    Some(msg_id),
                 ));
             }
         }
         ChannelEvent::WrapMessageReceived {
             id,
+            msg_id,
             timestamp,
             queue_len,
         } => {
@@ -416,6 +423,7 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                     timestamp_nanos(timestamp),
                     None,
                     None,
+                    Some(msg_id),
                 ));
             }
         }
@@ -643,6 +651,15 @@ cfg_if::cfg_if! {
 /// Optional parameters: `label`, `log = true`, `capacity` (in any order).
 /// `capacity` is required for `futures_channel::mpsc` bounded channels.
 /// `log = true` requires `Debug` on the message type.
+///
+/// # `wrap = true`
+///
+/// In wrap mode the channel expression **must be constructed inline**, e.g.
+/// `channel!(crossbeam_channel::unbounded::<T>(), wrap = true)`. The wrapper
+/// rebuilds the inner channel to carry a per-message id, discarding the channel
+/// you pass in. Any raw endpoint cloned or retained *before* wrapping is therefore
+/// orphaned (connected to the discarded channel) and its messages are silently
+/// dropped. Clone the returned wrapper endpoints instead.
 ///
 /// # Examples
 ///
@@ -941,6 +958,7 @@ mod tests {
             &mut state,
             ChannelEvent::WrapMessageReceived {
                 id,
+                msg_id: 1,
                 timestamp: ts,
                 queue_len: 0,
             },
@@ -949,6 +967,7 @@ mod tests {
             &mut state,
             ChannelEvent::WrapMessageSent {
                 id,
+                msg_id: 1,
                 log: None,
                 timestamp: ts,
                 queue_len: 1,

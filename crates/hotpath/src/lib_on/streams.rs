@@ -199,6 +199,7 @@ fn process_stream_event(state: &mut StreamsInternalState, event: StreamEvent) {
                     crate::channels::timestamp_nanos(timestamp),
                     log,
                     None,
+                    None,
                 ));
             }
         }

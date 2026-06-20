@@ -420,9 +420,14 @@ fn format_sent_log_entry(
     current_elapsed_ns: u64,
     received_logs: &[DataFlowLogEntry],
 ) -> JsonChannelSentLog {
+    // Pair by message identity when present (wrap mode); fall back to positional
+    // `index` for paths without an id (proxy mode), where order already lines up.
     let delay = received_logs
         .iter()
-        .find(|recv| recv.index == entry.index)
+        .find(|recv| match (recv.msg_id, entry.msg_id) {
+            (Some(a), Some(b)) => a == b,
+            _ => recv.index == entry.index,
+        })
         .map(|recv| format_delay(recv.timestamp.saturating_sub(entry.timestamp)));
 
     JsonChannelSentLog {
@@ -872,5 +877,49 @@ mod parse_tests {
             }
             _ => panic!("expected Error variant"),
         }
+    }
+
+    /// A send must pair with its exact receive by `msg_id`, not by arrival
+    /// position. Receives here are in reverse msg-id order, so index pairing
+    /// would mismatch both.
+    #[test]
+    fn delay_pairs_by_msg_id_not_arrival_index() {
+        let logs = ChannelLogs {
+            id: 1,
+            // (index, timestamp, message, tid, msg_id)
+            sent_logs: vec![
+                DataFlowLogEntry::new(1, 10, None, None, Some(100)),
+                DataFlowLogEntry::new(2, 15, None, None, Some(200)),
+            ],
+            received_logs: vec![
+                DataFlowLogEntry::new(1, 18, None, None, Some(200)),
+                DataFlowLogEntry::new(2, 30, None, None, Some(100)),
+            ],
+        };
+
+        let out = JsonChannelLogsList::from_logs(&logs, 1_000);
+
+        let by_index: HashMap<u64, Option<String>> = out
+            .sent_logs
+            .iter()
+            .map(|s| (s.index, s.delay.clone()))
+            .collect();
+
+        // msg 100: recv@30 - send@10 = 20ns; msg 200: recv@18 - send@15 = 3ns.
+        assert_eq!(by_index[&1], Some("20 ns".to_string()));
+        assert_eq!(by_index[&2], Some("3 ns".to_string()));
+    }
+
+    /// Without `msg_id`, pairing falls back to positional `index`.
+    #[test]
+    fn delay_falls_back_to_index_without_msg_id() {
+        let logs = ChannelLogs {
+            id: 1,
+            sent_logs: vec![DataFlowLogEntry::new(1, 10, None, None, None)],
+            received_logs: vec![DataFlowLogEntry::new(1, 25, None, None, None)],
+        };
+
+        let out = JsonChannelLogsList::from_logs(&logs, 1_000);
+        assert_eq!(out.sent_logs[0].delay, Some("15 ns".to_string()));
     }
 }
