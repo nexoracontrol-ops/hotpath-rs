@@ -158,10 +158,9 @@ pub(crate) struct ChannelEntry {
     pub(crate) state: ChannelState,
     pub(crate) sent_count: u64,
     pub(crate) received_count: u64,
-    /// Earliest and latest message timestamps (ns since start), shared across both
-    /// directions. Define the active window used to derive throughput rates.
+    /// Earliest message timestamp (ns since start), shared across both directions.
+    /// Anchors the elapsed window used to derive throughput rates.
     first_msg_ns: Option<u64>,
-    last_msg_ns: Option<u64>,
     pub(crate) type_name: &'static str,
     pub(crate) type_size: usize,
     pub(crate) wrap: bool,
@@ -257,7 +256,6 @@ impl ChannelEntry {
             sent_count: 0,
             received_count: 0,
             first_msg_ns: None,
-            last_msg_ns: None,
             type_name,
             type_size,
             wrap,
@@ -294,23 +292,29 @@ impl ChannelEntry {
     #[inline]
     fn record_activity(&mut self, ts_ns: u64) {
         // Per-thread batch flushing can deliver events out of timestamp order, so
-        // track the min/max extrema rather than first/last processed.
+        // track the minimum rather than the first processed.
         self.first_msg_ns = Some(self.first_msg_ns.map_or(ts_ns, |first| first.min(ts_ns)));
-        self.last_msg_ns = Some(self.last_msg_ns.map_or(ts_ns, |last| last.max(ts_ns)));
     }
 
     fn rate_per_sec(&self, count: u64) -> Option<f64> {
-        // A oneshot carries a single message, so its active window is just the
-        // send-to-receive gap; dividing by that microsecond-scale span yields a
-        // meaningless rate.
+        // A oneshot carries a single message, so any rate is meaningless.
         if self.channel_type == ChannelType::Oneshot {
             return None;
         }
-        let (first, last) = (self.first_msg_ns?, self.last_msg_ns?);
-        if last <= first {
+        // Below two messages the distribution is too sparse to report a rate.
+        if count < 2 {
             return None;
         }
-        Some(count as f64 / ((last - first) as f64 / 1e9))
+        // Anchor throughput to elapsed observation time since the first message
+        // rather than the first-to-last message span. The span collapses to a
+        // single inter-event gap for sparse channels and yields absurd rates;
+        // dividing by real elapsed time stays bounded and cannot blow up.
+        let first = self.first_msg_ns?;
+        let elapsed_ns = crate::lib_on::current_elapsed_ns().checked_sub(first)?;
+        if elapsed_ns == 0 {
+            return None;
+        }
+        Some(count as f64 / (elapsed_ns as f64 / 1e9))
     }
 
     pub(crate) fn sent_per_sec(&self) -> Option<f64> {
