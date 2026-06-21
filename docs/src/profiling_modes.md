@@ -56,7 +56,7 @@ fn main() { /* ... */ }
 fn main() { /* ... */ }
 ```
 
-The same applies to the builder API — `limit` sets all sections, then individual setters override:
+The same applies to the builder API - `limit` sets all sections, then individual setters override:
 
 ```rust
 use std::time::Duration;
