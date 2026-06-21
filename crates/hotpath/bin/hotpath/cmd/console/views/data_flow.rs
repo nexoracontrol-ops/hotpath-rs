@@ -99,7 +99,7 @@ pub(crate) fn render_channels_panel(
         "Label".to_string(),
         "State".to_string(),
         "Sent/Recv".to_string(),
-        "Rate s/r".to_string(),
+        "Msg/s s/r".to_string(),
         "Queue/Max/Cap".to_string(),
         "Avg".to_string(),
     ]
