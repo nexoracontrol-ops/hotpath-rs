@@ -375,7 +375,6 @@ pub(crate) enum ChannelEvent {
         id: u32,
         timestamp: Instant,
     },
-    #[cfg_attr(not(feature = "crossbeam"), allow(dead_code))]
     WrapMessageSent {
         id: u32,
         msg_id: u64,
@@ -383,7 +382,6 @@ pub(crate) enum ChannelEvent {
         timestamp: Instant,
         queue_len: usize,
     },
-    #[cfg_attr(not(feature = "crossbeam"), allow(dead_code))]
     WrapMessageReceived {
         id: u32,
         msg_id: u64,
@@ -769,6 +767,19 @@ cfg_if::cfg_if! {
 /// any endpoint cloned before wrapping is orphaned and its messages are silently
 /// dropped. Clone the returned wrapper endpoints instead.
 ///
+/// Bounded `std::sync::mpsc` wrappers (`sync_channel`) cannot recover their capacity
+/// from the endpoint, so `capacity = N` is required, e.g.
+/// `channel!(std::sync::mpsc::sync_channel::<T>(100), wrap = true, capacity = 100)`.
+/// Unbounded std and crossbeam wrappers need no `capacity`.
+///
+/// **The `capacity` you pass must match the `sync_channel(N)` argument.** Wrap mode
+/// rebuilds the inner channel from `capacity` and discards the one you constructed, so a
+/// mismatch (e.g. `sync_channel(100)` with `capacity = 1`) silently builds a different
+/// bounded channel - and only in profiled builds: with `hotpath` off, `channel!` returns
+/// your original `sync_channel(100)` untouched. The result is different backpressure (and
+/// potentially a deadlock) that appears only when profiling. There is no way to verify
+/// this for you, because std exposes no capacity accessor - keep the two numbers equal.
+///
 /// # Examples
 ///
 /// ```rust,no_run
@@ -823,6 +834,86 @@ macro_rules! channel {
             CHANNEL_ID,
             Some($label.to_string()),
             None,
+        )
+    }};
+
+    // Wrap mode with explicit `capacity` (required for bounded `std::sync::mpsc`
+    // wrappers, which cannot recover their capacity from the endpoint).
+    ($expr:expr, wrap = true, capacity = $capacity:expr) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrap::instrument_wrap($expr, CHANNEL_ID, None, Some($capacity))
+    }};
+
+    ($expr:expr, capacity = $capacity:expr, wrap = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrap::instrument_wrap($expr, CHANNEL_ID, None, Some($capacity))
+    }};
+
+    ($expr:expr, wrap = true, capacity = $capacity:expr, label = $label:expr) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrap::instrument_wrap(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            Some($capacity),
+        )
+    }};
+
+    ($expr:expr, wrap = true, label = $label:expr, capacity = $capacity:expr) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrap::instrument_wrap(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            Some($capacity),
+        )
+    }};
+
+    ($expr:expr, wrap = true, capacity = $capacity:expr, log = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            None,
+            Some($capacity),
+        )
+    }};
+
+    ($expr:expr, wrap = true, log = true, capacity = $capacity:expr) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            None,
+            Some($capacity),
+        )
+    }};
+
+    ($expr:expr, wrap = true, capacity = $capacity:expr, label = $label:expr, log = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            Some($capacity),
+        )
+    }};
+
+    ($expr:expr, wrap = true, label = $label:expr, capacity = $capacity:expr, log = true) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        const _: usize = $capacity;
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log(
+            $expr,
+            CHANNEL_ID,
+            Some($label.to_string()),
+            Some($capacity),
         )
     }};
 
@@ -1021,6 +1112,61 @@ macro_rules! channel {
             Some($label.to_string()),
             Some($capacity),
         )
+    }};
+
+    // Order-independent muncher for wrap-mode arguments. Accumulates `label`, `capacity`
+    // and `log` in any order (the explicit arms above cover the common no-capacity
+    // orders; this handles the rest, notably bounded-std `capacity` permutations).
+    (@wrap_munch $id:ident, $e:expr ; $lbl:tt $cap:tt $log:tt $wrap:tt ;) => {
+        $crate::channel!(@wrap_dispatch $id, $e ; $lbl $cap $log $wrap)
+    };
+    (@wrap_munch $id:ident, $e:expr ; $lbl:tt $cap:tt $log:tt $wrap:tt ; wrap = true $(, $($r:tt)*)?) => {
+        $crate::channel!(@wrap_munch $id, $e ; $lbl $cap $log [wrap] ; $($($r)*)?)
+    };
+    (@wrap_munch $id:ident, $e:expr ; $lbl:tt $cap:tt $log:tt $wrap:tt ; label = $l:expr $(, $($r:tt)*)?) => {
+        $crate::channel!(@wrap_munch $id, $e ; [$l] $cap $log $wrap ; $($($r)*)?)
+    };
+    (@wrap_munch $id:ident, $e:expr ; $lbl:tt $cap:tt $log:tt $wrap:tt ; capacity = $c:expr $(, $($r:tt)*)?) => {
+        $crate::channel!(@wrap_munch $id, $e ; $lbl [$c] $log $wrap ; $($($r)*)?)
+    };
+    (@wrap_munch $id:ident, $e:expr ; $lbl:tt $cap:tt $log:tt $wrap:tt ; log = true $(, $($r:tt)*)?) => {
+        $crate::channel!(@wrap_munch $id, $e ; $lbl $cap [log] $wrap ; $($($r)*)?)
+    };
+
+    (@wrap_dispatch $id:ident, $e:expr ; [$l:expr] [$c:expr] [log] [wrap]) => {
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log($e, $id, Some($l.to_string()), Some($c))
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; [$l:expr] [$c:expr] [nolog] [wrap]) => {
+        $crate::InstrumentChannelWrap::instrument_wrap($e, $id, Some($l.to_string()), Some($c))
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; [] [$c:expr] [log] [wrap]) => {
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log($e, $id, None, Some($c))
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; [] [$c:expr] [nolog] [wrap]) => {
+        $crate::InstrumentChannelWrap::instrument_wrap($e, $id, None, Some($c))
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; [$l:expr] [] [log] [wrap]) => {
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log($e, $id, Some($l.to_string()), None)
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; [$l:expr] [] [nolog] [wrap]) => {
+        $crate::InstrumentChannelWrap::instrument_wrap($e, $id, Some($l.to_string()), None)
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; [] [] [log] [wrap]) => {
+        $crate::InstrumentChannelWrapLog::instrument_wrap_log($e, $id, None, None)
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; [] [] [nolog] [wrap]) => {
+        $crate::InstrumentChannelWrap::instrument_wrap($e, $id, None, None)
+    };
+    (@wrap_dispatch $id:ident, $e:expr ; $lbl:tt $cap:tt $log:tt [nowrap]) => {
+        compile_error!("channel!: unsupported argument combination")
+    };
+
+    // Fallback entry for `wrap = true` calls whose argument order is not covered by an
+    // explicit arm above. `CHANNEL_ID` is captured once here at the call site and
+    // threaded through the muncher so `file!()`/`line!()` resolve to the user's location.
+    ($expr:expr, $($rest:tt)*) => {{
+        const CHANNEL_ID: &'static str = concat!(file!(), ":", line!());
+        $crate::channel!(@wrap_munch CHANNEL_ID, $expr ; [] [] [nolog] [nowrap] ; $($rest)*)
     }};
 }
 
