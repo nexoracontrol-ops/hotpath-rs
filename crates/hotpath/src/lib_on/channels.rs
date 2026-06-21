@@ -448,9 +448,10 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
             state.logs.insert(id, ChannelEntryLogs::new());
         }
         ChannelEvent::MessageSent { id, log, timestamp } => {
+            let ts_ns = timestamp_nanos(timestamp);
             if let Some(channel_stats) = state.stats.get_mut(&id) {
                 channel_stats.sent_count += 1;
-                channel_stats.record_activity(timestamp_nanos(timestamp));
+                channel_stats.record_activity(ts_ns);
                 channel_stats.update_state();
             }
             if let Some(entry_logs) = state.logs.get_mut(&id) {
@@ -459,19 +460,16 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                 if entry_logs.sent_logs.len() >= limit {
                     entry_logs.sent_logs.pop_front();
                 }
-                entry_logs.sent_logs.push_back(DataFlowLogEntry::new(
-                    sent_count,
-                    timestamp_nanos(timestamp),
-                    log,
-                    None,
-                    None,
-                ));
+                entry_logs
+                    .sent_logs
+                    .push_back(DataFlowLogEntry::new(sent_count, ts_ns, log, None, None));
             }
         }
         ChannelEvent::MessageReceived { id, timestamp } => {
+            let ts_ns = timestamp_nanos(timestamp);
             if let Some(channel_stats) = state.stats.get_mut(&id) {
                 channel_stats.received_count += 1;
-                channel_stats.record_activity(timestamp_nanos(timestamp));
+                channel_stats.record_activity(ts_ns);
                 channel_stats.update_state();
             }
             if let Some(entry_logs) = state.logs.get_mut(&id) {
@@ -482,7 +480,7 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                 }
                 entry_logs.received_logs.push_back(DataFlowLogEntry::new(
                     received_count,
-                    timestamp_nanos(timestamp),
+                    ts_ns,
                     None,
                     None,
                     None,
@@ -496,9 +494,10 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
             timestamp,
             queue_len,
         } => {
+            let ts_ns = timestamp_nanos(timestamp);
             if let Some(channel_stats) = state.stats.get_mut(&id) {
                 channel_stats.sent_count += 1;
-                channel_stats.record_activity(timestamp_nanos(timestamp));
+                channel_stats.record_activity(ts_ns);
                 channel_stats.update_state();
                 channel_stats.record_queue(queue_len);
             }
@@ -510,7 +509,7 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                 }
                 entry_logs.sent_logs.push_back(DataFlowLogEntry::new(
                     sent_count,
-                    timestamp_nanos(timestamp),
+                    ts_ns,
                     log,
                     None,
                     Some(msg_id),
@@ -524,9 +523,10 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
             queue_len,
             delay_nanos,
         } => {
+            let ts_ns = timestamp_nanos(timestamp);
             if let Some(channel_stats) = state.stats.get_mut(&id) {
                 channel_stats.received_count += 1;
-                channel_stats.record_activity(timestamp_nanos(timestamp));
+                channel_stats.record_activity(ts_ns);
                 channel_stats.update_state();
                 channel_stats.record_queue(queue_len);
                 channel_stats.record_proc(delay_nanos);
@@ -539,7 +539,7 @@ fn process_channel_event(state: &mut ChannelsInternalState, event: ChannelEvent)
                 }
                 entry_logs.received_logs.push_back(DataFlowLogEntry::new(
                     received_count,
-                    timestamp_nanos(timestamp),
+                    ts_ns,
                     None,
                     None,
                     Some(msg_id),

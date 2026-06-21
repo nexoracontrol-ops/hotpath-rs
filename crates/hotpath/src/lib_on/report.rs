@@ -17,7 +17,7 @@ use crate::json::{
 };
 use crate::mutexes::{compare_mutex_entries, MutexEntry, MUTEXES_STATE};
 use crate::output::{
-    format_bytes, format_duration, format_percentile_header, format_percentile_key,
+    format_bytes, format_duration, format_percentile_header, format_percentile_key, format_rate,
 };
 use crate::output_on::write_section_header;
 use crate::rw_locks::{compare_rw_lock_entries, RwLockEntry, RwLockKind, RW_LOCKS_STATE};
@@ -102,14 +102,13 @@ pub(crate) fn report_channels_table(
         let max_queue = channel_stats
             .max_queue_size
             .map_or_else(|| "-".to_string(), |q| q.to_string());
-        let fmt_rate = |r: Option<f64>| r.map_or_else(|| "-".to_string(), |v| format!("{v:.1}"));
         table.add_row(Row::new(vec![
             Cell::new(&label),
             Cell::new(&channel_stats.channel_type.to_string()),
             Cell::new(&channel_stats.sent_count.to_string()),
             Cell::new(&channel_stats.received_count.to_string()),
-            Cell::new(&fmt_rate(channel_stats.sent_per_sec())),
-            Cell::new(&fmt_rate(channel_stats.received_per_sec())),
+            Cell::new(&format_rate(channel_stats.sent_per_sec())),
+            Cell::new(&format_rate(channel_stats.received_per_sec())),
             Cell::new(&max_queue),
         ]));
     }

@@ -130,12 +130,10 @@ pub(crate) fn render_channels_panel(
                 (Some(queue), Some(max)) => format!("{queue}/{max}"),
                 _ => "-".to_string(),
             };
-            let fmt_rate =
-                |r: Option<f64>| r.map_or_else(|| "-".to_string(), |v| format!("{v:.1}"));
             let rate_text = format!(
                 "{}/{}",
-                fmt_rate(entry.sent_per_sec),
-                fmt_rate(entry.received_per_sec)
+                hotpath::format_rate(entry.sent_per_sec),
+                hotpath::format_rate(entry.received_per_sec)
             );
             // Latency is only measured for wrap channels; proxy channels show `-`.
             let mut cells = vec![
