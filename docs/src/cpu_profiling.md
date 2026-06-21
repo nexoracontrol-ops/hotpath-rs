@@ -1,10 +1,12 @@
-# CPU profiling
+# Rust CPU Profiling with samply
 
-In addition to execution time and allocations tracking, `hotpath` also supports CPU sampling. By comparing different profiling reports, you can determine whether a bottleneck is I/O-bound, CPU-bound, or memory-bound. See [Sampling comparison](/blog/sampling_comparison) for a detailed explanation of how the profiling modes differ.
+`hotpath` provides sampling-based CPU profiling for Rust using [samply](https://github.com/mstange/samply). Unlike pure instrumentation, CPU sampling shows where your program actually spends processor time, letting you tell apart CPU-bound, I/O-bound, and memory-bound bottlenecks. This guide covers installing samply, configuring permissions on macOS and Linux, and reading the CPU usage report.
 
-CPU profiling uses [samply](https://github.com/mstange/samply) and requires some additional system configuration.
+By comparing the CPU report against the timing and allocation reports, you can pin down what kind of bottleneck you have: high wall-clock time but low CPU samples means I/O-bound (waiting), high CPU samples means CPU-bound (computing), and high allocation counts point to memory pressure. See [Sampling comparison](/blog/sampling_comparison) for a detailed explanation of how the profiling modes differ.
 
-## Configuring CPU profiling
+CPU profiling requires some additional system configuration, covered below.
+
+## Configuring samply CPU profiler
 
 Start by installing `samply`:
 
@@ -33,7 +35,7 @@ If either binary lives outside `PATH`, point `hotpath` at it explicitly:
 - `HOTPATH_SAMPLY_WRAPPER_BIN` - path to the `hotpath-samply` wrapper binary the host process spawns (default: `hotpath-samply`, resolved via `PATH`).
 - `HOTPATH_SAMPLY_BIN` - path to the external `samply` binary the wrapper invokes (default: `samply`, resolved via `PATH`).
 
-### MacOS samply permissions
+### macOS: granting samply profiling permissions
 
 Run:
 
@@ -43,7 +45,7 @@ samply setup
 
 It will prompt you to sign `samply` binary so that it can attach to a running process by its PID. 
 
-### Linux samply permissions
+### Linux: enabling kernel profiling for samply
 
 On Linux, CPU profiling requires elevated kernel profiling permissions. Run:
 
@@ -71,7 +73,7 @@ setsid -w cargo run --features='hotpath,hotpath-alloc,hotpath-cpu'
 
 Otherwise the parent process may exit before `hotpath` finishes the profiling report.
 
-## CPU profiling with hotpath
+## Using a Rust CPU profiler with hotpath
 
 You must build with debug symbols enabled in order to attribute CPU samples to instrumented functions. Symbols are included by default in debug profile builds. `--release` builds don't include this info, so you should use a dedicated profile instead:
 
@@ -107,7 +109,7 @@ You can optionally run the displayed `samply load` command to open an interactiv
 
 <img loading="lazy" src="{{#asset-hash images/samply-report.png}}" alt="Interactive samply performance report">
 
-## Inlining and CPU attribution
+## Why inlined functions hide from CPU profilers
 
 Standard CPU profilers sometimes miss top bottleneck functions because the compiler implicitly inlines small or hot functions. Once a function is inlined, its symbol disappears from the binary and its samples get attributed to the caller, hiding it from the report.
 
@@ -115,7 +117,7 @@ Under the `hotpath-cpu` feature, `#[hotpath::measure]` strip any user-provided `
 
 To disable this rewrite, set `HOTPATH_KEEP_INLINE=1`. The variable is read at proc-macro expansion time, so touch the source file or run `cargo clean` after toggling it.
 
-## Improving symbols attribution
+## Improving symbol attribution for impl methods
 
 Currently `hotpath` correctly attributes CPU usage to module functions instrumented with `measure` macro. `impl` functions instrumented with `measure` require an additional config. 
 

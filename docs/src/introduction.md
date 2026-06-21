@@ -1,4 +1,6 @@
-# Rust Performance, CPU & Memory Profiler
+# A simple Rust profiler that shows exactly why your code is slow
+
+<h2 class="hero-subtitle">Profile CPU, memory, async execution, lock contention and channels from a single tool.</h2>
 
 <div class="hero-badges">
   <a href="https://github.com/pawurb/hotpath-rs" target="_blank"><img src="{{#asset-hash images/stars-pawurb-hotpath-rs.svg}}" alt="GitHub Stars"></a>
@@ -218,7 +220,6 @@ cargo install hotpath --features='tui' --version '^{{HOTPATH_VERSION}}'
 
 Explore the docs for customization options and advanced profiling features.
 
-- [Sampling Comparison](/blog/sampling_comparison) - when to use `hotpath` vs CPU sampling profilers
 - [Profiling modes](./profiling_modes.html) - static reports vs live TUI dashboard
 - [Functions](./functions.html) - measure execution time and memory allocations
 - [CPU profiling](./cpu_profiling.html) - attribute CPU samples to instrumented functions
@@ -229,4 +230,5 @@ Explore the docs for customization options and advanced profiling features.
 - [Tokio Runtime](./tokio_runtime.html) - monitor Tokio runtime worker stats and task scheduling
 - [MCP Server](./mcp.html) - LLM integration via Model Context Protocol
 - [GitHub CI](./github_ci.html) - automated benchmarking and regression detection in CI
+- [Cargo flamegraph alternatives](/blog/sampling_comparison) - when to use `hotpath` vs sampling profilers like perf and samply
 - [Configuration](./configuration.html) - explore all config options
