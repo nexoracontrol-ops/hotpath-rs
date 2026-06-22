@@ -2,6 +2,72 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.18.0] - 2026-06-22
+
+### 🚀 Features
+
+- Add mutexes_limit to macro
+
+- Initial wrap crossbeam channel macro
+
+- Add meta instrumentation to all worker channels
+
+- [**breaking**] Add perf histogram to wrap channels
+
+Stop displaying misleading log delay for non wrap channels
+
+
+- Add little law example and adjust channel report
+
+- [**breaking**] Add msg per s channel metric
+
+Remove state and queue from channels table report.
+
+
+- Add wrap support for std channels
+
+
+### 🐛 Bug Fixes
+
+- Misc fixes
+
+- Measure_all compile time err
+
+- Channels and futures set terminal states
+
+- Fix queue_size race and add cargo hack CI
+
+- Derive queue size
+
+- Add message IDs for wrap channels
+
+- Functions worker FIFO queue bug
+
+- Channel macro params order
+
+- Lib off channel macro params order
+
+- Clamp queue size metric
+
+- Channel rate per s calculation
+
+
+### 🚜 Refactor
+
+- Use unified enum for background workers
+
+- Minor cleanup
+
+- Simplify noop macros
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Add benchmark_load.rs
+
+- Release 0.18.0
+
+
 ## [0.17.0] - 2026-06-14
 
 ### 🚀 Features
