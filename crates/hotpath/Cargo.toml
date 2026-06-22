@@ -1,6 +1,6 @@
 [package]
 name = "hotpath"
-version = "0.17.0"
+version = "0.18.0"
 edition = "2021"
 repository = "https://github.com/pawurb/hotpath-rs"
 description = "One profiler for CPU, time, memory, and async code - quickly find and debug performance bottlenecks."
