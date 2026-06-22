@@ -80,7 +80,7 @@ or use the live TUI dashboard to monitor real-time performance and data flow met
 - **Zero cost when disabled** - fully feature-gated.
 
 <div class="waitlist-card" id="waitlist">
-  <h2 class="waitlist-card-title">Every Rust pull request gets a performance review.</h2>
+  <h2 class="waitlist-card-title">Every Rust PR gets a performance review.</h2>
   <p>Catch regressions in memory, SQL queries, HTTP calls and concurrency bottlenecks before they reach production. Iterate on reproducible signals, not CI noise.</p>
   <img src="{{#asset-hash images/hotpath-team-poc.webp}}" class="waitlist-card-image" alt="Hotpath Team commit timeline comparing duration, memory, HTTP and SQL metrics across commits, flagging a PR that introduced 171 new SQL calls" loading="lazy" width="1672" height="941">
   <p class="waitlist-cta-note">Launching soon • Early access invitations will be sent to waitlist members first.</p>
@@ -176,17 +176,11 @@ alloc - Cumulative allocations during each function call (including nested calls
 | docs_example::async_function | 1000  | 0 B     | 0 B     | 0 B     | 0.00%   |
 +------------------------------+-------+---------+---------+---------+---------+
 
-threads - Thread CPU and memory statistics. (RSS: 7.8 MB, Alloc: 2.1 MB, Dealloc: 304.3 KB, Diff: 1.8 MB, 5/10)
+threads - Thread CPU and memory statistics. (RSS: 7.8 MB, Alloc: 2.1 MB, Dealloc: 304.3 KB, Diff: 1.8 MB)
 +--------------+----------+------+------+----------+---------+-----------+----------+----------+----------+
 | Thread       | Status   | CPU% | Max% | CPU User | CPU Sys | CPU Total | Alloc    | Dealloc  | Diff     |
 +--------------+----------+------+------+----------+---------+-----------+----------+----------+----------+
-| hp-functions | Sleeping | 1.8% | 1.8% | 0.018s   | 0.001s  | 0.019s    | 1.8 MB   | 291.3 KB | 1.5 MB   |
-+--------------+----------+------+------+----------+---------+-----------+----------+----------+----------+
 | main         | Sleeping | 6.3% | 6.3% | 0.123s   | 0.070s  | 0.193s    | 367.8 KB | 9.9 KB   | 357.9 KB |
-+--------------+----------+------+------+----------+---------+-----------+----------+----------+----------+
-| hp-threads   | Running  | 0.0% | 0.0% | 0.000s   | 0.001s  | 0.001s    | 10.3 KB  | 3.0 KB   | 7.3 KB   |
-+--------------+----------+------+------+----------+---------+-----------+----------+----------+----------+
-| hp-server    | Sleeping | 0.0% | 0.0% | 0.000s   | 0.001s  | 0.001s    | 1.8 KB   | 56 B     | 1.7 KB   |
 +--------------+----------+------+------+----------+---------+-----------+----------+----------+----------+
 | thread_5     | Sleeping | -    | -    | 0.000s   | 0.000s  | 0.000s    | 640 B    | 24 B     | 616 B    |
 +--------------+----------+------+------+----------+---------+-----------+----------+----------+----------+
