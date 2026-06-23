@@ -9,6 +9,8 @@ pub fn init() {
     spawn_mutexes();
     spawn_channels();
     spawn_std_channel();
+    #[cfg(feature = "demo-sql")]
+    spawn_sql();
 }
 
 fn spawn_channels() {
@@ -138,6 +140,63 @@ fn spawn_rw_locks() {
             thread::sleep(Duration::from_millis(1));
         }
         thread::sleep(Duration::from_millis(200));
+    });
+}
+
+#[cfg(feature = "demo-sql")]
+fn spawn_sql() {
+    use sqlx::sqlite::SqlitePoolOptions;
+    use tracing_subscriber::prelude::*;
+
+    thread::spawn(|| {
+        // Route sqlx's per-query `sqlx::query` tracing events into hotpath's SQL subsystem.
+        tracing_subscriber::registry()
+            .with(hotpath::sql_tracing_layer())
+            .init();
+
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("Failed to create tokio runtime");
+
+        rt.block_on(async {
+            let pool = SqlitePoolOptions::new()
+                .max_connections(2)
+                .connect("sqlite::memory:")
+                .await
+                .expect("Failed to open in-memory sqlite pool");
+
+            sqlx::query("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)")
+                .execute(&pool)
+                .await
+                .expect("Failed to create demo table");
+
+            let mut i: i64 = 0;
+            loop {
+                i += 1;
+
+                let _ = sqlx::query("INSERT INTO users (name, age) VALUES (?, ?)")
+                    .bind(format!("user{i}"))
+                    .bind(20 + (i % 50))
+                    .execute(&pool)
+                    .await;
+
+                let _ = sqlx::query("SELECT id, name, age FROM users WHERE id = ?")
+                    .bind(i % 100 + 1)
+                    .fetch_optional(&pool)
+                    .await;
+
+                // Varying inline literals collapse into one normalized bucket.
+                let q = format!("SELECT name FROM users WHERE age = {}", 20 + (i % 30));
+                let _ = sqlx::query(sqlx::AssertSqlSafe(q)).fetch_all(&pool).await;
+
+                let _: Result<(i64,), _> = sqlx::query_as("SELECT COUNT(*) FROM users")
+                    .fetch_one(&pool)
+                    .await;
+
+                sleep_ms(120).await;
+            }
+        });
     });
 }
 

@@ -28,9 +28,16 @@ impl App {
                     self.switch_to_tab(SelectedTab::DataFlow);
                 }
             }
-            KeyCode::Char('3') => self.switch_to_tab(SelectedTab::Threads),
-            KeyCode::Char('4') => self.switch_to_tab(SelectedTab::Debug),
-            KeyCode::Char('5') => self.switch_to_tab(SelectedTab::Runtime),
+            KeyCode::Char('3') => {
+                if self.selected_tab == SelectedTab::Io {
+                    self.cycle_io_sub_tab();
+                } else {
+                    self.switch_to_tab(SelectedTab::Io);
+                }
+            }
+            KeyCode::Char('4') => self.switch_to_tab(SelectedTab::Threads),
+            KeyCode::Char('5') => self.switch_to_tab(SelectedTab::Debug),
+            KeyCode::Char('6') => self.switch_to_tab(SelectedTab::Runtime),
             _ => self.handle_tab_specific_key(key_code),
         }
     }
@@ -53,6 +60,9 @@ impl App {
             }
             SelectedTab::DataFlow => {
                 self.handle_data_flow_key(key_code);
+            }
+            SelectedTab::Io => {
+                self.handle_io_key(key_code);
             }
             SelectedTab::Threads => {
                 self.handle_threads_key(key_code);
@@ -229,6 +239,21 @@ impl App {
             }
             KeyCode::Char('g') if self.handle_g_key() => {
                 self.first_thread();
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_io_key(&mut self, key_code: KeyCode) {
+        match key_code {
+            KeyCode::Down | KeyCode::Char('j') => self.select_next_io(),
+            KeyCode::Up | KeyCode::Char('k') => self.select_previous_io(),
+            KeyCode::Char('G') => {
+                self.pending_g = None;
+                self.last_io();
+            }
+            KeyCode::Char('g') if self.handle_g_key() => {
+                self.first_io();
             }
             _ => {}
         }

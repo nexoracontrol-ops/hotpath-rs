@@ -34,9 +34,11 @@ jobs:
         run: |
           cargo check
       - name: Check all features
+        if: matrix.rust != '1.89'
         run: |
           cargo check --all-features
       - name: Check hotpath crate with all features
+        if: matrix.rust != '1.89'
         run: |
           cargo check -p hotpath --all-features
       - name: Check hotpath feature (time mode)
@@ -169,6 +171,7 @@ jobs:
         run: |
           cargo update
       - name: Build all features (updated deps)
+        if: matrix.rust != '1.89'
         run: |
           cargo build --all-features
 

@@ -1,6 +1,6 @@
 use crate::cmd::console::app::{
     App, DataFlowFocus, DataFlowLogs, DataFlowSubTab, DebugFocus, FunctionsFocus, FunctionsSubTab,
-    SelectedTab,
+    IoSubTab, SelectedTab,
 };
 use crate::cmd::console::views::data_flow::{inspect as data_flow_inspect, logs as data_flow_logs};
 use crate::cmd::console::views::debug::{inspect as debug_inspect, logs as debug_logs};
@@ -47,6 +47,7 @@ pub(crate) fn render_ui(frame: &mut Frame, app: &mut App) {
                 .is_some_and(|r| !r.data.is_empty()),
         },
         SelectedTab::DataFlow => app.data_flow_entries_len() > 0,
+        SelectedTab::Io => app.io_entries_len() > 0,
         SelectedTab::Threads => !app.threads.data.is_empty(),
         SelectedTab::Debug => !app.debug_stats.is_empty(),
         SelectedTab::Runtime => app.tokio_runtime.is_some(),
@@ -58,6 +59,8 @@ pub(crate) fn render_ui(frame: &mut Frame, app: &mut App) {
         render_functions_subtabs(frame, main_chunks[1], app.functions_sub_tab);
     } else if app.selected_tab == SelectedTab::DataFlow {
         render_data_flow_subtabs(frame, main_chunks[1], app.data_flow_sub_tab);
+    } else if app.selected_tab == SelectedTab::Io {
+        render_io_subtabs(frame, main_chunks[1], app.io_sub_tab);
     }
 
     top_bar::render_status_bar(
@@ -77,6 +80,9 @@ pub(crate) fn render_ui(frame: &mut Frame, app: &mut App) {
         }
         SelectedTab::DataFlow => {
             render_data_flow_view(frame, app, main_chunks[3]);
+        }
+        SelectedTab::Io => {
+            render_io_view(frame, app, main_chunks[3]);
         }
         SelectedTab::Threads => {
             render_threads_view(frame, app, main_chunks[3]);
@@ -244,6 +250,96 @@ fn render_data_flow_subtabs(frame: &mut Frame, area: Rect, sub_tab: DataFlowSubT
         label(DataFlowSubTab::Mutexes),
     ]);
     frame.render_widget(Paragraph::new(line), area);
+}
+
+#[hotpath::measure]
+fn render_io_subtabs(frame: &mut Frame, area: Rect, sub_tab: IoSubTab) {
+    let label = |tab: IoSubTab| {
+        if tab == sub_tab {
+            Span::styled(
+                format!(" {}*", tab.name()),
+                Style::default()
+                    .bg(Color::Cyan)
+                    .fg(Color::Black)
+                    .add_modifier(Modifier::BOLD),
+            )
+        } else {
+            Span::styled(
+                format!(" {} ", tab.name()),
+                Style::default().fg(Color::Gray),
+            )
+        }
+    };
+
+    let line = Line::from(vec![
+        Span::styled(
+            " [3]",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
+        label(IoSubTab::Sql),
+    ]);
+    frame.render_widget(Paragraph::new(line), area);
+}
+
+#[hotpath::measure]
+fn render_io_view(frame: &mut Frame, app: &mut App, area: Rect) {
+    let total = app.io_entries_len();
+
+    if let Some(ref error_msg) = app.error_message {
+        if total == 0 {
+            let error_text = vec![
+                Line::from(""),
+                Line::from("Error").red().bold().centered(),
+                Line::from(""),
+                Line::from(error_msg.as_str()).red().centered(),
+                Line::from(""),
+                Line::from(format!(
+                    "Make sure the metrics server is running on {}",
+                    app.metrics_host
+                ))
+                .yellow()
+                .centered(),
+            ];
+
+            let block = Block::bordered().border_set(border::THICK);
+            frame.render_widget(Paragraph::new(error_text).block(block), area);
+            return;
+        }
+    }
+
+    if total == 0 {
+        let empty_lines = match app.io_sub_tab {
+            IoSubTab::Sql => vec![
+                Line::from(""),
+                Line::from("No SQL queries found").yellow().centered(),
+                Line::from(""),
+                Line::from("Add hotpath::sql_tracing_layer() to your tracing subscriber")
+                    .centered(),
+            ],
+        };
+
+        let block = Block::bordered().border_set(border::THICK);
+        frame.render_widget(Paragraph::new(empty_lines).block(block), area);
+        return;
+    }
+
+    let selected_index = app.sql_table_state.selected().unwrap_or(0);
+    let position = selected_index + 1;
+
+    match app.io_sub_tab {
+        IoSubTab::Sql => data_flow::render_sql_panel(
+            &app.sql.data,
+            &app.sql.percentiles,
+            app.sql.total_ns,
+            area,
+            frame,
+            &mut app.sql_table_state,
+            position,
+            total,
+        ),
+    };
 }
 
 #[hotpath::measure]
@@ -681,6 +777,7 @@ fn render_tabs(frame: &mut Frame, area: ratatui::layout::Rect, selected_tab: Sel
     let titles = vec![
         create_tab_line(SelectedTab::Functions),
         create_tab_line(SelectedTab::DataFlow),
+        create_tab_line(SelectedTab::Io),
         create_tab_line(SelectedTab::Threads),
         create_tab_line(SelectedTab::Debug),
         create_tab_line(SelectedTab::Runtime),

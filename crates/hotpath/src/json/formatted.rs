@@ -378,6 +378,25 @@ pub struct JsonMutexEntry {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JsonSqlList {
+    pub current_elapsed_ns: u64,
+    pub total_ns: u64,
+    pub percentiles: Vec<f64>,
+    pub data: Vec<JsonSqlEntry>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JsonSqlEntry {
+    pub id: u32,
+    pub query: String,
+    pub count: u64,
+    pub avg: String,
+    pub total: String,
+    pub percent_total: String,
+    pub percentiles: HashMap<String, String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonChannelSentLog {
     pub index: u64,
     pub timestamp: String,
@@ -772,6 +791,8 @@ pub struct JsonReport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mutexes: Option<JsonMutexesList>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub sql: Option<JsonSqlList>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub threads: Option<JsonThreadsList>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub debug: Option<JsonDebugList>,
@@ -792,6 +813,7 @@ impl Default for JsonReport {
             futures: None,
             rw_locks: None,
             mutexes: None,
+            sql: None,
             threads: None,
             debug: None,
             cpu_baseline: None,

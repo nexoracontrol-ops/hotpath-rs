@@ -64,6 +64,53 @@ impl App {
         self.request_refresh_for_current_tab();
     }
 
+    pub(crate) fn cycle_io_sub_tab(&mut self) {
+        self.io_sub_tab = self.io_sub_tab.cycle();
+        debug!("Cycled I/O subtab: {}", self.io_sub_tab.name());
+        self.request_refresh_for_current_tab();
+    }
+
+    pub(crate) fn select_next_io(&mut self) {
+        let count = self.io_entries_len();
+        if count == 0 {
+            return;
+        }
+        let table_state = self.active_table_state_mut();
+        let i = match table_state.selected() {
+            Some(i) => (i + 1).min(count - 1),
+            None => 0,
+        };
+        table_state.select(Some(i));
+    }
+
+    pub(crate) fn select_previous_io(&mut self) {
+        let count = self.io_entries_len();
+        if count == 0 {
+            return;
+        }
+        let table_state = self.active_table_state_mut();
+        let i = match table_state.selected() {
+            Some(i) => i.saturating_sub(1),
+            None => 0,
+        };
+        table_state.select(Some(i));
+    }
+
+    pub(crate) fn first_io(&mut self) {
+        if self.io_entries_len() == 0 {
+            return;
+        }
+        self.active_table_state_mut().select(Some(0));
+    }
+
+    pub(crate) fn last_io(&mut self) {
+        let count = self.io_entries_len();
+        if count == 0 {
+            return;
+        }
+        self.active_table_state_mut().select(Some(count - 1));
+    }
+
     pub(crate) fn cycle_data_flow_sub_tab(&mut self) {
         self.data_flow_sub_tab = self.data_flow_sub_tab.cycle();
         debug!("Cycled data flow subtab: {}", self.data_flow_sub_tab.name());

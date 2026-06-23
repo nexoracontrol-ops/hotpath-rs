@@ -30,6 +30,7 @@ pub mod debug;
 pub mod futures;
 pub mod mutexes;
 pub mod rw_locks;
+pub mod sql;
 pub mod streams;
 #[cfg(feature = "threads")]
 pub mod threads;
@@ -44,6 +45,8 @@ pub use channels::{
 pub use futures::{InstrumentFuture, InstrumentFutureLog};
 pub use mutexes::InstrumentMutex;
 pub use rw_locks::InstrumentRwLock;
+#[cfg(feature = "sqlx")]
+pub use sql::sql_tracing_layer;
 pub use streams::{InstrumentStream, InstrumentStreamLog};
 
 pub mod hotpath_guard;

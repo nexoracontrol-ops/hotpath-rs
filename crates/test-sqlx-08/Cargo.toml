@@ -1,0 +1,15 @@
+[package]
+name = "test-sqlx-08"
+version = "0.0.0"
+publish = false
+edition = "2021"
+description = "Tests for sqlx 0.8 SQL query instrumentation via the tracing layer."
+
+[dependencies]
+hotpath = { workspace = true, features = ["sqlx"] }
+sqlx = { version = "0.8.0", default-features = false, features = ["sqlite", "runtime-tokio"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tracing-subscriber = { version = "0.3", features = ["registry"] }
+
+[features]
+hotpath = ["hotpath/hotpath"]

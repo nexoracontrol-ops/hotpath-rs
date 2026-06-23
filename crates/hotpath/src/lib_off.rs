@@ -227,6 +227,10 @@ impl HotpathGuardBuilder {
         self
     }
 
+    pub fn sql_limit(self, _limit: usize) -> Self {
+        self
+    }
+
     pub fn limit(self, _limit: usize) -> Self {
         self
     }
@@ -308,4 +312,15 @@ macro_rules! mutex {
     ($expr:expr, label = $label:expr) => {
         $expr
     };
+}
+
+/// No-op SQL profiling layer used when the `hotpath` feature is disabled. Lets
+/// call sites keep `.with(hotpath::sql_tracing_layer())` in their subscriber
+/// setup unconditionally - it observes nothing and forwards nothing.
+#[cfg(feature = "sqlx")]
+pub fn sql_tracing_layer<S>() -> impl tracing_subscriber::Layer<S>
+where
+    S: tracing::Subscriber + for<'a> tracing_subscriber::registry::LookupSpan<'a>,
+{
+    tracing_subscriber::layer::Identity::new()
 }

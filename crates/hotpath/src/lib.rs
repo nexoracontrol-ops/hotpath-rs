@@ -23,6 +23,8 @@ pub use lib_on::futures;
 #[cfg(feature = "hotpath")]
 pub use lib_on::mutexes;
 #[cfg(feature = "hotpath")]
+pub use lib_on::sql;
+#[cfg(feature = "hotpath")]
 pub use lib_on::streams;
 #[cfg(all(feature = "hotpath", feature = "threads"))]
 pub use lib_on::threads;

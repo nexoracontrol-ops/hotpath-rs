@@ -4,7 +4,7 @@ use hotpath::json::{
     JsonChannelLogsList, JsonChannelSentLog, JsonChannelsList, JsonDataFlowLog, JsonDebugEntry,
     JsonDebugLog, JsonFunctionAllocLogsList, JsonFunctionTimingLogsList, JsonFunctionsList,
     JsonFutureLog, JsonFutureLogsList, JsonFuturesList, JsonMutexesList, JsonRuntimeSnapshot,
-    JsonRwLocksList, JsonStreamLogsList, JsonStreamsList, JsonThreadsList,
+    JsonRwLocksList, JsonSqlList, JsonStreamLogsList, JsonStreamsList, JsonThreadsList,
 };
 use hotpath::wrap::crossbeam_channel::{Receiver, Sender};
 use ratatui::widgets::TableState;
@@ -21,6 +21,7 @@ pub(crate) enum SelectedTab {
     #[default]
     Functions,
     DataFlow,
+    Io,
     Threads,
     Debug,
     Runtime,
@@ -31,9 +32,10 @@ impl SelectedTab {
         match self {
             SelectedTab::Functions => 1,
             SelectedTab::DataFlow => 2,
-            SelectedTab::Threads => 3,
-            SelectedTab::Debug => 4,
-            SelectedTab::Runtime => 5,
+            SelectedTab::Io => 3,
+            SelectedTab::Threads => 4,
+            SelectedTab::Debug => 5,
+            SelectedTab::Runtime => 6,
         }
     }
 
@@ -41,6 +43,7 @@ impl SelectedTab {
         match self {
             SelectedTab::Functions => "Functions",
             SelectedTab::DataFlow => "Data Flow",
+            SelectedTab::Io => "I/O",
             SelectedTab::Threads => "Threads",
             SelectedTab::Debug => "Debug",
             SelectedTab::Runtime => "Tokio",
@@ -52,9 +55,10 @@ impl SelectedTab {
         match n {
             1 => Some(SelectedTab::Functions),
             2 => Some(SelectedTab::DataFlow),
-            3 => Some(SelectedTab::Threads),
-            4 => Some(SelectedTab::Debug),
-            5 => Some(SelectedTab::Runtime),
+            3 => Some(SelectedTab::Io),
+            4 => Some(SelectedTab::Threads),
+            5 => Some(SelectedTab::Debug),
+            6 => Some(SelectedTab::Runtime),
             _ => None,
         }
     }
@@ -120,6 +124,27 @@ impl DataFlowSubTab {
     /// RwLocks and Mutexes have no per-event logs, so the logs/inspect panes don't apply.
     pub(crate) fn has_logs(&self) -> bool {
         !matches!(self, DataFlowSubTab::RwLocks | DataFlowSubTab::Mutexes)
+    }
+}
+
+/// Sub-tabs of the I/O top-level tab.
+#[derive(Default, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum IoSubTab {
+    #[default]
+    Sql,
+}
+
+impl IoSubTab {
+    pub(crate) fn name(&self) -> &'static str {
+        match self {
+            IoSubTab::Sql => "SQL",
+        }
+    }
+
+    pub(crate) fn cycle(&self) -> Self {
+        match self {
+            IoSubTab::Sql => IoSubTab::Sql,
+        }
     }
 }
 
@@ -195,6 +220,7 @@ pub(crate) struct App {
     pub(crate) selected_tab: SelectedTab,
     pub(crate) functions_sub_tab: FunctionsSubTab,
     pub(crate) data_flow_sub_tab: DataFlowSubTab,
+    pub(crate) io_sub_tab: IoSubTab,
     pub(crate) paused: bool,
 
     pub(crate) last_refresh: Instant,
@@ -218,6 +244,7 @@ pub(crate) struct App {
 
     pub(crate) loading_functions: bool,
     pub(crate) loading_data_flow: bool,
+    pub(crate) loading_io: bool,
     pub(crate) loading_threads: bool,
     pub(crate) loading_debug: bool,
 
@@ -226,11 +253,13 @@ pub(crate) struct App {
     pub(crate) futures: JsonFuturesList,
     pub(crate) rw_locks: JsonRwLocksList,
     pub(crate) mutexes: JsonMutexesList,
+    pub(crate) sql: JsonSqlList,
     pub(crate) channels_table_state: TableState,
     pub(crate) streams_table_state: TableState,
     pub(crate) futures_table_state: TableState,
     pub(crate) rw_locks_table_state: TableState,
     pub(crate) mutexes_table_state: TableState,
+    pub(crate) sql_table_state: TableState,
     pub(crate) data_flow_focus: DataFlowFocus,
     pub(crate) show_data_flow_logs: bool,
     pub(crate) data_flow_logs: Option<DataFlowLogs>,
@@ -321,6 +350,7 @@ impl App {
             selected_tab: initial_tab,
             functions_sub_tab: FunctionsSubTab::default(),
             data_flow_sub_tab: DataFlowSubTab::default(),
+            io_sub_tab: IoSubTab::default(),
             paused: false,
             last_refresh: Instant::now(),
             last_successful_fetch: None,
@@ -340,6 +370,7 @@ impl App {
             exit: false,
             loading_functions: false,
             loading_data_flow: false,
+            loading_io: false,
             loading_threads: false,
             loading_debug: false,
             channels: JsonChannelsList {
@@ -365,11 +396,18 @@ impl App {
                 percentiles: vec![],
                 data: vec![],
             },
+            sql: JsonSqlList {
+                current_elapsed_ns: 0,
+                total_ns: 0,
+                percentiles: vec![],
+                data: vec![],
+            },
             channels_table_state: TableState::default().with_selected(0),
             streams_table_state: TableState::default().with_selected(0),
             futures_table_state: TableState::default().with_selected(0),
             rw_locks_table_state: TableState::default().with_selected(0),
             mutexes_table_state: TableState::default().with_selected(0),
+            sql_table_state: TableState::default().with_selected(0),
             data_flow_focus: DataFlowFocus::List,
             show_data_flow_logs: false,
             data_flow_logs: None,
@@ -436,6 +474,9 @@ impl App {
                 DataFlowSubTab::RwLocks => &mut self.rw_locks_table_state,
                 DataFlowSubTab::Mutexes => &mut self.mutexes_table_state,
             },
+            SelectedTab::Io => match self.io_sub_tab {
+                IoSubTab::Sql => &mut self.sql_table_state,
+            },
             SelectedTab::Threads => &mut self.threads_table_state,
             SelectedTab::Debug => &mut self.debug_table_state,
             SelectedTab::Runtime => &mut self.runtime_table_state,
@@ -449,6 +490,12 @@ impl App {
             DataFlowSubTab::Futures => self.futures.data.len(),
             DataFlowSubTab::RwLocks => self.rw_locks.data.len(),
             DataFlowSubTab::Mutexes => self.mutexes.data.len(),
+        }
+    }
+
+    pub(crate) fn io_entries_len(&self) -> usize {
+        match self.io_sub_tab {
+            IoSubTab::Sql => self.sql.data.len(),
         }
     }
 
