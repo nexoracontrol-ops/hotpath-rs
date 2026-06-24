@@ -1,10 +1,10 @@
-# Rust async data flow monitoring: channels, streams, and futures
+# Rust async monitoring: Futures, Streams and Channels performance
 
-`hotpath` lets you observe async data flow in real time - across Rust channels, streams, and futures. Track channel throughput, identify slow consumers, monitor futures resolution, and discover data flow bottlenecks while your system is running. With minimal instrumentation, you can get a clear picture of how data moves through your app's async pipeline.
+`hotpath` lets you monitor Rust channels performance in real time - alongside streams and futures. Track channel throughput, queue depth, identify slow consumers, monitor futures resolution, and discover bottlenecks while your system is running. With minimal instrumentation, you can get a clear picture of how data moves through your app's async pipeline.
 
 All monitoring macros (`channel!`, `stream!`, `future!` and `future_fn`) are noop unless `hotpath` feature is activated.
 
-## Channels
+## Channels monitoring
 
 ### channel! macro
 
@@ -118,9 +118,11 @@ Wrap mode rebuilds the inner channel from `capacity` (std exposes no way to read
 
 Please note that enabling monitoring can subtly affect channel behavior in some cases. For example, using `try_send` may behave slightly differently since the proxy adds 1 slot of extra capacity. Also some wrappers currently do not propagate info about receiver getting dropped.
 
-### Send-receive latency (`wrap = true`)
+I'm actively improving the library, so any feedback, issues, bug reports are appreciated.
 
-For crossbeam channels you can opt into **endpoint wrapping** with `wrap = true`. Instead of inserting a forwarder-proxy, this wraps the `Sender`/`Receiver` directly and stamps each message with its send time, so the report gains an exact **send-receive latency** histogram (`proc_avg` plus the configured percentiles), alongside an exact live queue depth:
+### Send-receive latency and queue depth (`wrap = true`)
+
+For `crossbeam` and `std` channels you can opt into **endpoint wrapping** with `wrap = true`. Instead of inserting a forwarder-proxy, this wraps the `Sender`/`Receiver` directly and stamps each message with its send time, so the report gains an exact **send-receive latency** histogram (`proc_avg` plus the configured percentiles), alongside an exact live queue depth:
 
 ```rust
 let (tx, rx) = hotpath::channel!(
@@ -132,13 +134,9 @@ let (tx, rx) = hotpath::channel!(
 
 The recorded latency is the full interval from `send()` to `recv()`, including backpressure wait on bounded channels. Because the timestamps are taken inside your own `send`/`recv` calls rather than in a forwarder thread, the value is exact - and wrap mode is also lighter than the proxy, since it adds no extra thread or hop.
 
-Latency is reported **only for wrap channels**. A proxy channel stamps its events inside the forwarder thread, in the middle of the pipeline, so it cannot observe the producer-side or consumer-side wait accurately; its latency fields are omitted (shown as `-`) rather than reported as a misleading zero. Prefer `wrap = true` when you care about channel latency.
+Latency is reported **only for wrap channels**. A proxy channel stamps its events inside the forwarder thread, in the middle of the pipeline, so it cannot observe the producer-side or consumer-side wait accurately. Prefer `wrap = true` when you care about channel latency.
 
-> Wrap mode requires the channel expression to be constructed inline (e.g. `channel!(crossbeam_channel::unbounded::<T>(), wrap = true)`) and is currently available for crossbeam channels.
-
-I'm actively improving the library, so any feedback, issues, bug reports are appreciated.
-
-## Streams
+## Streams monitoring
 
 ### stream! macro
 
@@ -172,7 +170,7 @@ Label streams to display them on top of the list. By passing `log = true` TUI wi
 
 <img loading="lazy" src="{{#asset-hash images/streams-log.png}}" alt="hotpath-rs TUI showing async stream item monitoring and throughput">
 
-## Futures
+## Futures monitoring
 
 ### future! and future_fn macros
 
