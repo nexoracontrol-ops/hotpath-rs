@@ -158,7 +158,7 @@ impl<S> Filter<S> for SqlxQueryFilter {
 /// use tracing_subscriber::prelude::*;
 ///
 /// tracing_subscriber::registry()
-///     .with(hotpath::sql_tracing_layer())
+///     .with(hotpath::sqlx_tracing_layer())
 ///     .init();
 /// ```
 ///
@@ -168,7 +168,7 @@ impl<S> Filter<S> for SqlxQueryFilter {
 /// this per-layer filter and can suppress `sqlx::query` for the whole stack.
 /// Attach any `EnvFilter` per-layer instead, or don't globally filter out the
 /// `sqlx::query` target.
-pub fn sql_tracing_layer<S>() -> impl Layer<S>
+pub fn sqlx_tracing_layer<S>() -> impl Layer<S>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {

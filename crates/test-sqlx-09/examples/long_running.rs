@@ -17,7 +17,7 @@ use tracing_subscriber::prelude::*;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::registry()
-        .with(hotpath::sql_tracing_layer())
+        .with(hotpath::sqlx_tracing_layer())
         .init();
 
     let _guard = HotpathGuardBuilder::new("main")

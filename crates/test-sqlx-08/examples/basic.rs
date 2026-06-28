@@ -1,4 +1,4 @@
-//! Demonstrates `hotpath::sql_tracing_layer()` capturing every sqlx 0.8 query
+//! Demonstrates `hotpath::sqlx_tracing_layer()` capturing every sqlx 0.8 query
 //! via a `tracing` layer - no pool wrapping, no application type changes. This
 //! is the same layer used for sqlx 0.9; the `sqlx::query` event field schema is
 //! identical across both versions, so only the dynamic-SQL call site differs
@@ -14,7 +14,7 @@ use tracing_subscriber::prelude::*;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::registry()
-        .with(hotpath::sql_tracing_layer())
+        .with(hotpath::sqlx_tracing_layer())
         .init();
 
     let _guard = HotpathGuardBuilder::new("main")

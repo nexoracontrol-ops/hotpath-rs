@@ -32,7 +32,7 @@ pub(crate) mod normalize;
 pub(crate) mod tracing_layer;
 
 #[cfg(feature = "sqlx")]
-pub use tracing_layer::sql_tracing_layer;
+pub use tracing_layer::sqlx_tracing_layer;
 
 static SQL_ID_COUNTER: AtomicU32 = AtomicU32::new(1);
 

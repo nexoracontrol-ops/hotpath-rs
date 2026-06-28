@@ -1,4 +1,4 @@
-//! Demonstrates `hotpath::sql_tracing_layer()` capturing every sqlx 0.9 query
+//! Demonstrates `hotpath::sqlx_tracing_layer()` capturing every sqlx 0.9 query
 //! via a `tracing` layer - no pool wrapping, no application type changes.
 //! Queries are timed (using sqlx's own measured `elapsed`) and aggregated by
 //! *normalized* statement text.
@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // One line: hook hotpath into the tracing pipeline. From here every sqlx
     // query (including transaction-internal ones) is captured.
     tracing_subscriber::registry()
-        .with(hotpath::sql_tracing_layer())
+        .with(hotpath::sqlx_tracing_layer())
         .init();
 
     let _guard = HotpathGuardBuilder::new("main")

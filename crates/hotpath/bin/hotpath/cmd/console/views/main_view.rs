@@ -315,7 +315,7 @@ fn render_io_view(frame: &mut Frame, app: &mut App, area: Rect) {
                 Line::from(""),
                 Line::from("No SQL queries found").yellow().centered(),
                 Line::from(""),
-                Line::from("Add hotpath::sql_tracing_layer() to your tracing subscriber")
+                Line::from("Add hotpath::sqlx_tracing_layer() to your tracing subscriber")
                     .centered(),
             ],
         };

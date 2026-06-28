@@ -315,10 +315,10 @@ macro_rules! mutex {
 }
 
 /// No-op SQL profiling layer used when the `hotpath` feature is disabled. Lets
-/// call sites keep `.with(hotpath::sql_tracing_layer())` in their subscriber
+/// call sites keep `.with(hotpath::sqlx_tracing_layer())` in their subscriber
 /// setup unconditionally - it observes nothing and forwards nothing.
 #[cfg(feature = "sqlx")]
-pub fn sql_tracing_layer<S>() -> impl tracing_subscriber::Layer<S>
+pub fn sqlx_tracing_layer<S>() -> impl tracing_subscriber::Layer<S>
 where
     S: tracing::Subscriber + for<'a> tracing_subscriber::registry::LookupSpan<'a>,
 {
