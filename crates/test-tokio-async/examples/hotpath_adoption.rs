@@ -6,20 +6,31 @@
 //! 2. Fetch each candidate `Cargo.toml`, parse it as TOML, and keep only repos
 //!    that declare `hotpath` in a real dependency table.
 //!
+//! Results are merged into a JSON file (default `hotpath_adoption.json` in the
+//! repo root, override with
+//! `HOTPATH_ADOPTION_PATH`). The first run stamps every repo with `discovered_at`;
+//! later daily runs keep each repo's original `discovered_at`, refresh its `stars`
+//! / `requirement`, and bump `last_seen_at`. Repos that drop out of the search are
+//! retained untouched (their stale `last_seen_at` flags them).
+//!
 //! Run with:
 //! `GH_TOKEN="$(gh auth token)" cargo run -p test-tokio-async --release --example hotpath_adoption`
 
 use anyhow::{Context, Result};
+use chrono::{SecondsFormat, Utc};
 use futures::stream::{self, StreamExt};
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, AUTHORIZATION, USER_AGENT};
-use serde::Deserialize;
-use std::collections::HashSet;
+use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
+use std::path::PathBuf;
 use std::time::Duration;
 
-/// Owner whose repos are skipped (the crate author).
-const SKIP_OWNER: &str = "pawurb/";
+/// The hotpath repo itself, skipped (would always self-match).
+const SKIP_REPO: &str = "pawurb/hotpath-rs";
 /// Concurrent raw-file fetches in phase 2.
 const FETCH_CONCURRENCY: usize = 8;
+/// Default path for the merged adoption dataset (repo root).
+const DEFAULT_OUTPUT_PATH: &str = "hotpath_adoption.json";
 
 #[derive(Debug, Deserialize)]
 struct SearchResponse {
@@ -52,6 +63,16 @@ struct Dependent {
     html_url: String,
     requirement: String,
     stars: u64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Record {
+    full_name: String,
+    html_url: String,
+    requirement: String,
+    stars: u64,
+    discovered_at: String,
+    last_seen_at: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -89,23 +110,91 @@ async fn main() -> Result<()> {
         candidates.len()
     );
 
-    let mut dependents = confirm_dependents(&client, candidates).await;
-    dependents.sort_by(|a, b| b.stars.cmp(&a.stars).then(a.full_name.cmp(&b.full_name)));
+    let dependents = confirm_dependents(&client, candidates).await;
+    println!(
+        "Phase 2: {} repos depend on the hotpath crate.",
+        dependents.len()
+    );
+
+    let path = output_path();
+    let mut records = load_records(&path)?;
+    let now = Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true);
+    let (added, updated) = merge_dependents(&mut records, dependents, &now);
+
+    let mut sorted: Vec<&Record> = records.values().collect();
+    sorted.sort_by(|a, b| b.stars.cmp(&a.stars).then(a.full_name.cmp(&b.full_name)));
+    write_records(&path, &sorted)?;
 
     println!();
     println!(
-        "Phase 2: {} repos depend on the hotpath crate:",
-        dependents.len()
+        "Merged into {}: {added} new, {updated} refreshed, {} total tracked.",
+        path.display(),
+        records.len()
     );
-    println!();
-    for dep in &dependents {
-        println!(
-            "- {:>7} ★  {} = {}",
-            dep.stars, dep.html_url, dep.requirement
-        );
-    }
 
     Ok(())
+}
+
+fn output_path() -> PathBuf {
+    std::env::var("HOTPATH_ADOPTION_PATH")
+        .unwrap_or_else(|_| DEFAULT_OUTPUT_PATH.to_string())
+        .into()
+}
+
+fn load_records(path: &std::path::Path) -> Result<HashMap<String, Record>> {
+    let body = match std::fs::read_to_string(path) {
+        Ok(body) => body,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(HashMap::new()),
+        Err(err) => return Err(err).context(format!("reading {}", path.display())),
+    };
+    let list: Vec<Record> =
+        serde_json::from_str(&body).context(format!("parsing {}", path.display()))?;
+    Ok(list.into_iter().map(|r| (r.full_name.clone(), r)).collect())
+}
+
+fn write_records(path: &std::path::Path, records: &[&Record]) -> Result<()> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).ok();
+    }
+    let json = serde_json::to_string_pretty(records)?;
+    std::fs::write(path, json).context(format!("writing {}", path.display()))?;
+    Ok(())
+}
+
+/// Merge this run's dependents into the persisted map, preserving each repo's
+/// original `discovered_at`. Returns `(new, refreshed)` counts.
+fn merge_dependents(
+    records: &mut HashMap<String, Record>,
+    dependents: Vec<Dependent>,
+    now: &str,
+) -> (usize, usize) {
+    let (mut added, mut updated) = (0, 0);
+    for dep in dependents {
+        match records.get_mut(&dep.full_name) {
+            Some(existing) => {
+                existing.html_url = dep.html_url;
+                existing.requirement = dep.requirement;
+                existing.stars = dep.stars;
+                existing.last_seen_at = now.to_string();
+                updated += 1;
+            }
+            None => {
+                records.insert(
+                    dep.full_name.clone(),
+                    Record {
+                        full_name: dep.full_name,
+                        html_url: dep.html_url,
+                        requirement: dep.requirement,
+                        stars: dep.stars,
+                        discovered_at: now.to_string(),
+                        last_seen_at: now.to_string(),
+                    },
+                );
+                added += 1;
+            }
+        }
+    }
+    (added, updated)
 }
 
 async fn search_candidates(client: &reqwest::Client) -> Result<Vec<Candidate>> {
@@ -136,7 +225,7 @@ async fn search_candidates(client: &reqwest::Client) -> Result<Vec<Candidate>> {
         }
 
         for item in response.items {
-            if item.repository.fork || item.repository.full_name.starts_with(SKIP_OWNER) {
+            if item.repository.fork || item.repository.full_name == SKIP_REPO {
                 continue;
             }
             let key = (item.repository.full_name.clone(), item.path.clone());

@@ -4224,6 +4224,7 @@ name = "test-tokio-async"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "futures",
  "futures-util",
  "hotpath",

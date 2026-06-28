@@ -6,6 +6,7 @@ hotpath_report.csv
 hotpath_report.json
 *.json.gz
 *.json
+!hotpath_adoption.json
 log/
 tmp/
 docs/book/
