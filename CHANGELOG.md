@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.0] - 2026-06-29
+
+### 🚀 Features
+
+- Add initial SQL sqlx instrumentation
+
+- Add diesel sql instrumentation
+
+
+### 🚜 Refactor
+
+- Rename sql_tracing_layer
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Store repo adoption data
+
+- Release 0.19.0
+
+
 ## [0.18.0] - 2026-06-22
 
 ### 🚀 Features
