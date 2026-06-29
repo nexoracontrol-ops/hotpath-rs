@@ -20,7 +20,7 @@
 
 [hotpath-rs](https://github.com/pawurb/hotpath-rs) is an easy-to-configure Rust performance profiling toolkit that shows exactly where your code spends time, burns CPU, and allocates memory. 
 
-It helps you distinguish between functions that are slow because they wait on I/O and those that are CPU-intensive. Instrument functions, channels, futures, and streams to find bottlenecks and focus optimizations where they matter most. Get actionable insights into time, memory, and async data flow with minimal setup.
+It helps you distinguish between functions that are slow because they wait on I/O and those that are CPU-intensive. Instrument functions, channels, futures, streams, and SQL queries to find bottlenecks and focus optimizations where they matter most. Get actionable insights into time, memory, and async data flow with minimal setup.
 
 <div style="clear: both;"></div>
 
@@ -72,6 +72,7 @@ or use the live TUI dashboard to monitor real-time performance and data flow met
 
 - **Time, CPU & memory profiling** - identify expensive functions, allocation hotspots, and investigate memory leaks.
 - **Async observability** - futures, channels and streams.
+- **SQL query profiling** - query performance metrics for sqlx and Diesel.
 - **Concurrency metrics** - Mutex/RwLock wait time and contention.
 - **Tokio runtime monitoring** - workers, scheduling and queues.
 - **Live TUI dashboard & static reports** - real-time or one-off analysis.
