@@ -25,15 +25,15 @@ It helps you distinguish between functions that are slow because they wait on I/
 <div style="clear: both;"></div>
 
 <div class="trusted-by">
-  <p class="trusted-by-tagline">Used by dozens of open-source projects, including:</p>
+  <p class="trusted-by-tagline">Used by <a href="/adoption" target="_blank">{{#adoption_count}} open-source projects</a>, including:</p>
   <div class="trusted-by-grid">
+    <a href="https://github.com/EasyTier/EasyTier" target="_blank" class="trusted-by-project">
+      <span class="trusted-by-name">EasyTier/EasyTier</span>
+      <img src="{{#asset-hash images/stars-easytier-easytier.svg}}" alt="EasyTier GitHub stars">
+    </a>
     <a href="https://github.com/apache/opendal" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">apache/opendal</span>
       <img src="{{#asset-hash images/stars-apache-opendal.svg}}" alt="opendal GitHub stars">
-    </a>
-    <a href="https://github.com/apache/horaedb" target="_blank" class="trusted-by-project">
-      <span class="trusted-by-name">apache/horaedb</span>
-      <img src="{{#asset-hash images/stars-apache-horaedb.svg}}" alt="horaedb GitHub stars">
     </a>
     <a href="https://github.com/maplibre/martin" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">maplibre/martin</span>

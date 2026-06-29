@@ -19,7 +19,7 @@
 - [GitHub CI integration](./github_ci.md)
 - [MCP integration](./mcp.md)
 - [Configuration](./configuration.md)
-- [Used by](./used_by.md)
+- [Used by](./adoption.md)
 
 ---
 

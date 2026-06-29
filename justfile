@@ -56,8 +56,8 @@ fetch-badges:
     set -euo pipefail
     DIR="docs/src/images"
     fetch() { sleep 2; echo "Fetching $2..."; curl -sL "https://img.shields.io/github/stars/${2}?style=social" -o "${DIR}/stars-${1}.svg"; }
+    fetch easytier-easytier EasyTier/EasyTier
     fetch apache-opendal apache/opendal
-    fetch apache-horaedb apache/horaedb
     fetch marc2332-freya marc2332/freya
     fetch tqwewe-kameo tqwewe/kameo
     fetch tryandromeda-andromeda tryandromeda/andromeda
