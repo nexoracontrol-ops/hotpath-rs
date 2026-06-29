@@ -1,6 +1,6 @@
 # A simple Rust profiler that shows exactly why your code is slow
 
-<h2 class="hero-subtitle">Profile CPU, memory, async execution, lock contention and channels from a single tool.</h2>
+<h2 class="hero-subtitle">Profile CPU, memory, async execution, SQL queries, lock contention and channels from a single tool.</h2>
 
 <div class="hero-badges">
   <a href="https://github.com/pawurb/hotpath-rs" target="_blank"><img src="{{#asset-hash images/stars-pawurb-hotpath-rs.svg}}" alt="GitHub Stars"></a>
