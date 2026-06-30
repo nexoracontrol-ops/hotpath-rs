@@ -145,6 +145,10 @@ Tokio bounded wrap channels do not need a `capacity` argument - the bound is rec
 
 Latency is reported **only for wrap channels**. A proxy channel stamps its events inside the forwarder thread, in the middle of the pipeline, so it cannot observe the producer-side or consumer-side wait accurately. Prefer `wrap = true` when you care about channel latency.
 
+### Instrumentation overhead
+
+Because wrap mode hits the real channel directly instead of relaying every message through a forwarder task or thread, it is dramatically cheaper for the channel libraries whose proxy needs a background relay. For `tokio` and `flume`, wrap mode cuts per-message instrumentation overhead roughly **5-6x** versus the forwarder proxy, since their proxies cost a scheduler round-trip per message. `std` also gets a large reduction (its proxy overhead drops by around **4x**). `crossbeam`'s forwarder is already cheap (a tight relay thread, no async scheduling), so the two modes are close there. Whenever a channel type supports `wrap = true`, prefer it over the proxy for both lower overhead and exact latency.
+
 ## Streams monitoring
 
 ### stream! macro
