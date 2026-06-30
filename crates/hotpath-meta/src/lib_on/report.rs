@@ -13,7 +13,7 @@ use crate::futures::{compare_future_stats, FutureEntry, FUTURES_STATE};
 use crate::json::JsonDebugEntry;
 use crate::json::{
     JsonChannelsList, JsonFutureEntry, JsonFuturesList, JsonMutexEntry, JsonMutexesList,
-    JsonRwLockEntry, JsonRwLocksList, JsonStreamEntry, JsonStreamsList,
+    JsonRwLockEntry, JsonRwLocksList, JsonSqlEntry, JsonSqlList, JsonStreamEntry, JsonStreamsList,
 };
 use crate::mutexes::{compare_mutex_entries, MutexEntry, MUTEXES_STATE};
 use crate::output::{
@@ -21,6 +21,7 @@ use crate::output::{
 };
 use crate::output_on::write_section_header;
 use crate::rw_locks::{compare_rw_lock_entries, RwLockEntry, RwLockKind, RW_LOCKS_STATE};
+use crate::sql::{compare_sql_entries, SqlEntry, SQL_STATE};
 use crate::streams::{compare_stream_stats, StreamStats, STREAMS_STATE};
 
 fn styled_header(text: &str) -> Cell {
@@ -488,6 +489,143 @@ pub(crate) fn collect_mutexes_json(
         data: mutexes
             .iter()
             .map(|mutex| mutex_to_json(mutex, percentiles))
+            .collect(),
+    }
+}
+
+pub(crate) fn shutdown_sql() -> Vec<SqlEntry> {
+    crate::lib_on::sql::flush_sql_batch();
+    SQL_STATE
+        .get()
+        .and_then(|state| {
+            if let Ok(mut guard) = state.shutdown_tx.lock() {
+                if let Some(tx) = guard.take() {
+                    let _ = tx.send(());
+                }
+            }
+            state
+                .completion_rx
+                .lock()
+                .ok()
+                .and_then(|mut guard| guard.take())
+                .and_then(|rx| rx.recv().ok());
+            state
+                .inner
+                .read()
+                .ok()
+                .map(|inner| inner.stats.values().cloned().collect::<Vec<_>>())
+        })
+        .map(|mut entries| {
+            entries.sort_by(compare_sql_entries);
+            entries
+        })
+        .unwrap_or_default()
+}
+
+const SQL_QUERY_DISPLAY_LEN: usize = 60;
+
+fn truncate_query(query: &str) -> String {
+    if query.chars().count() <= SQL_QUERY_DISPLAY_LEN {
+        return query.to_string();
+    }
+    let truncated: String = query.chars().take(SQL_QUERY_DISPLAY_LEN - 3).collect();
+    format!("{}...", truncated)
+}
+
+pub(crate) fn report_sql_table(
+    entries: &[SqlEntry],
+    total_count: usize,
+    reference_total: u64,
+    percentiles: &[f64],
+    writer: &mut dyn Write,
+) {
+    if entries.is_empty() {
+        return;
+    }
+
+    write_section_header(writer, "sql", "SQL query execution time statistics.");
+    if entries.len() < total_count {
+        let _ = write!(writer, " ({}/{})", entries.len(), total_count);
+    }
+    let _ = writeln!(writer);
+
+    let mut header = vec![
+        styled_header("Query"),
+        styled_header("Calls"),
+        styled_header("Avg"),
+    ];
+    for &p in percentiles {
+        header.push(styled_header(&format_percentile_header(p)));
+    }
+    header.push(styled_header("Total"));
+    header.push(styled_header("% Total"));
+
+    let mut table = Table::new();
+    table.add_row(Row::new(header));
+
+    for entry in entries {
+        let mut row = vec![
+            Cell::new(&truncate_query(&entry.query)),
+            Cell::new(&entry.count.to_string()),
+            Cell::new(&format_duration(entry.avg_nanos())),
+        ];
+        for &p in percentiles {
+            row.push(Cell::new(&format_duration(entry.percentile_nanos(p))));
+        }
+        row.push(Cell::new(&format_duration(entry.total_nanos)));
+        row.push(Cell::new(&format_sql_percent(
+            entry.total_nanos,
+            reference_total,
+        )));
+        table.add_row(Row::new(row));
+    }
+
+    print_table(&table, writer);
+    let _ = writeln!(writer);
+}
+
+fn format_sql_percent(total_nanos: u64, reference_total: u64) -> String {
+    let percentage = if reference_total > 0 {
+        (total_nanos as f64 / reference_total as f64) * 100.0
+    } else {
+        0.0
+    };
+    format!("{:.2}%", percentage)
+}
+
+fn sql_to_json(entry: &SqlEntry, reference_total: u64, percentiles: &[f64]) -> JsonSqlEntry {
+    let mut percentile_map = HashMap::new();
+    for &p in percentiles {
+        percentile_map.insert(
+            format_percentile_key(p),
+            format_duration(entry.percentile_nanos(p)),
+        );
+    }
+
+    JsonSqlEntry {
+        id: entry.id,
+        query: entry.query.clone(),
+        count: entry.count,
+        avg: format_duration(entry.avg_nanos()),
+        total: format_duration(entry.total_nanos),
+        percent_total: format_sql_percent(entry.total_nanos, reference_total),
+        percentiles: percentile_map,
+    }
+}
+
+pub(crate) fn collect_sql_json(
+    entries: &[SqlEntry],
+    elapsed: std::time::Duration,
+    reference_total: u64,
+    percentiles: &[f64],
+) -> JsonSqlList {
+    JsonSqlList {
+        current_elapsed_ns: elapsed.as_nanos() as u64,
+        total_ns: reference_total,
+        percentiles: percentiles.to_vec(),
+        data: entries
+            .iter()
+            .map(|entry| sql_to_json(entry, reference_total, percentiles))
             .collect(),
     }
 }

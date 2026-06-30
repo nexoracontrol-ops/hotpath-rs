@@ -6,9 +6,13 @@ pub(crate) mod crossbeam;
 pub(crate) mod crossbeam_wrap;
 #[cfg(feature = "flume")]
 pub(crate) mod flume;
+#[cfg(feature = "flume")]
+pub(crate) mod flume_wrap;
 #[cfg(feature = "futures")]
 pub(crate) mod ftc;
 pub(crate) mod std;
 pub(crate) mod std_wrap;
 #[cfg(feature = "tokio")]
 pub(crate) mod tokio;
+#[cfg(feature = "tokio")]
+pub(crate) mod tokio_wrap;

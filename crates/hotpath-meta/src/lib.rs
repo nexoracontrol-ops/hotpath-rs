@@ -27,6 +27,8 @@ pub use lib_on::futures;
 #[cfg(feature = "hotpath-meta")]
 pub use lib_on::mutexes;
 #[cfg(feature = "hotpath-meta")]
+pub use lib_on::sql;
+#[cfg(feature = "hotpath-meta")]
 pub use lib_on::streams;
 #[cfg(all(feature = "hotpath-meta", feature = "threads"))]
 pub use lib_on::threads;
@@ -113,6 +115,25 @@ pub mod wrap {
         }
     }
 
+    /// Instrumented `tokio::sync::mpsc` channel endpoints for
+    /// `channel!(..., wrap = true)`. With `hotpath-meta` enabled these are the
+    /// instrumented wrappers; otherwise `channel!` is a no-op and the endpoints
+    /// are the raw tokio types, so the alias resolves the same way regardless of
+    /// feature configuration.
+    #[cfg(feature = "tokio")]
+    pub mod tokio {
+        pub mod sync {
+            pub mod mpsc {
+                #[cfg(feature = "hotpath-meta")]
+                pub use crate::lib_on::channels::wrapper::tokio_wrap::{
+                    Receiver, Sender, UnboundedReceiver, UnboundedSender,
+                };
+                #[cfg(not(feature = "hotpath-meta"))]
+                pub use tokio::sync::mpsc::{Receiver, Sender, UnboundedReceiver, UnboundedSender};
+            }
+        }
+    }
+
     /// Instrumented crossbeam channel endpoints for `channel!(..., wrap = true)`.
     /// With `hotpath-meta` enabled these are the instrumented wrappers; otherwise
     /// `channel!` is a no-op and the endpoints are the raw crossbeam types, so the
@@ -123,6 +144,18 @@ pub mod wrap {
         pub use crate::lib_on::channels::wrapper::crossbeam_wrap::{Receiver, Sender};
         #[cfg(not(feature = "hotpath-meta"))]
         pub use crossbeam_channel::{Receiver, Sender};
+    }
+
+    /// Instrumented flume channel endpoints for `channel!(..., wrap = true)`.
+    /// With `hotpath-meta` enabled these are the instrumented wrappers; otherwise
+    /// `channel!` is a no-op and the endpoints are the raw flume types, so the
+    /// alias resolves the same way regardless of feature configuration.
+    #[cfg(feature = "flume")]
+    pub mod flume {
+        #[cfg(feature = "hotpath-meta")]
+        pub use crate::lib_on::channels::wrapper::flume_wrap::{Receiver, Sender};
+        #[cfg(not(feature = "hotpath-meta"))]
+        pub use flume::{Receiver, Sender};
     }
 }
 

@@ -31,6 +31,7 @@ pub mod debug;
 pub mod futures;
 pub mod mutexes;
 pub mod rw_locks;
+pub mod sql;
 pub mod streams;
 #[cfg(feature = "threads")]
 pub mod threads;

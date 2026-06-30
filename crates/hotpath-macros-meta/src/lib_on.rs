@@ -418,6 +418,7 @@ pub fn main_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let output = quote! {
         #allocator_item
+        #[allow(unused_braces)]
         #vis #sig {
             #wrapped_body
         }
@@ -604,6 +605,7 @@ pub fn measure_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let output = quote! {
         #(#attrs)*
+        #[allow(unused_braces)]
         #vis #sig {
             #cpu_alias_register
             #wrapped_body
@@ -718,6 +720,7 @@ pub fn future_fn_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let output = quote! {
         #(#attrs)*
+        #[allow(unused_braces)]
         #vis #sig {
             #wrapped_body
         }
