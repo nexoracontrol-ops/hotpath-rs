@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.1] - 2026-06-30
+
+### 🚀 Features
+
+- Add tokio wrap channel support
+
+- Add flume wrap channel support
+
+
+### 🐛 Bug Fixes
+
+- Ignore unused_braces warnings
+
+- Update rmcp
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Release 0.19.1
+
+
 ## [0.19.0] - 2026-06-29
 
 ### 🚀 Features
