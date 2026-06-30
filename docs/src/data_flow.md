@@ -219,3 +219,43 @@ let result = hotpath::future!(async { 42 }, log = true).await;
 Label futures to display them on top of the list. By passing `log = true` TUI will display values that future resolved to:
 
 <img loading="lazy" src="{{#asset-hash images/futures-log.png}}" alt="hotpath-rs TUI showing async futures poll tracking and value logging">
+
+## Wrapped types
+
+`channel!` with `wrap = true` does not return the endpoints you passed in - it returns *instrumented wrappers* around them. The macro expands to a different type than the original:
+
+```rust
+// before: a plain crossbeam receiver
+let (tx, rx): (crossbeam_channel::Sender<i32>, crossbeam_channel::Receiver<i32>) =
+    crossbeam_channel::unbounded();
+
+// after: the macro returns hotpath wrappers, not crossbeam_channel::Sender/Receiver
+let (tx, rx) = hotpath::channel!(crossbeam_channel::unbounded::<i32>(), wrap = true);
+```
+
+At a `let` binding this is invisible - type inference picks up whatever the macro returns. It only matters when you need to *name* the type, for example a struct field or a function signature. There you cannot write `crossbeam_channel::Sender<T>`, because the value is a wrapper, not a `crossbeam_channel::Sender`.
+
+Use the `hotpath::wrap::` path instead. It mirrors the original module layout, so you prefix the original path with `hotpath::wrap::`:
+
+```rust
+// before
+struct Pipeline {
+    jobs_tx: crossbeam_channel::Sender<Job>,
+    jobs_rx: crossbeam_channel::Receiver<Job>,
+}
+
+// after - prefix the type with hotpath::wrap::
+struct Pipeline {
+    jobs_tx: hotpath::wrap::crossbeam_channel::Sender<Job>,
+    jobs_rx: hotpath::wrap::crossbeam_channel::Receiver<Job>,
+}
+```
+
+The same prefix works for every wrap-capable library:
+
+- `hotpath::wrap::std::sync::mpsc::{Sender, SyncSender, Receiver}`
+- `hotpath::wrap::tokio::sync::mpsc::{Sender, Receiver, UnboundedSender, UnboundedReceiver}`
+- `hotpath::wrap::crossbeam_channel::{Sender, Receiver}`
+- `hotpath::wrap::flume::{Sender, Receiver}`
+
+This is purely to keep the compiler police happy: the `hotpath::wrap::` types are noop unless the `hotpath` feature is enabled. With the feature off they are plain re-exports of the original endpoints (zero overhead, **identical behavior**); with the feature on they resolve to the instrumented wrappers. Either way the field type lines up with what the macro returns, so the same code compiles in both configurations.
