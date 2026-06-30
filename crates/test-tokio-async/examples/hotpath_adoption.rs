@@ -11,13 +11,13 @@
 //! `HOTPATH_ADOPTION_PATH`). The first run stamps every repo with `discovered_at`;
 //! later daily runs keep each repo's original `discovered_at`, refresh its `stars`
 //! / `requirement`, and bump `last_seen_at`. Repos that drop out of the search are
-//! retained untouched (their stale `last_seen_at` flags them).
+//! retained until their `last_seen_at` is more than 7 days stale, then removed.
 //!
 //! Run with:
 //! `GH_TOKEN="$(gh auth token)" cargo run -p test-tokio-async --release --example hotpath_adoption`
 
 use anyhow::{Context, Result};
-use chrono::{SecondsFormat, Utc};
+use chrono::{DateTime, Duration as ChronoDuration, SecondsFormat, Utc};
 use futures::stream::{self, StreamExt};
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, AUTHORIZATION, USER_AGENT};
 use serde::{Deserialize, Serialize};
@@ -31,6 +31,8 @@ const SKIP_REPO: &str = "pawurb/hotpath-rs";
 const FETCH_CONCURRENCY: usize = 8;
 /// Default path for the merged adoption dataset (repo root).
 const DEFAULT_OUTPUT_PATH: &str = "hotpath_adoption.json";
+/// Drop a repo once it has been missing from the search for longer than this.
+const STALE_AFTER_DAYS: i64 = 7;
 
 #[derive(Debug, Deserialize)]
 struct SearchResponse {
@@ -119,7 +121,7 @@ async fn main() -> Result<()> {
     let path = output_path();
     let mut records = load_records(&path)?;
     let now = Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true);
-    let (added, updated) = merge_dependents(&mut records, dependents, &now);
+    let (added, updated, removed) = merge_dependents(&mut records, dependents, &now);
 
     let mut sorted: Vec<&Record> = records.values().collect();
     sorted.sort_by(|a, b| b.stars.cmp(&a.stars).then(a.full_name.cmp(&b.full_name)));
@@ -127,7 +129,7 @@ async fn main() -> Result<()> {
 
     println!();
     println!(
-        "Merged into {}: {added} new, {updated} refreshed, {} total tracked.",
+        "Merged into {}: {added} new, {updated} refreshed, {removed} removed, {} total tracked.",
         path.display(),
         records.len()
     );
@@ -162,12 +164,13 @@ fn write_records(path: &std::path::Path, records: &[&Record]) -> Result<()> {
 }
 
 /// Merge this run's dependents into the persisted map, preserving each repo's
-/// original `discovered_at`. Returns `(new, refreshed)` counts.
+/// original `discovered_at`, and drop repos whose `last_seen_at` is more than
+/// `STALE_AFTER_DAYS` old. Returns `(new, refreshed, removed)` counts.
 fn merge_dependents(
     records: &mut HashMap<String, Record>,
     dependents: Vec<Dependent>,
     now: &str,
-) -> (usize, usize) {
+) -> (usize, usize, usize) {
     let (mut added, mut updated) = (0, 0);
     for dep in dependents {
         match records.get_mut(&dep.full_name) {
@@ -194,7 +197,16 @@ fn merge_dependents(
             }
         }
     }
-    (added, updated)
+
+    let cutoff = Utc::now() - ChronoDuration::days(STALE_AFTER_DAYS);
+    let before = records.len();
+    records.retain(|_, r| match DateTime::parse_from_rfc3339(&r.last_seen_at) {
+        Ok(seen) => seen.with_timezone(&Utc) >= cutoff,
+        Err(_) => true,
+    });
+    let removed = before - records.len();
+
+    (added, updated, removed)
 }
 
 async fn search_candidates(client: &reqwest::Client) -> Result<Vec<Candidate>> {

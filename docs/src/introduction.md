@@ -27,10 +27,6 @@ It helps you distinguish between functions that are slow because they wait on I/
 <div class="trusted-by">
   <p class="trusted-by-tagline">Integrated by <a href="/adoption" target="_blank">{{#adoption_count}} open-source projects</a>, including:</p>
   <div class="trusted-by-grid">
-    <a href="https://github.com/EasyTier/EasyTier" target="_blank" class="trusted-by-project">
-      <span class="trusted-by-name">EasyTier/EasyTier</span>
-      <img src="{{#asset-hash images/stars-easytier-easytier.svg}}" alt="EasyTier GitHub stars">
-    </a>
     <a href="https://github.com/apache/opendal" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">apache/opendal</span>
       <img src="{{#asset-hash images/stars-apache-opendal.svg}}" alt="opendal GitHub stars">
@@ -42,6 +38,10 @@ It helps you distinguish between functions that are slow because they wait on I/
     <a href="https://github.com/marc2332/freya" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">marc2332/freya</span>
       <img src="{{#asset-hash images/stars-marc2332-freya.svg}}" alt="freya GitHub stars">
+    </a>
+    <a href="https://github.com/parseablehq/parseable" target="_blank" class="trusted-by-project">
+      <span class="trusted-by-name">parseablehq/parseable</span>
+      <img src="{{#asset-hash images/stars-parseablehq-parseable.svg}}" alt="parseable GitHub stars">
     </a>
     <a href="https://github.com/tqwewe/kameo" target="_blank" class="trusted-by-project">
       <span class="trusted-by-name">tqwewe/kameo</span>
