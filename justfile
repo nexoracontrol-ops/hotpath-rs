@@ -30,6 +30,8 @@ test_all:
     cargo test --features hotpath --test streams -- --nocapture --test-threads=1
     cargo test --features hotpath --test channels_crossbeam -- --nocapture --test-threads=1
     cargo test --features hotpath --test channels_crossbeam_wrap -- --nocapture --test-threads=1
+    cargo test --features hotpath --test channels_std_wrap -- --nocapture --test-threads=1
+    cargo test --features hotpath --test channels_tokio_wrap -- --nocapture --test-threads=1
     cargo test --features hotpath --test channels_ftc -- --nocapture --test-threads=1
     cargo test --features hotpath --test channels_asc -- --nocapture --test-threads=1
     cargo test --features hotpath --test channels_std -- --nocapture --test-threads=1

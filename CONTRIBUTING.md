@@ -95,6 +95,14 @@ cargo run -p test-channels-asc --example benchmark_channel_asc --features hotpat
 cargo run -p test-channels-flume --example benchmark_channel_flume --features hotpath --release
 ```
 
+Wrap-mode variants instrument the channel endpoints directly instead of relaying every message through a forwarder task/thread and a second channel. Compare each against its non-wrap counterpart above to see the wrap-vs-forwarder cost difference.
+
+```bash
+cargo run -p test-channels-std --example benchmark_channel_wrap_std --features hotpath --release
+cargo run -p test-channels-crossbeam --example benchmark_channel_wrap_crossbeam --features hotpath --release
+cargo run -p test-channels-tokio --example benchmark_channel_wrap_tokio --features hotpath --release
+```
+
 #### Futures and Streams
 
 ```bash

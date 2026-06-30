@@ -153,6 +153,20 @@ pub mod wrap {
             pub use crate::lib_on::rw_locks::wrapper::tokio::{
                 RwLock, RwLockReadGuard, RwLockWriteGuard,
             };
+
+            /// Instrumented `tokio::sync::mpsc` channel endpoints for
+            /// `channel!(..., wrap = true)`. With `hotpath` enabled these are the
+            /// instrumented wrappers; otherwise `channel!` is a no-op and the endpoints
+            /// are the raw tokio types, so the alias resolves the same way regardless of
+            /// feature configuration.
+            pub mod mpsc {
+                #[cfg(feature = "hotpath")]
+                pub use crate::lib_on::channels::wrapper::tokio_wrap::{
+                    Receiver, Sender, UnboundedReceiver, UnboundedSender,
+                };
+                #[cfg(not(feature = "hotpath"))]
+                pub use tokio::sync::mpsc::{Receiver, Sender, UnboundedReceiver, UnboundedSender};
+            }
         }
     }
 

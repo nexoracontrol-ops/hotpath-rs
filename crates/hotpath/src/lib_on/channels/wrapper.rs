@@ -12,3 +12,5 @@ pub(crate) mod std;
 pub(crate) mod std_wrap;
 #[cfg(feature = "tokio")]
 pub(crate) mod tokio;
+#[cfg(feature = "tokio")]
+pub(crate) mod tokio_wrap;

@@ -128,6 +128,12 @@ jobs:
       - name: Run channels crossbeam wrap tests
         run: |
           cargo test --features hotpath --test channels_crossbeam_wrap -- --nocapture --test-threads=1
+      - name: Run channels std wrap tests
+        run: |
+          cargo test --features hotpath --test channels_std_wrap -- --nocapture --test-threads=1
+      - name: Run channels tokio wrap tests
+        run: |
+          cargo test --features hotpath --test channels_tokio_wrap -- --nocapture --test-threads=1
       - name: Run channels futures tests
         run: |
           cargo test --features hotpath --test channels_ftc -- --nocapture --test-threads=1
